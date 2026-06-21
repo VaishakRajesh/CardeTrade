@@ -52,7 +52,7 @@ cd CardeTrade
 ```bash
 # Windows
 python -m venv env
-venv\Scripts\activate
+env\Scripts\activate
 
 # macOS / Linux
 python3 -m venv env
