@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conversation - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:6rem 0 1.5rem;">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <nav class="breadcrumb-premium">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:conversation_list' %}">Messages</a></li>
+                <li class="breadcrumb-item active">
+                    {% for p in conversation.participants.all %}
+                        {% if p.user != user %}{{ p.user.username }}{% endif %}
+                    {% endfor %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="dashboard-wrapper" style="padding-top:1rem;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card-premium">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="bi bi-chat-dots me-2"></i>
+                                {% for p in conversation.participants.all %}
+                                    {% if p.user != user %}{{ p.user.username }}{% endif %}
+                                {% endfor %}
+                                {% if conversation.subject %} — {{ conversation.subject }}{% endif %}
+                            </h5>
+                            <small class="opacity-75">{{ conversation.get_type_display }}</small>
+                        </div>
+                        <span class="badge-premium badge-premium-{% if conversation.status == 'open' %}success{% elif conversation.status == 'archived' %}secondary{% else %}warning{% endif %}">{{ conversation.get_status_display }}</span>
+                    </div>
+                    <div class="chat-container" id="chatContainer">
+                        {% for msg in conversation.messages.all %}
+                        <div class="d-flex mb-3 {% if msg.sender == user %}justify-content-end{% endif %}">
+                            <div class="msg-bubble {% if msg.sender == user %}sent{% else %}received{% endif %}">
+                                {% if msg.sender != user %}
+                                <small class="fw-bold d-block" style="color:var(--accent);">{{ msg.sender.username }}</small>
+                                {% endif %}
+                                {{ msg.content }}
+                                <div class="msg-time text-end">{{ msg.sent_at|date:"H:i" }}</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-chat fs-1 d-block mb-2"></i>
+                            No messages yet. Start the conversation.
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="card-body border-top">
+                        <form method="post" class="d-flex gap-2">
+                            {% csrf_token %}
+                            <input type="text" name="content" class="form-premium" placeholder="Type your message..." required autofocus>
+                            <button type="submit" class="btn-premium btn-premium-primary" style="padding:0.75rem 1.5rem;">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var chat = document.getElementById('chatContainer');
+    if (chat) chat.scrollTop = chat.scrollHeight;
+});
+</script>
+{% endblock %}

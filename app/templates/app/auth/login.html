@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper-premium">
+    <div class="auth-bg-premium">
+        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="auth-card-premium">
+        <div class="auth-logo-premium">
+            <div class="logo-img-wrapper">
+                <img src="{% static 'image/cardamom2.jpg' %}" alt="CardeTrade" onerror="this.style.display='none'">
+            </div>
+            <h3>Welcome Back</h3>
+            <p>Sign in to continue to CardeTrade</p>
+        </div>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center mt-2">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </button>
+        </form>
+        <div class="text-center mt-4">
+            <small class="text-muted">Don't have an account? <a href="{% url 'app:register' %}">Create one</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}

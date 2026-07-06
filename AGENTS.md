@@ -47,169 +47,47 @@
 
 ```
 CardeTrade/                              # Root
-├── README.md                            # Full schema, workflows, API reference
-├── AGENTS.md                            # ← YOU ARE HERE
-├── requirements.txt                     # Python dependencies
-├── .env                                 # Environment variables (gitignored)
+├── README.md
+├── AGENTS.md
+├── requirements.txt
+├── .env
 ├── .gitignore
 │
-├── cardetrade/                          # Django project config
-│   ├── __init__.py
-│   ├── settings.py                      # AUTH_USER_MODEL, INSTALLED_APPS, DB, etc.
-│   ├── urls.py                          # Root: includes all app urls
-│   ├── wsgi.py                          # WSGI entry point
-│   └── asgi.py                          # (future) WebSocket support
-│
-├── accounts/                            # App 1: User & Roles
-│   ├── __init__.py
-│   ├── models.py                        # User (AbstractUser)
-│   ├── views.py                         # LoginView, RegisterView, ProfileView
-│   ├── urls.py                          # accounts/ urls
-│   ├── forms.py                         # RegistrationForm, ProfileForm
-│   ├── decorators.py                    # @role_required, @pm_or_admin
-│   ├── admin.py                         # UserAdmin config
-│   ├── tests.py                         # Registration, login, role enforcement
-│   ├── templates/accounts/
-│   │   ├── login.html
-│   │   ├── register.html
-│   │   └── profile.html
-│   └── migrations/
-│
-├── farms/                               # App 2: Farm Profiles
-│   ├── __init__.py
-│   ├── models.py                        # Farm
-│   ├── views.py                         # FarmCreateView, FarmListView, etc.
-│   ├── urls.py                          # farms/ urls
-│   ├── forms.py                         # FarmForm
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/farms/
-│   │   ├── farm_create.html
-│   │   ├── farm_list.html
-│   │   └── farm_detail.html
-│   └── migrations/
-│
-├── batches/                             # App 3: Batch Lifecycle + Verification
-│   ├── __init__.py
-│   ├── models.py                        # Batch, QualityVerification
-│   ├── views.py                         # BatchCreateView, BatchDetailView, VerifyView
-│   ├── urls.py                          # batches/ urls
-│   ├── forms.py                         # BatchForm, VerificationForm
-│   ├── signals.py                       # post_save: verified → create Listing
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/batches/
-│   │   ├── batch_create.html
-│   │   ├── batch_detail.html
-│   │   └── batch_verify.html
-│   └── migrations/
-│
-├── trading/                             # App 4: Listings, Bids, Buy
-│   ├── __init__.py
-│   ├── models.py                        # Listing, Bid
-│   ├── views.py                         # ListingListView, DetailView, BidView, BuyView
-│   ├── urls.py                          # trading/ urls
-│   ├── forms.py                         # BidForm
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/trading/
-│   │   ├── listing_list.html
-│   │   ├── listing_detail.html
-│   │   └── bid_form.html
-│   └── migrations/
-│
-├── orders/                              # App 5: Orders, Tracking, Payments
-│   ├── __init__.py
-│   ├── models.py                        # Order, OrderTracking, Payment
-│   ├── views.py                         # OrderListView, DetailView, TrackView
-│   ├── urls.py                          # orders/ urls
-│   ├── forms.py                         # TrackingForm
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/orders/
-│   │   ├── order_list.html
-│   │   ├── order_detail.html
-│   │   └── order_tracking.html
-│   └── migrations/
-│
-├── disputes/                            # App 6: Dispute Resolution
-│   ├── __init__.py
-│   ├── models.py                        # Dispute
-│   ├── views.py                         # RaiseDisputeView, ListView, ResolveView
-│   ├── urls.py                          # disputes/ urls
-│   ├── forms.py                         # DisputeForm, ResolutionForm
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/disputes/
-│   │   ├── dispute_raise.html
-│   │   ├── dispute_list.html
-│   │   └── dispute_detail.html
-│   └── migrations/
-│
-├── notifications/                       # App 7: In-App Notifications
-│   ├── __init__.py
-│   ├── models.py                        # Notification
-│   ├── views.py                         # NotificationListView, MarkReadView
-│   ├── urls.py                          # notifications/ urls
-│   ├── signals.py                       # post_save triggers for each event
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/notifications/
-│   │   └── notification_list.html
-│   └── migrations/
-│
-├── messaging/                           # App 8: Conversations + Messages
-│   ├── __init__.py
-│   ├── models.py                        # Conversation, Participant, Message
-│   ├── views.py                         # InboxView, ConversationView
-│   ├── urls.py                          # messaging/ urls
-│   ├── forms.py                         # MessageForm
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/messaging/
-│   │   ├── inbox.html
-│   │   └── conversation.html
-│   └── migrations/
-│
-├── reports/                             # App 9: Admin Reports
-│   ├── __init__.py
-│   ├── models.py                        # Report
-│   ├── views.py                         # TradeSummaryView, GradeDistributionView, etc.
-│   ├── urls.py                          # reports/ urls
-│   ├── utils.py                         # Query helpers: get_trade_summary(), etc.
-│   ├── admin.py
-│   ├── tests.py
-│   ├── templates/reports/
-│   │   └── report_dashboard.html
-│   └── migrations/
-│
-├── audit/                               # App 10: Audit Trail
-│   ├── __init__.py
-│   ├── models.py                        # AuditLog
-│   ├── signals.py                       # Generic post_save handler
-│   ├── middleware.py                    # Captures IP → thread local
-│   ├── admin.py
-│   ├── tests.py
-│   └── migrations/
-│
-├── templates/                           # Shared templates
-│   ├── base.html                        # Bootstrap 5 nav + footer + alerts
-│   ├── includes/
-│   │   ├── navbar.html
-│   │   ├── footer.html
-│   │   ├── alerts.html
-│   │   └── pagination.html
-│   └── admin/                           # Admin overrides
-│
-├── static/                              # Static assets
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── main.js
-│
-└── media/                               # User uploads (gitignored)
-    ├── batch_images/
-    └── documents/
+cardetrade/
+├── __init__.py
+├── settings.py              # Django config, AUTH_USER_MODEL = 'app.User'
+├── urls.py                  # Root URL routing
+├── wsgi.py                  # WSGI deployment entry
+
+app/                         # Core single app
+├── __init__.py
+├── models.py                # All 16 tables (User, Farm, Batch, Listing, Order...)
+├── views.py                 # All platform views
+├── urls.py                  # / routes
+├── forms.py                 # All forms
+├── decorators.py            # @role_required, etc.
+├── admin.py                 # Admin configurations
+├── tests.py                 # Test cases
+├── signals.py               # Post-save signals
+├── middleware.py            # Audit middleware
+├── utils.py                 # Helpers
+├── templates/app/           # App-specific HTML files
+└── migrations/
+
+templates/                   # Shared templates
+├── base.html                # Bootstrap 5 nav + footer + alerts
+├── includes/                # Partials (navbar, sidebar, pagination)
+└── admin/                   # Django admin overrides
+
+static/                      # Static assets
+├── css/
+│   └── style.css
+└── js/
+    └── main.js
+
+media/                       # User-uploaded files
+├── batch_images/
+└── documents/
 ```
 
 ---
@@ -223,7 +101,7 @@ These override all other considerations:
 | **R1** | Never use `IntegerChoices`. Always use `models.TextChoices` for ENUM-like fields | Database stores strings, not integers |
 | **R2** | Always set `related_name` on every `ForeignKey` | Django creates backwards relations automatically |
 | **R3** | `total_amount` on Order must be `GeneratedField` (Django 5+) or `@property` | Never store as a regular DB column |
-| **R4** | `AUTH_USER_MODEL = 'accounts.User'` must be set in `settings.py` **before** first migration | Otherwise Django creates its own `auth_user` table |
+| **R4** | `AUTH_USER_MODEL = 'app.User'` must be set in `settings.py` **before** first migration | Otherwise Django creates its own `auth_user` table |
 | **R5** | Soft delete for `messages` only. All other tables use hard delete or status | Messages are sensitive; hard delete causes data loss |
 | **R6** | Every state mutation must be logged in `audit_logs` | Legal/compliance requirement |
 | **R7** | `is_staff=True` for Product Manager but `is_superuser=False` | PM gets admin panel access but not full control |
@@ -238,7 +116,7 @@ These override all other considerations:
 ### User Model
 
 ```python
-# accounts/models.py
+# app/models.py
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -267,7 +145,7 @@ class User(AbstractUser):
 ### Role Enforcement Decorator
 
 ```python
-# accounts/decorators.py
+# app/decorators.py
 from functools import wraps
 from django.shortcuts import redirect
 from django.http import HttpResponseForbidden
@@ -335,7 +213,7 @@ def save(self, *args, **kwargs):
 
 ## 📦 Complete Django Models (All 16 Tables)
 
-### accounts/models.py
+### app/models.py
 
 ```python
 from django.contrib.auth.models import AbstractUser
@@ -366,7 +244,7 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 ```
 
-### farms/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -396,7 +274,7 @@ class Farm(models.Model):
         return f"{self.farm_name} ({self.farmer.username})"
 ```
 
-### batches/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -420,7 +298,7 @@ class Batch(models.Model):
         limit_choices_to={'role': 'farmer'}
     )
     farm = models.ForeignKey(
-        'farms.Farm',
+        'Farm',
         on_delete=models.SET_NULL,
         null=True,
         related_name='batches'
@@ -498,7 +376,7 @@ class QualityVerification(models.Model):
         return f"Batch {self.batch.batch_code} → Grade {self.grade}"
 ```
 
-### trading/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -511,7 +389,7 @@ class Listing(models.Model):
         AUCTION = 'auction', 'Auction'
 
     batch = models.OneToOneField(
-        'batches.Batch',
+        'Batch',
         on_delete=models.CASCADE,
         related_name='listing'
     )
@@ -577,7 +455,7 @@ class Bid(models.Model):
         return f"Bid {self.id}: ₹{self.bid_price_per_kg}/kg by {self.trader.username}"
 ```
 
-### orders/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -603,13 +481,13 @@ class Order(models.Model):
 
     order_code = models.CharField(max_length=50, unique=True, editable=False)
     listing = models.ForeignKey(
-        'trading.Listing',
+        'Listing',
         on_delete=models.SET_NULL,
         null=True,
         related_name='orders'
     )
     batch = models.ForeignKey(
-        'batches.Batch',
+        'Batch',
         on_delete=models.SET_NULL,
         null=True,
         related_name='orders'
@@ -627,7 +505,7 @@ class Order(models.Model):
         limit_choices_to={'role': 'farmer'}
     )
     bid = models.ForeignKey(
-        'trading.Bid',
+        'Bid',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -754,7 +632,7 @@ class Payment(models.Model):
         return f"Payment {self.id}: ₹{self.amount} ({self.status})"
 ```
 
-### disputes/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -768,7 +646,7 @@ class Dispute(models.Model):
         CLOSED = 'closed', 'Closed'
 
     order = models.ForeignKey(
-        'orders.Order',
+        'Order',
         on_delete=models.CASCADE,
         related_name='disputes'
     )
@@ -806,7 +684,7 @@ class Dispute(models.Model):
         return f"Dispute {self.id} - Order {self.order.order_code} ({self.status})"
 ```
 
-### notifications/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -841,7 +719,7 @@ class Notification(models.Model):
         return f"[{self.type}] {self.message[:50]}"
 ```
 
-### messaging/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -860,14 +738,14 @@ class Conversation(models.Model):
         LOCKED = 'locked', 'Locked'
 
     batch = models.ForeignKey(
-        'batches.Batch',
+        'Batch',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='conversations'
     )
     order = models.ForeignKey(
-        'orders.Order',
+        'Order',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -959,7 +837,7 @@ class Message(models.Model):
         return f"Message {self.id} in Conversation {self.conversation.id}"
 ```
 
-### reports/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -992,7 +870,7 @@ class Report(models.Model):
         return f"{self.get_report_type_display()} - {self.created_at.date()}"
 ```
 
-### audit/models.py
+### app/models.py
 
 ```python
 from django.db import models
@@ -1041,23 +919,23 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('farms/', include('farms.urls')),
-    path('batches/', include('batches.urls')),
-    path('trading/', include('trading.urls')),
-    path('orders/', include('orders.urls')),
-    path('disputes/', include('disputes.urls')),
-    path('notifications/', include('notifications.urls')),
-    path('messaging/', include('messaging.urls')),
-    path('reports/', include('reports.urls')),
-    path('audit/', include('audit.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
+    path('app/', include('app.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
 ### Each App's URL Patterns
 
 ```python
-# accounts/urls.py
+# app/urls.py
 from django.urls import path
 from . import views
 
@@ -1069,7 +947,7 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
 ]
 
-# batches/urls.py
+# app/urls.py
 app_name = 'batches'
 urlpatterns = [
     path('', views.BatchListView.as_view(), name='list'),
@@ -1078,7 +956,7 @@ urlpatterns = [
     path('<int:pk>/verify/', views.BatchVerifyView.as_view(), name='verify'),
 ]
 
-# trading/urls.py
+# app/urls.py
 app_name = 'trading'
 urlpatterns = [
     path('', views.ListingListView.as_view(), name='listings'),
@@ -1096,7 +974,7 @@ urlpatterns = [
 ### Class-Based Views (CBV) — Preferred
 
 ```python
-# batches/views.py
+# app/views.py
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
@@ -1110,8 +988,8 @@ from .forms import BatchForm
 class BatchCreateView(LoginRequiredMixin, CreateView):
     model = Batch
     form_class = BatchForm
-    template_name = 'batches/batch_create.html'
-    success_url = reverse_lazy('batches:list')
+    template_name = 'app/batch_create.html'
+    success_url = reverse_lazy('app:list')
 
     def form_valid(self, form):
         form.instance.farmer = self.request.user
@@ -1121,7 +999,7 @@ class BatchCreateView(LoginRequiredMixin, CreateView):
 @method_decorator(role_required('farmer', 'product_manager', 'admin'), name='dispatch')
 class BatchDetailView(LoginRequiredMixin, DetailView):
     model = Batch
-    template_name = 'batches/batch_detail.html'
+    template_name = 'app/batch_detail.html'
     context_object_name = 'batch'
 
 
@@ -1129,7 +1007,7 @@ class BatchDetailView(LoginRequiredMixin, DetailView):
 class BatchVerifyView(LoginRequiredMixin, UpdateView):
     model = Batch
     fields = []  # No direct edit; handled via verification form
-    template_name = 'batches/batch_verify.html'
+    template_name = 'app/batch_verify.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1146,14 +1024,14 @@ class BatchVerifyView(LoginRequiredMixin, UpdateView):
             verification.save()
             batch.status = Batch.Status.VERIFIED
             batch.save()
-            return redirect('batches:detail', pk=batch.pk)
+            return redirect('app:detail', pk=batch.pk)
         return self.form_invalid(form)
 ```
 
 ### Function-Based Views (FBV) — For Simple Pages
 
 ```python
-# accounts/views.py
+# app/views.py
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistrationForm
@@ -1167,7 +1045,7 @@ def register_view(request):
             return redirect('home')
     else:
         form = RegistrationForm()
-    return render(request, 'accounts/register.html', {'form': form})
+    return render(request, 'app/register.html', {'form': form})
 ```
 
 ### `@role_required` on Function Views
@@ -1185,7 +1063,7 @@ def create_batch(request):
 ## 📝 Form Patterns
 
 ```python
-# batches/forms.py
+# app/forms.py
 from django import forms
 from .models import Batch, QualityVerification
 
@@ -1267,7 +1145,7 @@ class VerificationForm(forms.ModelForm):
 ### App Template Example
 
 ```django
-{# batches/batch_create.html #}
+{# app/batch_create.html #}
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
@@ -1320,11 +1198,11 @@ class VerificationForm(forms.ModelForm):
 ### 1. Batch Verified → Create Listing
 
 ```python
-# batches/signals.py
+# app/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Batch
-from trading.models import Listing
+from app.models import Listing
 
 @receiver(post_save, sender=Batch)
 def create_listing_on_verification(sender, instance, created, **kwargs):
@@ -1351,11 +1229,11 @@ def create_listing_on_verification(sender, instance, created, **kwargs):
 ### 2. Order Created → Notify Seller
 
 ```python
-# orders/signals.py
+# app/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Order
-from notifications.models import Notification
+from app.models import Notification
 
 @receiver(post_save, sender=Order)
 def notify_seller_on_order(sender, instance, created, **kwargs):
@@ -1372,11 +1250,11 @@ def notify_seller_on_order(sender, instance, created, **kwargs):
 ### 3. Bid Placed → Notify Farmer
 
 ```python
-# trading/signals.py
+# app/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Bid
-from notifications.models import Notification
+from app.models import Notification
 
 @receiver(post_save, sender=Bid)
 def notify_farmer_on_bid(sender, instance, created, **kwargs):
@@ -1393,7 +1271,7 @@ def notify_farmer_on_bid(sender, instance, created, **kwargs):
 ### 4. Universal Audit Logger
 
 ```python
-# audit/signals.py
+# app/signals.py
 import json
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -1416,7 +1294,7 @@ def audit_pre_save(sender, **kwargs):
 > **Full audit approach**: Use a middleware that stores the current user/IP per thread, then a `post_save` receiver connected to all models (except AuditLog itself) that serializes old/new values and writes to `audit_logs`.
 
 ```python
-# audit/middleware.py
+# app/middleware.py
 import threading
 from django.utils.deprecation import MiddlewareMixin
 
@@ -1437,7 +1315,7 @@ class AuditMiddleware(MiddlewareMixin):
 ### 5. Message Sent → Update Conversation
 
 ```python
-# messaging/signals.py
+# app/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -1456,7 +1334,7 @@ def update_conversation_timestamp(sender, instance, created, **kwargs):
 ## ⚙ Admin Configuration
 
 ```python
-# accounts/admin.py
+# app/admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
@@ -1473,7 +1351,7 @@ class UserAdmin(BaseUserAdmin):
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
     )
 
-# batches/admin.py
+# app/admin.py
 from django.contrib import admin
 from .models import Batch, QualityVerification
 
@@ -1494,7 +1372,7 @@ class QualityVerificationAdmin(admin.ModelAdmin):
 
 ## 🧪 Testing Patterns
 
-### accounts/tests.py
+### app/tests.py
 
 ```python
 from django.test import TestCase
@@ -1505,7 +1383,7 @@ User = get_user_model()
 
 class UserRegistrationTest(TestCase):
     def test_register_farmer(self):
-        response = self.client.post(reverse('accounts:register'), {
+        response = self.client.post(reverse('app:register'), {
             'username': 'farmer1',
             'email': 'farmer@test.com',
             'password1': 'testpass123',
@@ -1519,7 +1397,7 @@ class UserRegistrationTest(TestCase):
         self.assertFalse(user.is_superuser)
 
     def test_register_pm_sets_staff(self):
-        response = self.client.post(reverse('accounts:register'), {
+        response = self.client.post(reverse('app:register'), {
             'username': 'pm1',
             'email': 'pm@test.com',
             'password1': 'testpass123',
@@ -1535,7 +1413,7 @@ class UserRegistrationTest(TestCase):
             username='farmer', password='test', role='farmer'
         )
         self.client.login(username='farmer', password='test')
-        response = self.client.get(reverse('batches:create'))
+        response = self.client.get(reverse('app:create'))
         self.assertEqual(response.status_code, 200)
 
         # Trader cannot access batch create
@@ -1543,18 +1421,18 @@ class UserRegistrationTest(TestCase):
             username='trader', password='test', role='trader'
         )
         self.client.login(username='trader', password='test')
-        response = self.client.get(reverse('batches:create'))
+        response = self.client.get(reverse('app:create'))
         self.assertEqual(response.status_code, 403)
 ```
 
-### batches/tests.py
+### app/tests.py
 
 ```python
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from .models import Batch, QualityVerification
-from trading.models import Listing
+from app.models import Listing
 
 User = get_user_model()
 
@@ -1578,7 +1456,7 @@ class BatchWorkflowTest(TestCase):
     def test_verify_batch_creates_listing(self):
         self.client.login(username='pm', password='test')
         response = self.client.post(
-            reverse('batches:verify', args=[self.batch.id]),
+            reverse('app:verify', args=[self.batch.id]),
             {
                 'grade': 'A',
                 'verified_price_per_kg': 50.00,
@@ -1603,13 +1481,13 @@ class BatchWorkflowTest(TestCase):
         self.assertTrue(re.match(r'^CDM-\d{4}-\d{4}$', batch.batch_code))
 ```
 
-### trading/tests.py
+### app/tests.py
 
 ```python
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .models import Listing, Bid
-from batches.models import Batch
+from app.models import Batch
 
 User = get_user_model()
 
@@ -1737,7 +1615,7 @@ When writing code for CardeTrade, follow these rules strictly:
 | Form | `PascalCase + Form` | `BatchForm`, `VerificationForm` |
 | Signal receiver | `snake_case, descriptive` | `create_listing_on_verification` |
 | Template | `snake_case, descriptive` | `batch_create.html`, `order_tracking.html` |
-| URL name | `snake_case` | `batches:create`, `trading:listings` |
+| URL name | `snake_case` | `app:create`, `app:listings` |
 | Migration | Auto-generated | Don't rename |
 
 ---
@@ -1772,8 +1650,8 @@ from crispy_forms.layout import Submit, Layout, Row, Column
 from ..accounts.decorators import role_required
 from .models import Batch, QualityVerification
 from .forms import BatchForm, VerificationForm
-from trading.models import Listing
-from notifications.models import Notification
+from app.models import Listing
+from app.models import Notification
 ```
 
 ### Import Order (strict)
@@ -1846,7 +1724,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'audit.middleware.AuditMiddleware',  # Custom: captures user/IP for audit
+    'app.middleware.AuditMiddleware',  # Custom: captures user/IP for audit
 ]
 
 ROOT_URLCONF = 'cardetrade.urls'
@@ -1867,7 +1745,7 @@ TEMPLATES = [
     },
 ]
 
-AUTH_USER_MODEL = 'accounts.User'  # ← MUST be set before first migration
+AUTH_USER_MODEL = 'app.User'  # ← MUST be set before first migration
 
 DATABASES = {
     'default': {
@@ -1876,9 +1754,9 @@ DATABASES = {
     }
 }
 
-LOGIN_URL = '/accounts/login/'
+LOGIN_URL = '/app/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/app/login/'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']

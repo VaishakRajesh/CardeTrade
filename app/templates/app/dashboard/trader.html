@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Trader Dashboard - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,#0a1a10,#1a4d2e);">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <div class="d-flex flex-wrap justify-content-between align-items-end">
+            <div>
+                <h2><i class="bi bi-bag-check me-2"></i> Trader Dashboard</h2>
+                <p>Browse listings, place bids, and track your orders</p>
+                <div class="header-accent-line"></div>
+            </div>
+            <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-primary btn-premium-sm mt-3"><i class="bi bi-search"></i> Browse Listings</a>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card-premium stat-card-blue animate-on-scroll">
+                    <i class="bi bi-hand-index stat-icon"></i>
+                    <div class="stat-number">{{ stats.active_bids }}</div>
+                    <div class="stat-label">Active Bids</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card-premium stat-card-green animate-on-scroll">
+                    <i class="bi bi-truck stat-icon"></i>
+                    <div class="stat-number">{{ stats.won_orders }}</div>
+                    <div class="stat-label">Orders Won</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card-premium stat-card-gold animate-on-scroll">
+                    <i class="bi bi-currency-rupee stat-icon"></i>
+                    <div class="stat-number">Rs {{ stats.total_spent|floatformat:0 }}</div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card-premium animate-on-scroll">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-shop me-2"></i> Available Listings</h5>
+                        <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for listing in listings %}
+                            <div class="col-md-6 mb-3">
+                                <div class="listing-card-premium h-100" style="box-shadow:var(--shadow-sm);transform:none;">
+                                    <a href="{% url 'app:listing_detail' listing.pk %}" class="listing-image d-block" style="height:140px;">
+                                        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+                                    </a>
+                                    <div class="listing-body" style="padding:1rem;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="fw-bold mb-0">{{ listing.batch.batch_code }}</h6>
+                                            <span class="badge-premium {% if listing.listing_type == 'auction' %}badge-premium-warning{% else %}badge-premium-info{% endif %}">{{ listing.get_listing_type_display }}</span>
+                                        </div>
+                                        <div class="listing-farmer mt-1"><i class="bi bi-person"></i> {{ listing.farmer.username }}</div>
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <span class="listing-price" style="font-size:1.3rem;">Rs {{ listing.price_per_kg }}<small class="fs-6">/kg</small></span>
+                                            {% if listing.batch.verification %}
+                                            <span class="grade-badge grade-{{ listing.batch.verification.grade }}">{{ listing.batch.verification.grade }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <a href="{% url 'app:listing_detail' listing.pk %}" class="btn-premium btn-premium-outline btn-premium-sm w-100 justify-content-center mt-2">View Details <i class="bi bi-arrow-right ms-1"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12"><div class="empty-state-premium"><i class="bi bi-basket2 empty-icon"></i><h5>No Listings</h5><p>No active listings at the moment.</p></div></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card-premium mb-4 animate-on-scroll">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-hand-index me-2"></i> My Bids</h5>
+                        <a href="{% url 'app:my_bids' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for bid in my_bids %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3" style="border-left:3px solid {% if bid.status == 'active' %}var(--accent){% elif bid.status == 'accepted' %}#166534{% else %}#9ca3af{% endif %};">
+                                <div>
+                                    <strong>{{ bid.listing.batch.batch_code }}</strong><br>
+                                    <small class="text-muted">Rs {{ bid.bid_price_per_kg }}/kg · {{ bid.quantity_kg }}kg</small>
+                                </div>
+                                <span class="badge-premium badge-premium-{% if bid.status == 'active' %}primary{% elif bid.status == 'accepted' %}success{% else %}secondary{% endif %}">{{ bid.get_status_display }}</span>
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item text-center py-4 text-muted">No bids placed yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-premium animate-on-scroll">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-truck me-2"></i> Orders</h5>
+                        <a href="{% url 'app:order_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for order in orders %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <a href="{% url 'app:order_detail' order.pk %}" style="color:var(--primary);font-weight:600;">{{ order.order_code }}</a><br>
+                                    <small class="text-muted">Rs {{ order.total_amount }}</small>
+                                </div>
+                                <span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span>
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item text-center py-4 text-muted">No orders yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

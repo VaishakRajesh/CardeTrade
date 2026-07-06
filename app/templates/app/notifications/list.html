@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <div class="d-flex flex-wrap justify-content-between align-items-end">
+            <div>
+                <h2><i class="bi bi-bell me-2"></i> Notifications</h2>
+                <p>Stay updated on your batches, orders, and bids</p>
+                <div class="header-accent-line"></div>
+            </div>
+            {% if notifications %}
+            <form method="post" action="{% url 'app:notification_mark_read' %}" class="mt-3">
+                {% csrf_token %}
+                <button type="submit" class="btn-premium btn-premium-outline btn-premium-sm"><i class="bi bi-check-all"></i> Mark All Read</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        {% if notifications %}
+        <div class="row g-2">
+            {% for n in notifications %}
+            <div class="col-12">
+                <div class="card-premium animate-on-scroll" style="{% if not n.is_read %}border-left:4px solid var(--accent);{% endif %}">
+                    <div class="card-body d-flex align-items-center gap-3 py-3">
+                        <div style="width:40px;height:40px;border-radius:50%;background:rgba(200,169,81,0.1);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;">
+                            <i class="bi {% if n.type == 'bid_received' or n.type == 'bid_accepted' %}bi-hammer{% elif n.type == 'order_placed' or n.type == 'order_shipped' %}bi-truck{% elif n.type == 'payment_received' %}bi-credit-card{% elif n.type == 'batch_verified' %}bi-check-circle{% elif n.type == 'dispute_raised' %}bi-exclamation-triangle{% else %}bi-bell{% endif %}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold small">{{ n.message }}</span>
+                                <small class="text-muted" style="font-size:0.7rem;">{{ n.created_at|timesince }} ago</small>
+                            </div>
+                            <small class="text-muted">
+                                <span class="badge-premium badge-premium-{% if n.type == 'dispute_raised' %}danger{% elif n.type == 'bid_received' or n.type == 'bid_accepted' %}warning{% elif n.type == 'order_placed' or n.type == 'order_shipped' %}info{% elif n.type == 'payment_received' %}success{% elif n.type == 'batch_verified' %}primary{% else %}secondary{% endif %}" style="font-size:0.6rem;">{{ n.get_type_display }}</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state-premium">
+            <i class="bi bi-bell-slash empty-icon"></i>
+            <h5>No Notifications</h5>
+            <p>You're all caught up! Notifications about bids, orders, and verifications will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

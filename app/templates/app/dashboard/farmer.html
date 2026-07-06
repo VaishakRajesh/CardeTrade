@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Farmer Dashboard - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#1a4d2e);">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <div class="d-flex flex-wrap justify-content-between align-items-end">
+            <div>
+                <h2><i class="bi bi-person-arms-up me-2"></i> Farmer Dashboard</h2>
+                <p>Manage your farms, batches, and orders</p>
+                <div class="header-accent-line"></div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+                <a href="{% url 'app:farm_create' %}" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-plus-lg"></i> New Farm</a>
+                <a href="{% url 'app:batch_create' %}" class="btn-premium btn-premium-secondary btn-premium-sm"><i class="bi bi-plus-lg"></i> New Batch</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card-premium stat-card-green animate-on-scroll">
+                    <i class="bi bi-box-seam stat-icon"></i>
+                    <div class="stat-number">{{ stats.total_batches }}</div>
+                    <div class="stat-label">Total Batches</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card-premium stat-card-blue animate-on-scroll">
+                    <i class="bi bi-shop stat-icon"></i>
+                    <div class="stat-number">{{ stats.active_listings }}</div>
+                    <div class="stat-label">Active Listings</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card-premium stat-card-teal animate-on-scroll">
+                    <i class="bi bi-truck stat-icon"></i>
+                    <div class="stat-number">{{ stats.total_orders }}</div>
+                    <div class="stat-label">Orders Received</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card-premium stat-card-rose animate-on-scroll">
+                    <i class="bi bi-hand-index stat-icon"></i>
+                    <div class="stat-number">{{ stats.pending_bids }}</div>
+                    <div class="stat-label">Pending Bids</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card-premium h-100 animate-on-scroll">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i> Recent Batches</h5>
+                        <a href="{% url 'app:batch_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table-premium">
+                            <thead><tr><th>Code</th><th>Qty</th><th>Status</th><th>Date</th></tr></thead>
+                            <tbody>
+                                {% for batch in batches %}
+                                <tr class="clickable-row" onclick="window.location='{% url 'app:batch_detail' batch.pk %}'">
+                                    <td><span class="fw-bold" style="color:var(--primary);">{{ batch.batch_code }}</span></td>
+                                    <td>{{ batch.quantity_kg }} kg</td>
+                                    <td><span class="badge-premium badge-premium-{% if batch.status == 'pending' %}secondary{% elif batch.status == 'under_review' %}info{% elif batch.status == 'verified' %}primary{% elif batch.status == 'listed' %}success{% elif batch.status == 'sold' %}dark{% else %}danger{% endif %}">{{ batch.get_status_display }}</span></td>
+                                    <td><small class="text-muted">{{ batch.created_at|date:"d M" }}</small></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No batches yet. <a href="{% url 'app:batch_create' %}" class="fw-bold">Create one</a></td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-premium h-100 animate-on-scroll">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-hand-index me-2"></i> Recent Bids</h5>
+                        <a href="{% url 'app:my_bids' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table-premium">
+                            <thead><tr><th>Trader</th><th>Price/kg</th><th>Qty</th><th>Status</th></tr></thead>
+                            <tbody>
+                                {% for bid in bids %}
+                                <tr>
+                                    <td><i class="bi bi-person me-1 text-muted"></i>{{ bid.trader.username }}</td>
+                                    <td class="fw-bold" style="color:var(--primary);">Rs {{ bid.bid_price_per_kg }}</td>
+                                    <td>{{ bid.quantity_kg }} kg</td>
+                                    <td><span class="badge-premium badge-premium-{% if bid.status == 'active' %}primary{% elif bid.status == 'accepted' %}success{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %}">{{ bid.get_status_display }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No bids received yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-3">
+            <div class="col-md-6">
+                <div class="card-premium h-100 animate-on-scroll">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-shop me-2"></i> My Listings</h5>
+                        <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table-premium">
+                            <thead><tr><th>Batch</th><th>Type</th><th>Price</th><th>Active</th></tr></thead>
+                            <tbody>
+                                {% for listing in listings %}
+                                <tr>
+                                    <td><a href="{% url 'app:listing_detail' listing.pk %}" style="color:var(--primary);font-weight:600;">{{ listing.batch.batch_code }}</a></td>
+                                    <td><span class="badge-premium {% if listing.listing_type == 'auction' %}badge-premium-warning{% else %}badge-premium-info{% endif %}">{{ listing.get_listing_type_display }}</span></td>
+                                    <td class="fw-bold">Rs {{ listing.price_per_kg }}/kg</td>
+                                    <td>{% if listing.is_active %}<i class="bi bi-check-circle-fill" style="color:#166534;"></i>{% else %}<i class="bi bi-x-circle-fill text-danger"></i>{% endif %}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No listings yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-premium h-100 animate-on-scroll">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-truck me-2"></i> Recent Orders</h5>
+                        <a href="{% url 'app:order_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table-premium">
+                            <thead><tr><th>Order</th><th>Buyer</th><th>Amount</th><th>Status</th></tr></thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td><a href="{% url 'app:order_detail' order.pk %}" style="color:var(--primary);font-weight:600;">{{ order.order_code }}</a></td>
+                                    <td>{{ order.buyer.username }}</td>
+                                    <td class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</td>
+                                    <td><span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No orders yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

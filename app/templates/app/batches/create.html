@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Batch - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper-premium" style="min-height: auto; padding: 7rem 0 3rem;">
+    <div class="auth-bg-premium">
+        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.parentElement.style.display='none'">
+    </div>
+    <div class="auth-card-premium auth-card-premium-wide animate-on-scroll visible">
+        <div class="auth-logo-premium">
+            <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+            <h3>Create New Batch</h3>
+            <p>Register your cardamom harvest for quality verification</p>
+        </div>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Farm</label>
+                    <select name="farm" class="form-premium">
+                        <option value="">-- Select Farm --</option>
+                        {% for farm in form.farm.field.queryset %}
+                        <option value="{{ farm.pk }}">{{ farm.farm_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Quantity (kg) *</label>
+                    <input type="number" name="quantity_kg" step="0.01" class="form-premium" placeholder="e.g. 100" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Harvest Date *</label>
+                    <input type="date" name="harvest_date" class="form-premium" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Est. Price (per kg) *</label>
+                    <input type="number" name="estimated_price_per_kg" step="0.01" class="form-premium" placeholder="e.g. 45.00" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-premium" rows="3" placeholder="Variety, quality notes, harvest details..."></textarea>
+            </div>
+            <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center mt-3">
+                <i class="bi bi-check-lg"></i> Submit Batch
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% load static %}
+<footer class="footer-premium">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <h5><i class="bi bi-shop me-2" style="color:var(--accent)"></i> CardeTrade</h5>
+                <p class="small mt-3" style="color:rgba(255,255,255,0.55);">India's premier digital marketplace connecting cardamom farmers directly with verified traders. Transparent pricing, quality assured.</p>
+                <div class="footer-social mt-3 d-flex gap-2">
+                    <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h6 class="text-white fw-bold">Platform</h6>
+                <ul class="list-unstyled small mt-3">
+                    <li class="mb-2"><a href="{% url 'app:home' %}">Home</a></li>
+                    <li class="mb-2"><a href="{% url 'app:listing_list' %}">Marketplace</a></li>
+                    <li class="mb-2"><a href="{% url 'app:register' %}">Register</a></li>
+                    <li class="mb-2"><a href="{% url 'app:login' %}">Sign In</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-3">
+                <h6 class="text-white fw-bold">Resources</h6>
+                <ul class="list-unstyled small mt-3">
+                    <li class="mb-2"><a href="#">How It Works</a></li>
+                    <li class="mb-2"><a href="#">Quality Standards</a></li>
+                    <li class="mb-2"><a href="#">FAQ</a></li>
+                    <li class="mb-2"><a href="#">Support</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3">
+                <h6 class="text-white fw-bold">Contact</h6>
+                <ul class="list-unstyled small mt-3">
+                    <li class="mb-2"><i class="bi bi-envelope me-2" style="color:var(--accent)"></i> support@cardetrade.com</li>
+                    <li class="mb-2"><i class="bi bi-telephone me-2" style="color:var(--accent)"></i> +91-484-XXX-XXXX</li>
+                    <li class="mb-2"><i class="bi bi-geo-alt me-2" style="color:var(--accent)"></i> Kochi, Kerala, India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p class="mb-0">&copy; {% now "Y" %} CardeTrade. All rights reserved. <span style="color:var(--accent)">Grade First, Trade Second.</span></p>
+        </div>
+    </div>
+</footer>

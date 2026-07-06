@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Disputes - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#5f1e3a);">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <h2><i class="bi bi-exclamation-triangle me-2"></i> Disputes</h2>
+        <p>Track and manage order disputes</p>
+        <div class="header-accent-line"></div>
+    </div>
+</div>
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        {% if disputes %}
+        <div class="card-premium">
+            <div class="table-responsive">
+                <table class="table-premium">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Raised By</th>
+                            <th>Against</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dispute in disputes %}
+                        <tr>
+                            <td class="fw-bold">{{ dispute.order.order_code }}</td>
+                            <td>{{ dispute.raised_by.username }}</td>
+                            <td>{{ dispute.against_user.username }}</td>
+                            <td><small>{{ dispute.reason|truncatewords:8 }}</small></td>
+                            <td><span class="badge-premium badge-premium-{% if dispute.status == 'open' %}danger{% elif dispute.status == 'under_review' %}warning{% elif dispute.status == 'resolved' %}success{% else %}secondary{% endif %}">{{ dispute.get_status_display }}</span></td>
+                            <td><small class="text-muted">{{ dispute.created_at|date:"d M Y" }}</small></td>
+                            <td>
+                                {% if user.role == 'admin' and dispute.status != 'closed' %}
+                                <a href="{% url 'app:dispute_resolve' dispute.pk %}" class="btn-premium btn-premium-primary btn-premium-sm" style="font-size:0.75rem;padding:0.3rem 1rem;">Resolve</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="text-center py-4 text-muted">No disputes found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state-premium">
+            <i class="bi bi-check-circle-fill" style="font-size:4rem;color:#166534;"></i>
+            <h5>No Disputes</h5>
+            <p>There are no disputes on your account. Everything is running smoothly.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

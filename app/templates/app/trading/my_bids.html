@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Bids - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <h2><i class="bi bi-hand-index me-2"></i> My Bids</h2>
+        <p>Track all your bids across listings</p>
+        <div class="header-accent-line"></div>
+    </div>
+</div>
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        <div class="card-premium">
+            <div class="table-responsive">
+                <table class="table-premium">
+                    <thead>
+                        <tr>
+                            <th>Listing</th>
+                            <th>{% if user.role == 'farmer' %}Bidder{% else %}Seller{% endif %}</th>
+                            <th>Price/kg</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bid in bids %}
+                        <tr>
+                            <td><a href="{% url 'app:listing_detail' bid.listing.pk %}" style="color:var(--primary);font-weight:600;">{{ bid.listing.batch.batch_code }}</a></td>
+                            <td>{% if user.role == 'farmer' %}{{ bid.trader.username }}{% else %}{{ bid.listing.farmer.username }}{% endif %}</td>
+                            <td class="fw-bold">Rs {{ bid.bid_price_per_kg }}</td>
+                            <td>{{ bid.quantity_kg }} kg</td>
+                            <td class="fw-bold" style="color:var(--primary);">Rs {{ bid.bid_price_per_kg }}</td>
+                            <td><span class="badge-premium badge-premium-{% if bid.status == 'active' %}primary{% elif bid.status == 'accepted' %}success{% elif bid.status == 'rejected' %}danger{% elif bid.status == 'outbid' %}warning{% else %}secondary{% endif %}">{{ bid.get_status_display }}</span></td>
+                            <td><small class="text-muted">{{ bid.bid_time|date:"d M Y" }}</small></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state-premium">
+                                    <i class="bi bi-hand-index-thumb empty-icon"></i>
+                                    <h5>No Bids Yet</h5>
+                                    <p class="text-muted">
+                                        {% if user.role == 'trader' %}Start exploring listings and place your first bid.{% else %}No bids have been placed on your listings yet.{% endif %}
+                                    </p>
+                                    {% if user.role == 'trader' %}
+                                    <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-primary">Browse Listings</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CardeTrade — Premium Cardamom Trading Platform{% endblock %}
+
+{% block content %}
+
+{% if not user.is_authenticated %}
+<!-- ============================================================
+     HERO SECTION — Premium Parallax with Dual Images
+     ============================================================ -->
+<section class="hero-premium" id="hero">
+    <div class="hero-overlay">
+        <img src="{% static 'image/cardamom1.jpg' %}" alt="Premium Cardamom" onerror="this.parentElement.style.display='none'">
+    </div>
+    <div class="hero-particles"></div>
+    <div class="hero-deco hero-deco-1"></div>
+    <div class="hero-deco hero-deco-2"></div>
+    <div class="hero-morph-blob"></div>
+
+    <div class="container hero-content">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-badge"><i class="bi bi-award-fill me-1"></i> India's Premium Cardamom Marketplace</div>
+                <h1 class="hero-title">
+                    Fresh Cardamom,<br>
+                    <span class="shimmer-text">Fair Trade.</span>
+                </h1>
+                <p class="hero-subtitle">
+                    India's premier digital marketplace connecting cardamom farmers directly with verified traders.
+                    Transparent pricing, professional quality grading, zero middlemen exploitation.
+                </p>
+                <div class="hero-buttons">
+                    <a href="{% url 'app:register' %}" class="btn-premium btn-premium-primary">
+                        <i class="bi bi-person-plus-fill"></i> Get Started Free
+                    </a>
+                    <a href="{% url 'app:login' %}" class="btn-premium btn-premium-secondary">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </a>
+                </div>
+                <div class="hero-stats-premium">
+                    <div class="hero-stat-item">
+                        <h3><span class="counter-value" data-target="{{ stats.farmers }}">{{ stats.farmers }}</span></h3>
+                        <p>Farmers</p>
+                    </div>
+                    <div class="hero-stat-item">
+                        <h3><span class="counter-value" data-target="{{ stats.traders }}">{{ stats.traders }}</span></h3>
+                        <p>Traders</p>
+                    </div>
+                    <div class="hero-stat-item">
+                        <h3><span class="counter-value" data-target="{{ stats.batches }}">{{ stats.batches }}</span></h3>
+                        <p>Batches</p>
+                    </div>
+                    <div class="hero-stat-item">
+                        <h3><span class="counter-value" data-target="{{ stats.orders }}">{{ stats.orders }}</span></h3>
+                        <p>Orders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-image-container">
+                    <div class="hero-image-main">
+                        <img src="{% static 'image/cardamom2.jpg' %}" alt="Premium Cardamom Harvest" onerror="this.parentElement.style.display='none'">
+                        <div class="hero-image-badge">
+                            <i class="bi bi-star-fill"></i>
+                            <span>Premium Grade Cardamom</span>
+                        </div>
+                    </div>
+                    <div class="hero-image-floating">
+                        <img src="{% static 'image/cardamom1.jpg' %}" alt="Cardamom Pods" onerror="this.parentElement.style.display='none'">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section-padding">
+    <div class="container">
+
+        {% if user.is_authenticated %}
+        <!-- Logged-in Welcome -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card-premium overflow-hidden">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-1 fw-bold"><i class="bi bi-person-circle me-2"></i> Welcome back, {{ user.username }}!</h3>
+                            <p class="mb-0 opacity-75">{{ user.get_role_display }} · {{ user.region|default:"CardeTrade Platform" }}</p>
+                        </div>
+                        <a href="{% url 'app:dashboard' %}" class="btn-premium btn-premium-primary btn-premium-sm mt-2 mt-md-0">
+                            <i class="bi bi-speedometer2"></i> Go to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.is_authenticated and user.role == 'trader' %}
+        <!-- Trader Listings -->
+        <div class="row mb-5">
+            <div class="col-12 mb-4">
+                <div class="d-flex justify-content-between align-items-end">
+                    <div>
+                        <h4 class="section-title-premium"><i class="bi bi-shop me-2"></i> Active Listings</h4>
+                        <p class="text-muted small mt-2">Premium cardamom batches available for purchase</p>
+                    </div>
+                    <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-outline btn-premium-sm d-none d-md-flex">
+                        View All <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+            {% for listing in listings %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="listing-card-premium animate-on-scroll">
+                    <div class="listing-type-badge {% if listing.listing_type == 'auction' %}auction{% else %}fixed{% endif %}">
+                        <i class="bi {% if listing.listing_type == 'auction' %}bi-hammer{% else %}bi-tag-fill{% endif %} me-1"></i>
+                        {{ listing.get_listing_type_display }}
+                    </div>
+                    <a href="{% url 'app:listing_detail' listing.pk %}" class="listing-image d-block">
+                        <img src="{% static 'image/cardamom1.jpg' %}" alt="Cardamom Batch" onerror="this.style.display='none'">
+                    </a>
+                    <div class="listing-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">{{ listing.batch.batch_code }}</h6>
+                        </div>
+                        <div class="listing-farmer mb-2">
+                            <i class="bi bi-person"></i> {{ listing.farmer.username }}
+                            {% if listing.batch.farm and listing.batch.farm.region %}
+                            · <i class="bi bi-geo-alt"></i> {{ listing.batch.farm.region }}
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end mt-3">
+                            <div>
+                                <span class="listing-price">Rs {{ listing.price_per_kg }}</span>
+                                <small class="text-muted">/ kg</small>
+                            </div>
+                            <span class="text-muted small">{{ listing.available_qty_kg }} kg left</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            {% if listing.batch.verification %}
+                            <span class="grade-badge grade-{{ listing.batch.verification.grade }}">{{ listing.batch.verification.grade }}</span>
+                            {% else %}
+                            <span></span>
+                            {% endif %}
+                            <a href="{% url 'app:listing_detail' listing.pk %}" class="btn-premium btn-premium-outline btn-premium-sm">
+                                Details <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty-state-premium">
+                    <i class="bi bi-basket2 empty-icon"></i>
+                    <h5>No Active Listings</h5>
+                    <p>There are no cardamom listings available at the moment. Check back soon!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if not user.is_authenticated %}
+        <!-- ============================================================
+             HOW IT WORKS
+             ============================================================ -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-5">
+                <span class="hero-badge" style="border-color:var(--primary);color:var(--primary);position:static;animation:none;"><i class="bi bi-diagram-3 me-1"></i> Simple Process</span>
+                <h2 class="fw-bold mt-3" style="color:var(--primary);font-size:2.5rem;">How CardeTrade Works</h2>
+                <p class="text-muted" style="max-width:550px;margin:0 auto;">From harvest to delivery — a transparent journey for everyone</p>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="feature-card-premium animate-on-scroll">
+                    <div class="feature-icon-premium"><i class="bi bi-person-plus-fill"></i></div>
+                    <h5>1. Register</h5>
+                    <p class="text-muted small">Sign up as a Farmer, Trader, or Product Manager. Complete your profile to get started.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="feature-card-premium animate-on-scroll">
+                    <div class="feature-icon-premium"><i class="bi bi-clipboard-check-fill"></i></div>
+                    <h5>2. Quality Check</h5>
+                    <p class="text-muted small">Certified Product Managers grade each batch (A/B/C) and set a fair verified price.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="feature-card-premium animate-on-scroll">
+                    <div class="feature-icon-premium"><i class="bi bi-hand-index-thumb-fill"></i></div>
+                    <h5>3. Trade</h5>
+                    <p class="text-muted small">Choose fixed-price buying or auction bidding. Farmers get the best market price.</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="feature-card-premium animate-on-scroll">
+                    <div class="feature-icon-premium"><i class="bi bi-truck"></i></div>
+                    <h5>4. Deliver</h5>
+                    <p class="text-muted small">Track your order from payment to delivery. Dispute resolution if needed.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             PHILOSOPHY SECTION — Dual Image
+             ============================================================ -->
+        <div class="row align-items-center g-5 mb-5">
+            <div class="col-lg-6 animate-on-scroll-left">
+                <div class="img-frame-premium" style="border-radius:var(--radius-lg);box-shadow:var(--shadow-xl);">
+                    <img src="{% static 'image/cardamom2.jpg' %}" alt="Cardamom Farming" class="img-fluid" onerror="this.style.display='none'">
+                </div>
+            </div>
+            <div class="col-lg-6 animate-on-scroll-right">
+                <span class="hero-badge" style="border-color:var(--accent);color:var(--primary);position:static;animation:none;"><i class="bi bi-award-fill me-1"></i> Our Philosophy</span>
+                <h2 class="fw-bold mt-3" style="color:var(--primary);font-size:2.2rem;">Grade First,<br>Trade Second.</h2>
+                <p class="text-muted mt-3" style="line-height:1.8;font-size:1.05rem;">Every batch of cardamom on CardeTrade is professionally graded by certified Product Managers before it reaches the marketplace. This ensures complete transparency and trust between farmers and traders.</p>
+                <div class="row mt-4 g-3">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="width:44px;height:44px;background:rgba(200,169,81,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;"><i class="bi bi-check-lg fs-5"></i></div>
+                            <div><strong>Transparent Quality</strong><br><small class="text-muted">Professional grading reports</small></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="width:44px;height:44px;background:rgba(200,169,81,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;"><i class="bi bi-currency-rupee fs-5"></i></div>
+                            <div><strong>Fair Pricing</strong><br><small class="text-muted">Based on verified grade</small></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="width:44px;height:44px;background:rgba(200,169,81,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;"><i class="bi bi-people fs-5"></i></div>
+                            <div><strong>Direct Trade</strong><br><small class="text-muted">No middlemen exploitation</small></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="width:44px;height:44px;background:rgba(200,169,81,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;"><i class="bi bi-shield-check fs-5"></i></div>
+                            <div><strong>Trust & Security</strong><br><small class="text-muted">Verified farmers & traders</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             IMAGE GALLERY
+             ============================================================ -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-5">
+                <span class="hero-badge" style="border-color:var(--primary);color:var(--primary);position:static;animation:none;"><i class="bi bi-images me-1"></i> Our Marketplace</span>
+                <h2 class="fw-bold mt-3" style="color:var(--primary);font-size:2.2rem;">Premium Cardamom Gallery</h2>
+            </div>
+            <div class="col-md-6 mb-4 animate-on-scroll-scale">
+                <div class="img-frame-premium" style="height:350px;border-radius:var(--radius-lg);">
+                    <img src="{% static 'image/cardamom2.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                </div>
+            </div>
+            <div class="col-md-6 mb-4 animate-on-scroll-scale">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="img-frame-premium" style="height:160px;border-radius:var(--radius-md);">
+                            <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="img-frame-premium" style="height:160px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;">
+                            <i class="bi bi-star-fill fs-1 mb-2" style="color:var(--accent)"></i>
+                            <strong>Grade A</strong>
+                            <small>Premium Quality</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="img-frame-premium" style="height:160px;background:linear-gradient(135deg,var(--accent),var(--gold));border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--primary-dark);">
+                            <i class="bi bi-trophy-fill fs-1 mb-2"></i>
+                            <strong>Certified</strong>
+                            <small>By PMs</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="img-frame-premium" style="height:160px;border-radius:var(--radius-md);">
+                            <img src="{% static 'image/cardamom2.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             CTA SECTION
+             ============================================================ -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card-premium animate-on-scroll" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;">
+                    <div class="card-body p-5 text-center">
+                        <h3 class="fw-bold mb-2" style="font-size:2rem;">Ready to Start Trading?</h3>
+                        <p class="mb-4 opacity-75" style="max-width:550px;margin:0 auto 1.5rem;">Join hundreds of farmers and traders already using CardeTrade for transparent, verified cardamom trading.</p>
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{% url 'app:register' %}" class="btn-premium btn-premium-primary">
+                                <i class="bi bi-person-plus-fill"></i> Create Free Account
+                            </a>
+                            <a href="{% url 'app:login' %}" class="btn-premium" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;">
+                                <i class="bi bi-box-arrow-in-right"></i> Sign In
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

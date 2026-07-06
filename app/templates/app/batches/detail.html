@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Batch {{ batch.batch_code }} - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <nav class="breadcrumb-premium">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:batch_list' %}">Batches</a></li>
+                <li class="breadcrumb-item active">{{ batch.batch_code }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card-premium mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold">{{ batch.batch_code }}</h4>
+                    <span class="badge-premium badge-premium-{% if batch.status == 'pending' %}secondary{% elif batch.status == 'under_review' %}info{% elif batch.status == 'verified' %}primary{% elif batch.status == 'listed' %}success{% elif batch.status == 'sold' %}dark{% else %}danger{% endif %} fs-6">
+                        <i class="bi {% if batch.status == 'pending' %}bi-clock{% elif batch.status == 'under_review' %}bi-eye{% elif batch.status == 'verified' %}bi-check{% elif batch.status == 'listed' %}bi-shop{% elif batch.status == 'sold' %}bi-check-all{% else %}bi-x{% endif %} me-1"></i>
+                        {{ batch.get_status_display }}
+                    </span>
+                </div>
+                <div class="row g-0">
+                    <div class="col-md-5">
+                        <div class="img-frame-premium" style="border-radius:0; height:100%; min-height:250px;">
+                            <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="min-height:250px;" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                    <div class="col-md-7 p-4">
+                        <div class="row">
+                            <div class="col-6 mb-3"><small class="text-muted">Farmer</small><p class="fw-bold mb-0">{{ batch.farmer.username }}</p></div>
+                            <div class="col-6 mb-3"><small class="text-muted">Farm</small><p class="fw-bold mb-0">{{ batch.farm.farm_name|default:"-" }}</p></div>
+                            <div class="col-6 mb-3"><small class="text-muted">Quantity</small><p class="fw-bold mb-0">{{ batch.quantity_kg }} kg</p></div>
+                            <div class="col-6 mb-3"><small class="text-muted">Harvest</small><p class="fw-bold mb-0">{{ batch.harvest_date }}</p></div>
+                            <div class="col-6 mb-3"><small class="text-muted">Est. Price</small><p class="fw-bold mb-0">Rs{{ batch.estimated_price_per_kg }}/kg</p></div>
+                            <div class="col-6 mb-3"><small class="text-muted">Created</small><p class="fw-bold mb-0">{{ batch.created_at|date:"d M Y" }}</p></div>
+                        </div>
+                    </div>
+                </div>
+                {% if batch.description %}
+                <div class="card-body"><p>{{ batch.description }}</p></div>
+                {% endif %}
+            </div>
+
+            {% if batch.verification %}
+            <div class="card-premium mb-4">
+                <div class="card-header"><h5 class="mb-0 fw-bold"><i class="bi bi-clipboard-check me-2" style="color:var(--accent);"></i> Quality Report</h5></div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-4 col-md-2"><span class="badge-premium badge-premium-success" style="font-size:1.1rem;">{{ batch.verification.grade }}</span></div>
+                        <div class="col-4 col-md-2"><small class="text-muted">Moisture</small><p class="fw-bold mb-0">{{ batch.verification.moisture_content_pct|default:"-" }}%</p></div>
+                        <div class="col-4 col-md-2"><small class="text-muted">Aroma</small><p class="fw-bold mb-0">{{ batch.verification.aroma_score|default:"-" }}/10</p></div>
+                        <div class="col-4 col-md-2"><small class="text-muted">Color</small><p class="fw-bold mb-0">{{ batch.verification.color_score|default:"-" }}/10</p></div>
+                        <div class="col-4 col-md-2"><small class="text-muted">Purity</small><p class="fw-bold mb-0">{{ batch.verification.purity_pct|default:"-" }}%</p></div>
+                        <div class="col-4 col-md-2"><small class="text-muted">Price</small><p class="fw-bold mb-0" style="color:var(--primary);">Rs{{ batch.verification.verified_price_per_kg }}</p></div>
+                    </div>
+                    {% if batch.verification.remarks %}
+                    <div class="mt-3 pt-3 border-top"><small class="text-muted">Remarks:</small><p class="mb-0">{{ batch.verification.remarks }}</p></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card-premium">
+                <div class="card-header"><h5 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i> Actions</h5></div>
+                <div class="card-body">
+                    {% if user.role == 'product_manager' and batch.status == 'pending' %}
+                    <a href="{% url 'app:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary w-100 justify-content-center mb-2"><i class="bi bi-clipboard-check"></i> Verify Batch</a>
+                    {% endif %}
+                    {% if user.role == 'farmer' and batch.status == 'listed' and batch.listing %}
+                    <a href="{% url 'app:listing_detail' batch.listing.pk %}" class="btn-premium btn-custom-premium w-100 justify-content-center mb-2" style="border:1px solid var(--primary); color:var(--primary);"><i class="bi bi-shop"></i> View Listing</a>
+                    {% endif %}
+                    <a href="{% url 'app:batch_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(0,0,0,0.05); color:var(--text-muted);"><i class="bi bi-arrow-left"></i> Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
