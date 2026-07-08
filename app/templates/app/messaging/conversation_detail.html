@@ -1,17 +1,48 @@
+{# ============================================================
+   FILE: conversation_detail.html
+   PURPOSE: Displays a single conversation thread with its full
+            message history and a form to send new messages.
+   ============================================================ #}
+
+{# ============================================================
+   INHERITANCE & STATIC LOAD
+   ============================================================
+   Extend base.html to reuse the site layout. Load static files
+   (images, CSS, JS)    so they can be referenced with the static tag. #}
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE
+   ============================================================
+   Sets the browser tab title to "Conversation - CardeTrade". #}
 {% block title %}Conversation - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   ============================================================
+   Replaces the 'content' block from base.html. #}
 {% block content %}
+
+{# ============================================================
+   PAGE HEADER / BANNER WITH BREADCRUMB
+   ============================================================
+   A compact banner with a gradient background. Contains a breadcrumb
+   trail showing "Messages > [other participant's name]". #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:6rem 0 1.5rem;">
+    {# Decorative background image; hidden on error. #}
     <div class="page-header-bg">
         <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
     </div>
+    {# Text overlay container (z-index:1 keeps it above the image). #}
     <div class="container position-relative" style="z-index:1;">
+        {# Breadcrumb navigation: "Messages" links back to the conversation list. #}
         <nav class="breadcrumb-premium">
             <ol class="breadcrumb">
+                {# First crumb: link to the conversation list page. #}
                 <li class="breadcrumb-item"><a href="{% url 'app:conversation_list' %}">Messages</a></li>
+                {# Second crumb (active, not clickable): the other participant's username.
+                   Loops through participants and shows all except the current user. #}
                 <li class="breadcrumb-item active">
                     {% for p in conversation.participants.all %}
                         {% if p.user != user %}{{ p.user.username }}{% endif %}
@@ -22,63 +53,125 @@
     </div>
 </div>
 
+{# ============================================================
+   CHAT INTERFACE AREA
+   ============================================================
+   Main wrapper below the banner. Contains the conversation card
+   with the message history and the message input form. #}
 <div class="dashboard-wrapper" style="padding-top:1rem;">
     <div class="container">
         <div class="row">
             <div class="col-12">
+
+                {# ============================================================
+                   CONVERSATION CARD
+                   ============================================================
+                   The outer card containing the header (participant info/status),
+                   message scroll area, and the reply form. #}
                 <div class="card-premium">
+
+                    {# --- CARD HEADER ---
+                       Shows the other participant's name, conversation subject,
+                       type label, and a status badge. #}
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-0">
                                 <i class="bi bi-chat-dots me-2"></i>
+                                {# Display all participants except the current user. #}
                                 {% for p in conversation.participants.all %}
                                     {% if p.user != user %}{{ p.user.username }}{% endif %}
                                 {% endfor %}
+                                {# If a subject exists, append it after an em dash. #}
                                 {% if conversation.subject %} — {{ conversation.subject }}{% endif %}
                             </h5>
+                            {# Small text showing the conversation type (e.g. "Quality Review"). #}
                             <small class="opacity-75">{{ conversation.get_type_display }}</small>
                         </div>
+                        {# Status badge: color changes based on conversation status.
+                           open     = success (green),
+                           archived = secondary (grey),
+                           locked   = warning (yellow). #}
                         <span class="badge-premium badge-premium-{% if conversation.status == 'open' %}success{% elif conversation.status == 'archived' %}secondary{% else %}warning{% endif %}">{{ conversation.get_status_display }}</span>
                     </div>
+
+                    {# --- MESSAGE LIST (scrollable container) ---
+                       This div is the scrollable chat area. It gets an id
+                       "chatContainer" so JavaScript can auto-scroll to bottom. #}
                     <div class="chat-container" id="chatContainer">
+
+                        {# Loop through every message in the conversation,
+                           ordered by sent_at (oldest first). #}
                         {% for msg in conversation.messages.all %}
+
+                        {# Each message row: if the sender is the current user,
+                           align the bubble to the right (justify-content-end).
+                           Otherwise it aligns left. #}
                         <div class="d-flex mb-3 {% if msg.sender == user %}justify-content-end{% endif %}">
+                            {# The speech-bubble itself: gets class 'sent' for outgoing
+                               messages or 'received' for incoming messages. #}
                             <div class="msg-bubble {% if msg.sender == user %}sent{% else %}received{% endif %}">
+                                {# For incoming messages, show the sender's name above
+                                   the content. Not shown for own messages. #}
                                 {% if msg.sender != user %}
                                 <small class="fw-bold d-block" style="color:var(--accent);">{{ msg.sender.username }}</small>
                                 {% endif %}
+                                {# The actual message text content. #}
                                 {{ msg.content }}
+                                {# Timestamp displayed right-aligned below the message,
+                                   formatted as HH:MM (24-hour). #}
                                 <div class="msg-time text-end">{{ msg.sent_at|date:"H:i" }}</div>
                             </div>
                         </div>
+
+                        {# If there are zero messages, show an empty-state prompt. #}
                         {% empty %}
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-chat fs-1 d-block mb-2"></i>
                             No messages yet. Start the conversation.
                         </div>
                         {% endfor %}
+
                     </div>
+
+                    {# --- REPLY FORM ---
+                       A form at the bottom of the card that POSTs a new message.
+                       The top border separates it from the message history. #}
                     <div class="card-body border-top">
                         <form method="post" class="d-flex gap-2">
+                            {# CSRF token: security measure required by Django for all POST forms. #}
                             {% csrf_token %}
+                            {# Text input for the message body. Uses the custom form-premium
+                               styling class. Required and gets autofocus when page loads. #}
                             <input type="text" name="content" class="form-premium" placeholder="Type your message..." required autofocus>
+                            {# Submit button with a send icon. #}
                             <button type="submit" class="btn-premium btn-premium-primary" style="padding:0.75rem 1.5rem;">
                                 <i class="bi bi-send"></i>
                             </button>
                         </form>
                     </div>
-                </div>
+
+                </div>{# /card-premium #}
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
+{# ============================================================
+   EXTRA JAVASCRIPT BLOCK
+   ============================================================
+   This block is defined in base.html for page-specific scripts.
+   Here we add an auto-scroll to the bottom of the chat so the
+   user always sees the newest message first. #}
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var chat = document.getElementById('chatContainer');
-    if (chat) chat.scrollTop = chat.scrollHeight;
-});
+    // Wait for the page's DOM to be fully loaded before running.
+    document.addEventListener('DOMContentLoaded', function() {
+        // Find the chat container element by its id.
+        var chat = document.getElementById('chatContainer');
+        // If the element exists, immediately scroll to its full height,
+        // which puts the most recent messages in view.
+        if (chat) chat.scrollTop = chat.scrollHeight;
+    });
 </script>
 {% endblock %}

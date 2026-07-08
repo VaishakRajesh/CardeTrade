@@ -1,14 +1,30 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE
+   ============================================================
+   The browser tab title includes the specific batch code
+   (e.g. "CDM-2026-0001 - CardeTrade") so the user can
+   identify which listing they are viewing. #}
 {% block title %}{{ listing.batch.batch_code }} - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   ============================================================ #}
 {% block content %}
+
+{# ============================================================
+   PAGE HEADER WITH BREADCRUMB NAVIGATION
+   ============================================================
+   A gradient hero banner containing breadcrumb links so
+   the user can navigate back to the Marketplace listing. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#1a3a2e);">
     <div class="page-header-bg">
         <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
     </div>
     <div class="container position-relative" style="z-index:1;">
+        {# Breadcrumb: Marketplace > [Batch Code] #}
         <nav class="breadcrumb-premium">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'app:listing_list' %}">Marketplace</a></li>
@@ -18,22 +34,39 @@
     </div>
 </div>
 
+{# ============================================================
+   TWO-COLUMN CONTENT LAYOUT
+   ============================================================
+   Left column (8/12 width) — batch info and quality report.
+   Right column (4/12 width) — pricing and purchase actions. #}
 <div class="container py-4">
     <div class="row g-4">
+
+        {# ==========================================================
+           LEFT COLUMN — BATCH INFORMATION & QUALITY REPORT
+           ========================================================== #}
         <div class="col-lg-8">
+
+            {# --------------------------------------------------
+               CARD: Batch / Listing Details
+               -------------------------------------------------- #}
             <div class="card-premium mb-4">
+                {# Card header with batch code and status badges. #}
                 <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
                     <h4 class="mb-0 fw-bold">{{ listing.batch.batch_code }}</h4>
                     <div class="d-flex gap-2 mt-2 mt-md-0">
+                        {# Badge showing listing type (Auction / Fixed Price). #}
                         <span class="badge-premium {% if listing.listing_type == 'auction' %}badge-premium-warning{% else %}badge-premium-info{% endif %}">
                             <i class="bi {% if listing.listing_type == 'auction' %}bi-hammer{% else %}bi-tag-fill{% endif %} me-1"></i>
                             {{ listing.get_listing_type_display }}
                         </span>
+                        {# Badge showing whether the listing is currently active. #}
                         <span class="badge-premium {% if listing.is_active %}badge-premium-success{% else %}badge-premium-secondary{% endif %}">
                             {% if listing.is_active %}<i class="bi bi-check-circle"></i> Active{% else %}Inactive{% endif %}
                         </span>
                     </div>
                 </div>
+                {# Two-column card body: image on left, key details on right. #}
                 <div class="row g-0">
                     <div class="col-md-6">
                         <div class="img-frame-premium" style="border-radius:0; height:100%; min-height:300px;">
@@ -41,34 +74,48 @@
                         </div>
                     </div>
                     <div class="col-md-6 p-4">
+                        {# Each detail is a label/value pair — label in small muted text, value in bold. #}
                         <div class="mb-3"><label class="text-muted small">Farmer</label><p class="fw-bold fs-5 mb-0">{{ listing.farmer.username }}</p></div>
                         <div class="mb-3"><label class="text-muted small">Farm</label><p class="fw-bold mb-0">{{ listing.batch.farm.farm_name|default:"Not specified" }}</p></div>
                         <div class="mb-3"><label class="text-muted small">Total Batch</label><p class="fw-bold mb-0">{{ listing.batch.quantity_kg }} kg</p></div>
                         <div class="mb-3"><label class="text-muted small">Harvest Date</label><p class="fw-bold mb-0">{{ listing.batch.harvest_date }}</p></div>
+                        {# Minimum order is optional — only show if a value is set. #}
                         {% if listing.min_order_kg %}
                         <div class="mb-3"><label class="text-muted small">Min. Order</label><p class="fw-bold mb-0">{{ listing.min_order_kg }} kg</p></div>
                         {% endif %}
                     </div>
                 </div>
+                {# Optional description text from the batch, shown below the two columns. #}
                 {% if listing.batch.description %}
                 <div class="card-body pt-0"><p>{{ listing.batch.description }}</p></div>
                 {% endif %}
             </div>
 
+            {# --------------------------------------------------
+               CARD: Quality Report (only shown if the batch
+               has been verified by a Product Manager).
+               -------------------------------------------------- #}
             {% if listing.batch.verification %}
             <div class="card-premium mb-4">
                 <div class="card-header"><h5 class="mb-0 fw-bold"><i class="bi bi-clipboard-check me-2" style="color: var(--accent);"></i> Quality Report</h5></div>
                 <div class="card-body">
                     <div class="row g-3">
+                        {# Grade badge — prominently displayed (e.g. "Grade A"). #}
                         <div class="col-md-4 text-center">
                             <span class="badge-premium badge-premium-success fs-6" style="font-size:1.2rem !important; padding:0.5rem 1.5rem;">Grade {{ listing.batch.verification.grade }}</span>
                         </div>
+                        {# Moisture content percentage. Falls back to "-" if not recorded. #}
                         <div class="col-md-4 text-center"><small class="text-muted">Moisture</small><p class="fw-bold mb-0">{{ listing.batch.verification.moisture_content_pct|default:"-" }}%</p></div>
+                        {# Aroma score out of 10. #}
                         <div class="col-md-4 text-center"><small class="text-muted">Aroma</small><p class="fw-bold mb-0">{{ listing.batch.verification.aroma_score|default:"-" }}/10</p></div>
+                        {# Colour score out of 10. #}
                         <div class="col-md-4 text-center"><small class="text-muted">Color</small><p class="fw-bold mb-0">{{ listing.batch.verification.color_score|default:"-" }}/10</p></div>
+                        {# Purity percentage. #}
                         <div class="col-md-4 text-center"><small class="text-muted">Purity</small><p class="fw-bold mb-0">{{ listing.batch.verification.purity_pct|default:"-" }}%</p></div>
+                        {# The verified price per kg — this is the PM-approved price. #}
                         <div class="col-md-4 text-center"><small class="text-muted">Verified Price</small><p class="fw-bold mb-0" style="color:var(--primary);">Rs{{ listing.batch.verification.verified_price_per_kg }}/kg</p></div>
                     </div>
+                    {# Optional remarks from the Product Manager about the quality inspection. #}
                     {% if listing.batch.verification.remarks %}
                     <div class="mt-3 pt-3 border-top"><small class="text-muted">Remarks:</small><p class="mb-0">{{ listing.batch.verification.remarks }}</p></div>
                     {% endif %}
@@ -77,43 +124,69 @@
             {% endif %}
         </div>
 
+        {# ==========================================================
+           RIGHT COLUMN — PRICING & PURCHASE ACTIONS
+           ========================================================== #}
         <div class="col-lg-4">
+
+            {# --------------------------------------------------
+               CARD: Pricing summary + buy/bid actions
+               -------------------------------------------------- #}
             <div class="card-premium mb-4">
                 <div class="card-header"><h5 class="mb-0 fw-bold"><i class="bi bi-currency-rupee me-2"></i> Pricing</h5></div>
                 <div class="card-body text-center">
+                    {# Large prominent price display. #}
                     <div class="display-4 fw-bold" style="color: var(--primary);">Rs{{ listing.price_per_kg }}</div>
                     <p class="text-muted">per kilogram</p>
                     <hr>
+                    {# Summary stats: available quantity and total value (price × available qty). #}
                     <div class="d-flex justify-content-between mb-2"><span>Available Qty</span><span class="fw-bold">{{ listing.available_qty_kg }} kg</span></div>
                     <div class="d-flex justify-content-between mb-3"><span>Total Value</span><span class="fw-bold fs-5">Rs{{ listing.price_per_kg|floatformat:2 }}</span></div>
 
+                    {# --------------------------------------------------
+                       CONDITIONAL ACTIONS BASED ON USER ROLE & STATUS
+                       --------------------------------------------------
+                       Only Traders can buy. Only active listings can be purchased.
+                       Auction listings show "Place Bid" + bid history.
+                       Fixed-price listings show "Buy Now" form. #}
+
+                    {# CASE 1: User is a Trader AND the listing is active. #}
                     {% if user.role == 'trader' and listing.is_active %}
+                        {# Sub-case A: Auction — show "Place Bid" button + current bid list. #}
                         {% if listing.listing_type == 'auction' %}
                             <a href="{% url 'app:place_bid' listing.pk %}" class="btn-premium btn-premium-primary w-100 justify-content-center mb-2">
                                 <i class="bi bi-hammer"></i> Place Bid
                             </a>
                             <h6 class="mt-4 mb-3 fw-bold">Current Bids</h6>
+                            {# Loop through all bids on this listing, ordered by price descending. #}
                             {% for bid in listing.bids.all %}
                             <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                                 <div><small class="fw-bold">Rs{{ bid.bid_price_per_kg }}/kg</small><br><small class="text-muted">{{ bid.trader.username }}</small></div>
+                                {# Colour-code the status badge based on bid status. #}
                                 <span class="badge-premium badge-premium-{% if bid.status == 'active' %}primary{% elif bid.status == 'accepted' %}success{% else %}secondary{% endif %}">{{ bid.get_status_display }}</span>
                             </div>
                             {% empty %}
+                            {# No bids yet message. #}
                             <p class="text-muted small mb-0">No bids yet. Be the first!</p>
                             {% endfor %}
+                        {# Sub-case B: Fixed Price — show "Buy Now" form that POSTs to direct_buy. #}
                         {% else %}
                             <form method="post" action="{% url 'app:direct_buy' listing.pk %}">
                                 {% csrf_token %}
+                                {# Hidden input submits the full available quantity. #}
                                 <input type="hidden" name="quantity_kg" value="{{ listing.available_qty_kg }}">
                                 <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center">
                                     <i class="bi bi-bag-check-fill"></i> Buy Now — Rs{{ listing.available_qty_kg|floatformat:2 }}
                                 </button>
                             </form>
                         {% endif %}
+                    {# CASE 2: User is NOT logged in — show login prompt. #}
                     {% elif not user.is_authenticated %}
                         <p class="text-muted mt-3">Please <a href="{% url 'app:login' %}" class="fw-bold" style="color:var(--accent);">login</a> to purchase.</p>
+                    {# CASE 3: User is logged in but is NOT a Trader (e.g. Farmer or PM). #}
                     {% elif user.role != 'trader' %}
                         <p class="text-muted mt-3">Only traders can purchase listings.</p>
+                    {# CASE 4: Listing is inactive. #}
                     {% else %}
                         <p class="text-muted mt-3">This listing is no longer active.</p>
                     {% endif %}

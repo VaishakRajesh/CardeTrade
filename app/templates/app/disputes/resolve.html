@@ -1,42 +1,107 @@
+{# ============================================================
+   FILE: resolve.html (Disputes)
+   PURPOSE: Admin-only page for resolving or closing a dispute.
+            Shows the full dispute details and a form to choose
+            the resolution outcome and add notes.
+   ============================================================ #}
+
+{# ============================================================
+   INHERITANCE & STATIC LOAD
+   ============================================================
+   Extends the base template for the shared layout. Loads the
+   static tag so we can reference images and assets. #}
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE
+   ============================================================
+   Sets the browser tab title to "Resolve Dispute - CardeTrade". #}
 {% block title %}Resolve Dispute - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   ============================================================
+   Replaces the 'content' block from base.html. #}
 {% block content %}
+
+{# ============================================================
+   PAGE HEADER / BANNER
+   ============================================================
+   A decorative hero banner with a dark green gradient to signal
+   resolution/closure (as opposed to the red used on the create page). #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#1a3a2e);">
+    {# Background image layer with cardamom photo; hidden on error. #}
     <div class="page-header-bg">
         <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
     </div>
+    {# Text overlay (z-index:1 ensures visibility over the background image). #}
     <div class="container position-relative" style="z-index:1;">
+        {# Heading with a shield-check icon (suggests authority/verification). #}
         <h2><i class="bi bi-shield-check me-2"></i> Resolve Dispute</h2>
+        {# Subtitle showing which order this dispute belongs to. #}
         <p>Order {{ dispute.order.order_code }}</p>
+        {# Small decorative accent line. #}
         <div class="header-accent-line"></div>
     </div>
 </div>
 
+{# ============================================================
+   FORM AREA
+   ============================================================
+   A two-card layout centered on the page:
+   1. Dispute Details Card — full read-only information about the dispute.
+   2. Resolution Form Card — admin chooses outcome and writes notes. #}
 <div class="container py-5">
     <div class="row justify-content-center">
+        {# Constrain width to col-lg-8 (two-thirds on large screens) for readability. #}
         <div class="col-lg-8">
+
+            {# ============================================================
+               CARD 1: DISPUTE DETAILS
+               ============================================================
+               Displays all relevant information about the dispute in a
+               read-only grid, so the admin can review before deciding. #}
             <div class="card-premium mb-4">
                 <div class="card-header"><h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Dispute Details</h5></div>
                 <div class="card-body">
+                    {# Two-column row with labels above values. #}
                     <div class="row g-3">
+                        {# Order code (bold text) with a muted label above it. #}
                         <div class="col-md-6"><small class="text-muted">Order</small><p class="fw-bold"> {{ dispute.order.order_code }}</p></div>
+                        {# Current dispute status rendered as a badge with dynamic color.
+                           open         = danger (red),
+                           under_review = warning (yellow),
+                           resolved     = success (green). #}
                         <div class="col-md-6"><small class="text-muted">Status</small><p><span class="badge-premium badge-premium-{% if dispute.status == 'open' %}danger{% elif dispute.status == 'under_review' %}warning{% else %}success{% endif %}">{{ dispute.get_status_display }}</span></p></div>
+                        {# Person who raised the dispute (with their role in parentheses). #}
                         <div class="col-md-4"><small class="text-muted">Raised By</small><p class="fw-bold">{{ dispute.raised_by.username }} ({{ dispute.raised_by.get_role_display }})</p></div>
+                        {# Person the dispute is against (with their role in parentheses). #}
                         <div class="col-md-4"><small class="text-muted">Against</small><p class="fw-bold">{{ dispute.against_user.username }} ({{ dispute.against_user.get_role_display }})</p></div>
+                        {# Date the dispute was created, formatted as "dd Mon YYYY". #}
                         <div class="col-md-4"><small class="text-muted">Date</small><p class="fw-bold">{{ dispute.created_at|date:"d M Y" }}</p></div>
+                        {# Full reason text (not truncated, since this is the detail view). #}
                         <div class="col-12"><small class="text-muted">Reason</small><p>{{ dispute.reason }}</p></div>
                     </div>
                 </div>
             </div>
 
+            {# ============================================================
+               CARD 2: RESOLUTION FORM
+               ============================================================
+               The form where the admin decides the outcome. Offers a
+               dropdown (Resolved / Closed) and a required notes textarea. #}
             <div class="card-premium">
                 <div class="card-header"><h5 class="mb-0"><i class="bi bi-pencil me-2"></i> Resolution</h5></div>
                 <div class="card-body p-4">
+                    {# POSTs back to the same URL with the selected resolution. #}
                     <form method="post">
+                        {# CSRF protection token required by Django for all POST forms. #}
                         {% csrf_token %}
+
+                        {# --- STATUS DROPDOWN ---
+                           The admin chooses whether the dispute was "resolved" (issue settled)
+                           or "closed" (dismissed without resolution). #}
                         <div class="mb-3">
                             <label class="fw-semibold small">Resolution Outcome *</label>
                             <select name="status" class="form-premium" required>
@@ -44,16 +109,23 @@
                                 <option value="closed">Closed — Dismissed</option>
                             </select>
                         </div>
+
+                        {# --- RESOLUTION NOTES TEXTAREA ---
+                           The admin provides a detailed explanation of the resolution,
+                           including any refunds, replacements, or agreements. #}
                         <div class="mb-3">
                             <label class="fw-semibold small">Resolution Notes *</label>
                             <textarea name="resolution" class="form-premium" rows="4" placeholder="Describe the resolution, any refunds, replacements, or agreements..." required></textarea>
                         </div>
+
+                        {# Submit button, full width, primary color, with a check-all icon. #}
                         <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center">
                             <i class="bi bi-check-all"></i> Submit Resolution
                         </button>
                     </form>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

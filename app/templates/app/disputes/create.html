@@ -1,52 +1,118 @@
+{# ============================================================
+   FILE: create.html (Disputes)
+   PURPOSE: Allows a user to raise a new dispute against an order.
+            Shows a summary of the order and a form to describe
+            the issue.
+   ============================================================ #}
+
+{# ============================================================
+   INHERITANCE & STATIC LOAD
+   ============================================================
+   Extend the base template so the page includes the shared UI
+   shell (navbar, footer, alerts). Load the static tag to access
+   images, CSS, and JavaScript files. #}
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE
+   ============================================================
+   Sets the browser's tab title to "Raise Dispute - CardeTrade". #}
 {% block title %}Raise Dispute - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   ============================================================
+   Replaces the 'content' placeholder from base.html. #}
 {% block content %}
+
+{# ============================================================
+   PAGE HEADER / BANNER
+   ============================================================
+   A decorative hero banner with a red-tinted gradient (to visually
+   indicate a warning/dispute context). Contains the heading and
+   the order code being disputed. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#991b1b);">
+    {# Background image layer: loads a cardamom photo; hidden if it fails. #}
     <div class="page-header-bg">
         <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
     </div>
+    {# Text overlay container (z-index:1 ensures it's visible over the image). #}
     <div class="container position-relative" style="z-index:1;">
+        {# Main heading with a warning-triangle icon. #}
         <h2><i class="bi bi-exclamation-triangle me-2"></i> Raise a Dispute</h2>
+        {# Subtitle showing which order the dispute is about. #}
         <p>Order {{ order.order_code }}</p>
+        {# Small decorative accent line under the heading. #}
         <div class="header-accent-line"></div>
     </div>
 </div>
 
+{# ============================================================
+   FORM AREA
+   ============================================================
+   A two-card layout centered on the page:
+   1. Order Summary Card — shows order details for reference.
+   2. Issue Description Card — contains the dispute form. #}
 <div class="container py-5">
     <div class="row justify-content-center">
+        {# Constrain the width to a medium column (col-lg-6 = half width on large screens). #}
         <div class="col-lg-6">
+
+            {# ============================================================
+               CARD 1: ORDER SUMMARY
+               ============================================================
+               A read-only card that shows key order information so the user
+               can verify they are disputing the correct order. #}
             <div class="card-premium">
                 <div class="card-header"><h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Order Summary</h5></div>
                 <div class="card-body">
+                    {# Order code #}
                     <div class="d-flex justify-content-between mb-2"><span class="text-muted">Order</span><span class="fw-bold">{{ order.order_code }}</span></div>
+                    {# Batch code associated with the order (falls back to "-" if None) #}
                     <div class="d-flex justify-content-between mb-2"><span class="text-muted">Batch</span><span class="fw-bold">{{ order.batch.batch_code|default:"-" }}</span></div>
+                    {# Seller (farmer) username #}
                     <div class="d-flex justify-content-between mb-2"><span class="text-muted">Seller</span><span class="fw-bold">{{ order.seller.username }}</span></div>
+                    {# Buyer (trader) username #}
                     <div class="d-flex justify-content-between mb-2"><span class="text-muted">Buyer</span><span class="fw-bold">{{ order.buyer.username }}</span></div>
+                    {# Total order amount in Rupees #}
                     <div class="d-flex justify-content-between"><span class="text-muted">Amount</span><span class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</span></div>
                 </div>
             </div>
+
+            {# ============================================================
+               CARD 2: DISPUTE FORM
+               ============================================================
+               The form where the user describes the issue. Posts back to
+               the same URL via method="post". #}
             <div class="card-premium mt-4">
                 <div class="card-header"><h5 class="mb-0"><i class="bi bi-pencil me-2"></i> Describe the Issue</h5></div>
                 <div class="card-body p-4">
                     <form method="post">
+                        {# Django CSRF token — required for all POST forms to prevent cross-site request forgery. #}
                         {% csrf_token %}
+
+                        {# Textarea for the dispute reason/description. #}
                         <div class="mb-3">
                             <label class="fw-semibold small">Reason for Dispute *</label>
+                            {# A multi-line text input (5 rows) with a placeholder explaining what to write. Required field. #}
                             <textarea name="reason" class="form-premium" rows="5" placeholder="Please describe the issue in detail. Include any relevant information such as quality concerns, payment issues, delivery problems, etc." required></textarea>
                         </div>
+
+                        {# Informational alert telling the user an admin will review within 48 hours. #}
                         <div class="alert alert-premium alert-warning">
                             <i class="bi bi-info-circle me-2"></i>
                             An admin will review your dispute and respond within 48 hours.
                         </div>
+
+                        {# Submit button styled as a danger (red) button, full width. #}
                         <button type="submit" class="btn-premium btn-premium-danger w-100 justify-content-center">
                             <i class="bi bi-exclamation-triangle"></i> Submit Dispute
                         </button>
                     </form>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

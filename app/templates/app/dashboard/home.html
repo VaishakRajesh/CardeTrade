@@ -1,17 +1,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   HOME PAGE (Public Landing Page)
+   ------------------------------------------------------------
+   URL:        /
+   View:       HomeView (TemplateView — no login required)
+   Context:    stats (farmers/traders/batches/orders counts),
+               listings (active listings for trader dashboard)
+   Purpose:    Marketing landing page for anonymous visitors,
+               plus a personalized summary for logged-in users.
+   ============================================================ #}
+
 {% block title %}CardeTrade — Premium Cardamom Trading Platform{% endblock %}
 
 {% block content %}
 
+{# ---- HERO SECTION: only shown to anonymous (logged-out) visitors ---- #}
 {% if not user.is_authenticated %}
-<!-- ============================================================
-     HERO SECTION — Premium Parallax with Dual Images
-     ============================================================ -->
 <section class="hero-premium" id="hero">
+    {# Cardamom1.jpg as the dominant background image, with bg.gif as subtle animated underlay via global CSS #}
     <div class="hero-overlay">
-        <img src="{% static 'image/cardamom1.jpg' %}" alt="Premium Cardamom" onerror="this.parentElement.style.display='none'">
+        <img src="{% static 'image/cardamom1.jpg' %}"
+             alt="Premium Cardamom"
+             onerror="this.parentElement.style.background='linear-gradient(135deg, var(--bg-dark), var(--primary))'">
     </div>
     <div class="hero-particles"></div>
     <div class="hero-deco hero-deco-1"></div>
@@ -21,6 +33,7 @@
     <div class="container hero-content">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
+                {# Badge + headline + subtext that pitch the platform #}
                 <div class="hero-badge"><i class="bi bi-award-fill me-1"></i> India's Premium Cardamom Marketplace</div>
                 <h1 class="hero-title">
                     Fresh Cardamom,<br>
@@ -30,6 +43,7 @@
                     India's premier digital marketplace connecting cardamom farmers directly with verified traders.
                     Transparent pricing, professional quality grading, zero middlemen exploitation.
                 </p>
+                {# Primary call-to-action buttons #}
                 <div class="hero-buttons">
                     <a href="{% url 'app:register' %}" class="btn-premium btn-premium-primary">
                         <i class="bi bi-person-plus-fill"></i> Get Started Free
@@ -38,6 +52,7 @@
                         <i class="bi bi-box-arrow-in-right"></i> Sign In
                     </a>
                 </div>
+                {# Animated counter statistics pulled from the view context #}
                 <div class="hero-stats-premium">
                     <div class="hero-stat-item">
                         <h3><span class="counter-value" data-target="{{ stats.farmers }}">{{ stats.farmers }}</span></h3>
@@ -60,12 +75,14 @@
             <div class="col-lg-6 d-none d-lg-block">
                 <div class="hero-image-container">
                     <div class="hero-image-main">
+                        {# Right-side hero image - uses cardamom2.jpg as the static hero image #}
                         <img src="{% static 'image/cardamom2.jpg' %}" alt="Premium Cardamom Harvest" onerror="this.parentElement.style.display='none'">
                         <div class="hero-image-badge">
                             <i class="bi bi-star-fill"></i>
                             <span>Premium Grade Cardamom</span>
                         </div>
                     </div>
+                    {# Floating secondary image showing cardamom1.jpg #}
                     <div class="hero-image-floating">
                         <img src="{% static 'image/cardamom1.jpg' %}" alt="Cardamom Pods" onerror="this.parentElement.style.display='none'">
                     </div>
@@ -79,8 +96,8 @@
 <section class="section-padding">
     <div class="container">
 
+        {# ---- LOGGED-IN WELCOME CARD: shown to any authenticated user ---- #}
         {% if user.is_authenticated %}
-        <!-- Logged-in Welcome -->
         <div class="row mb-5">
             <div class="col-12">
                 <div class="card-premium overflow-hidden">
@@ -98,8 +115,8 @@
         </div>
         {% endif %}
 
+        {# ---- TRADER DASHBOARD PREVIEW: active listings for traders only ---- #}
         {% if user.is_authenticated and user.role == 'trader' %}
-        <!-- Trader Listings -->
         <div class="row mb-5">
             <div class="col-12 mb-4">
                 <div class="d-flex justify-content-between align-items-end">
@@ -115,6 +132,7 @@
             {% for listing in listings %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="listing-card-premium animate-on-scroll">
+                    {# Badge that switches style based on listing type (auction vs fixed) #}
                     <div class="listing-type-badge {% if listing.listing_type == 'auction' %}auction{% else %}fixed{% endif %}">
                         <i class="bi {% if listing.listing_type == 'auction' %}bi-hammer{% else %}bi-tag-fill{% endif %} me-1"></i>
                         {{ listing.get_listing_type_display }}
@@ -140,6 +158,7 @@
                             <span class="text-muted small">{{ listing.available_qty_kg }} kg left</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-2">
+                            {# Show quality grade badge if a verification exists for the batch #}
                             {% if listing.batch.verification %}
                             <span class="grade-badge grade-{{ listing.batch.verification.grade }}">{{ listing.batch.verification.grade }}</span>
                             {% else %}
@@ -164,10 +183,10 @@
         </div>
         {% endif %}
 
+        {# ---- MARKETING SECTIONS: only shown to anonymous visitors ---- #}
         {% if not user.is_authenticated %}
-        <!-- ============================================================
-             HOW IT WORKS
-             ============================================================ -->
+
+        {# HOW IT WORKS — 4-step process cards #}
         <div class="row mb-5">
             <div class="col-12 text-center mb-5">
                 <span class="hero-badge" style="border-color:var(--primary);color:var(--primary);position:static;animation:none;"><i class="bi bi-diagram-3 me-1"></i> Simple Process</span>
@@ -204,9 +223,7 @@
             </div>
         </div>
 
-        <!-- ============================================================
-             PHILOSOPHY SECTION — Dual Image
-             ============================================================ -->
+        {# PHILOSOPHY SECTION — "Grade First, Trade Second" with dual image #}
         <div class="row align-items-center g-5 mb-5">
             <div class="col-lg-6 animate-on-scroll-left">
                 <div class="img-frame-premium" style="border-radius:var(--radius-lg);box-shadow:var(--shadow-xl);">
@@ -246,9 +263,7 @@
             </div>
         </div>
 
-        <!-- ============================================================
-             IMAGE GALLERY
-             ============================================================ -->
+        {# IMAGE GALLERY — visual showcase of premium cardamom #}
         <div class="row mb-5">
             <div class="col-12 text-center mb-5">
                 <span class="hero-badge" style="border-color:var(--primary);color:var(--primary);position:static;animation:none;"><i class="bi bi-images me-1"></i> Our Marketplace</span>
@@ -256,14 +271,14 @@
             </div>
             <div class="col-md-6 mb-4 animate-on-scroll-scale">
                 <div class="img-frame-premium" style="height:350px;border-radius:var(--radius-lg);">
-                    <img src="{% static 'image/cardamom2.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                    <img src="{% static 'image/cardamom2.jpg' %}" alt="" style="height:100%;width:100%;object-fit:cover;" onerror="this.style.display='none'">
                 </div>
             </div>
             <div class="col-md-6 mb-4 animate-on-scroll-scale">
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="img-frame-premium" style="height:160px;border-radius:var(--radius-md);">
-                            <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                            <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="height:100%;width:100%;object-fit:cover;" onerror="this.style.display='none'">
                         </div>
                     </div>
                     <div class="col-6">
@@ -282,16 +297,14 @@
                     </div>
                     <div class="col-6">
                         <div class="img-frame-premium" style="height:160px;border-radius:var(--radius-md);">
-                            <img src="{% static 'image/cardamom2.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+                            <img src="{% static 'image/cardamom2.jpg' %}" alt="" style="height:100%;width:100%;object-fit:cover;" onerror="this.style.display='none'">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ============================================================
-             CTA SECTION
-             ============================================================ -->
+        {# CTA SECTION — final call to action for sign up #}
         <div class="row">
             <div class="col-12">
                 <div class="card-premium animate-on-scroll" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;">

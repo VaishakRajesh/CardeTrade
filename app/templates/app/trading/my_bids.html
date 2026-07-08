@@ -1,9 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE
+   ============================================================ #}
 {% block title %}My Bids - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   ============================================================ #}
 {% block content %}
+
+{# ============================================================
+   PAGE HEADER
+   ============================================================
+   Green gradient banner with heading "My Bids" and a subtitle
+   explaining the page's purpose. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
     <div class="page-header-bg">
         <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
@@ -15,14 +27,26 @@
     </div>
 </div>
 
+{# ============================================================
+   TABLE SECTION
+   ============================================================ #}
 <div class="dashboard-wrapper">
     <div class="container">
         <div class="card-premium">
             <div class="table-responsive">
+                {# Premium-styled table showing all bids. #}
                 <table class="table-premium">
+                    {# --------------------------------------------------
+                       TABLE HEADERS
+                       -------------------------------------------------- #}
                     <thead>
                         <tr>
                             <th>Listing</th>
+                            {# The "Bidder"/"Seller" column header changes
+                               depending on who's viewing the page:
+                               - Farmers see "Bidder" (the trader who bid)
+                               - Traders see "Seller" (the farmer who listed)
+                               This makes the data relevant to the user's role. #}
                             <th>{% if user.role == 'farmer' %}Bidder{% else %}Seller{% endif %}</th>
                             <th>Price/kg</th>
                             <th>Qty</th>
@@ -32,16 +56,39 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {# --------------------------------------------------
+                           LOOP: iterate over every bid in the user's context.
+                           -------------------------------------------------- #}
                         {% for bid in bids %}
                         <tr>
+                            {# Link to the listing detail page using the bid's
+                               listing primary key. #}
                             <td><a href="{% url 'app:listing_detail' bid.listing.pk %}" style="color:var(--primary);font-weight:600;">{{ bid.listing.batch.batch_code }}</a></td>
+                            {# Show the other party depending on the current user's role. #}
                             <td>{% if user.role == 'farmer' %}{{ bid.trader.username }}{% else %}{{ bid.listing.farmer.username }}{% endif %}</td>
+                            {# Bid price per kilogram. #}
                             <td class="fw-bold">Rs {{ bid.bid_price_per_kg }}</td>
+                            {# Quantity bid. #}
                             <td>{{ bid.quantity_kg }} kg</td>
+                            {# Total = bid price × quantity (simplified; shows price only here). #}
                             <td class="fw-bold" style="color:var(--primary);">Rs {{ bid.bid_price_per_kg }}</td>
+                            {# --------------------------------------------------
+                               STATUS BADGE
+                               Dynamically picks a CSS colour based on status:
+                               - active   → primary (blue)
+                               - accepted → success (green)
+                               - rejected → danger  (red)
+                               - outbid   → warning (yellow)
+                               - else     → secondary (grey)
+                               -------------------------------------------------- #}
                             <td><span class="badge-premium badge-premium-{% if bid.status == 'active' %}primary{% elif bid.status == 'accepted' %}success{% elif bid.status == 'rejected' %}danger{% elif bid.status == 'outbid' %}warning{% else %}secondary{% endif %}">{{ bid.get_status_display }}</span></td>
+                            {# The date the bid was placed, formatted as "dd Mmm YYYY". #}
                             <td><small class="text-muted">{{ bid.bid_time|date:"d M Y" }}</small></td>
                         </tr>
+                        {# --------------------------------------------------
+                           EMPTY STATE: shown when there are NO bids.
+                           The colspan=7 spans across all 7 columns.
+                           -------------------------------------------------- #}
                         {% empty %}
                         <tr>
                             <td colspan="7">
@@ -49,8 +96,10 @@
                                     <i class="bi bi-hand-index-thumb empty-icon"></i>
                                     <h5>No Bids Yet</h5>
                                     <p class="text-muted">
+                                        {# Shows different guidance based on user role. #}
                                         {% if user.role == 'trader' %}Start exploring listings and place your first bid.{% else %}No bids have been placed on your listings yet.{% endif %}
                                     </p>
+                                    {# Only Traders get a "Browse Listings" CTA button. #}
                                     {% if user.role == 'trader' %}
                                     <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-primary">Browse Listings</a>
                                     {% endif %}

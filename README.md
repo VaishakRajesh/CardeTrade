@@ -164,9 +164,9 @@ CardeTrade/
 │   ├── WORKFLOW.md                  # Business workflows
 │   ├── TEMPLATES.md                 # UI/UX design guide
 │   ├── API.md                       # Endpoint reference
+│   ├── ARCHITECTURE.md              # System architecture
 │   └── SETUP.md                     # Setup & deployment
 │
-├── project.md                       # Full project docs
 ├── README.md                        # This file
 ├── AGENTS.md                        # AI agent instructions
 ├── requirements.txt                 # Dependencies

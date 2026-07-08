@@ -1,10 +1,25 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE
+   ============================================================
+   Tab title includes the specific order code
+   (e.g. "ORD-2026-0001 - CardeTrade"). #}
 {% block title %}Order {{ order.order_code }} - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   ============================================================ #}
 {% block content %}
+
+{# Main container with proper spacing. #}
 <div class="container py-4">
+
+    {# ==========================================================
+       BREADCRUMB NAVIGATION
+       ==========================================================
+       A simple breadcrumb linking back to the orders list. #}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'app:order_list' %}" class="text-success">Orders</a></li>
@@ -12,17 +27,34 @@
         </ol>
     </nav>
 
+    {# ==========================================================
+       TWO-COLUMN LAYOUT
+       ========================================================== #}
     <div class="row">
+
+        {# ==========================================================
+           LEFT COLUMN (8/12) — ORDER INFO, TRACKING, PAYMENTS
+           ========================================================== #}
         <div class="col-md-8">
+
+            {# --------------------------------------------------
+               CARD 1: Order Summary
+               Displays the order code, status badges, and all
+               key fields (buyer, seller, batch, quantity,
+               price, total). #}
             <div class="card shadow-sm border-0 mb-4">
+                {# Header row with order code on left, badges on right. #}
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h4 class="mb-0 fw-bold">{{ order.order_code }}</h4>
                     <div>
+                        {# Order status badge — colour changes based on status value. #}
                         <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}primary{% else %}secondary{% endif %} fs-6 me-2">{{ order.get_status_display }}</span>
+                        {# Payment status badge. #}
                         <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'unpaid' %}secondary{% elif order.payment_status == 'refunded' %}danger{% else %}warning{% endif %} fs-6">{{ order.get_payment_status_display }}</span>
                     </div>
                 </div>
                 <div class="card-body">
+                    {# Grid of order details: buyer, seller, batch, quantity, price, total. #}
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="text-muted small">Buyer</label>
@@ -46,9 +78,11 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="text-muted small">Total Amount</label>
+                            {# Total amount in green, larger font for emphasis. #}
                             <p class="fw-bold text-success fs-4">Rs{{ order.total_amount }}</p>
                         </div>
                     </div>
+                    {# If this order originated from a bid, show the bid reference. #}
                     {% if order.bid %}
                     <div class="mb-3">
                         <label class="text-muted small">From Bid</label>
@@ -58,35 +92,50 @@
                 </div>
             </div>
 
+            {# --------------------------------------------------
+               CARD 2: Tracking Timeline
+               Shows the order's journey through various status
+               updates in chronological order. #}
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history"></i> Tracking Timeline</h5>
                 </div>
                 <div class="card-body">
+                    {# Fetch all tracking entries related to this order. #}
                     {% with tracking=order.tracking_entries.all %}
                     {% if tracking %}
+                    {# Timeline-style list — each entry is a row with a green dot icon. #}
                     <div class="timeline">
                         {% for entry in tracking %}
                         <div class="d-flex mb-3">
+                            {# Green circle icon indicating a timeline node. #}
                             <div class="me-3 text-center">
                                 <i class="bi bi-circle-fill text-success"></i>
                             </div>
                             <div>
+                                {# The human-readable status name (e.g. "Shipped"). #}
                                 <p class="fw-bold mb-0">{{ entry.get_status_display }}</p>
+                                {# Optional location field (e.g. "Mumbai Warehouse"). #}
                                 {% if entry.location %}<p class="small text-muted mb-0">Location: {{ entry.location }}</p>{% endif %}
+                                {# Optional notes about this tracking event. #}
                                 {% if entry.notes %}<p class="small mb-0">{{ entry.notes }}</p>{% endif %}
+                                {# Timestamp and who updated it — falls back to "System" if no user. #}
                                 <p class="small text-muted">{{ entry.tracked_at|date:"d M Y H:i" }} by {{ entry.updated_by.username|default:"System" }}</p>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                     {% else %}
+                    {# Shown if no tracking entries exist yet. #}
                     <p class="text-muted text-center py-3">No tracking entries yet.</p>
                     {% endif %}
                     {% endwith %}
                 </div>
             </div>
 
+            {# --------------------------------------------------
+               CARD 3: Payments Table
+               Lists all payments made against this order. #}
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-credit-card"></i> Payments</h5>
@@ -94,6 +143,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
+                            {# Table headers. #}
                             <thead class="table-light">
                                 <tr>
                                     <th>Amount</th>
@@ -104,15 +154,20 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {# Loop through every payment for this order. #}
                                 {% for payment in order.payments.all %}
                                 <tr>
                                     <td class="fw-bold">Rs{{ payment.amount }}</td>
+                                    {# Human-readable payment method (e.g. "Bank Transfer"). #}
                                     <td>{{ payment.get_payment_method_display }}</td>
+                                    {# Transaction reference number, or "-" if not available. #}
                                     <td>{{ payment.transaction_ref|default:"-" }}</td>
+                                    {# Payment status badge with dynamic colouring. #}
                                     <td><span class="badge bg-{% if payment.status == 'completed' %}success{% elif payment.status == 'pending' %}warning{% else %}danger{% endif %}">{{ payment.get_status_display }}</span></td>
                                     <td><small>{{ payment.created_at|date:"d M Y" }}</small></td>
                                 </tr>
                                 {% empty %}
+                                {# Shown when no payments have been recorded. #}
                                 <tr><td colspan="5" class="text-center py-4 text-muted">No payments recorded.</td></tr>
                                 {% endfor %}
                             </tbody>
@@ -122,15 +177,22 @@
             </div>
         </div>
 
+        {# ==========================================================
+           RIGHT COLUMN (4/12) — ACTIONS SIDEBAR
+           ==========================================================
+           Contains helpful links like "View Listing" and
+           "Back to Orders". #}
         <div class="col-md-4">
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-gear"></i> Actions</h5>
                 </div>
                 <div class="card-body">
+                    {# Link back to the original listing (if still available). #}
                     {% if order.listing %}
                     <a href="{% url 'app:listing_detail' order.listing.pk %}" class="btn btn-outline-success w-100 mb-2"><i class="bi bi-shop"></i> View Listing</a>
                     {% endif %}
+                    {# Link back to the full orders list page. #}
                     <a href="{% url 'app:order_list' %}" class="btn btn-outline-secondary w-100"><i class="bi bi-arrow-left"></i> Back to Orders</a>
                 </div>
             </div>

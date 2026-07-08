@@ -1,94 +1,148 @@
 {% load static %}
+
 <nav class="navbar navbar-expand-lg navbar-premium">
     <div class="container">
+
         <a class="navbar-brand" href="{% url 'app:home' %}">
             <i class="bi bi-shop"></i> CardeTrade
         </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="color: #fff; font-size: 1.5rem;">
+
+        <button class="navbar-toggler border-0" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                style="color: #fff; font-size: 1.5rem;">
             <i class="bi bi-list"></i>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'app:home' %}"><i class="bi bi-house me-1"></i>Home</a>
+                    <a class="nav-link" href="{% url 'app:home' %}">
+                        <i class="bi bi-house me-1"></i>Home
+                    </a>
                 </li>
+
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'app:dashboard' %}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+                        <a class="nav-link" href="{% url 'app:dashboard' %}">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'app:listing_list' %}"><i class="bi bi-shop me-1"></i>Marketplace</a>
+                        <a class="nav-link" href="{% url 'app:listing_list' %}">
+                            <i class="bi bi-shop me-1"></i>Marketplace
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'app:order_list' %}"><i class="bi bi-truck me-1"></i>Orders</a>
+                        <a class="nav-link" href="{% url 'app:order_list' %}">
+                            <i class="bi bi-truck me-1"></i>Orders
+                        </a>
                     </li>
+
                     {% if user.role == 'farmer' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'app:batch_list' %}"><i class="bi bi-boxes me-1"></i>Batches</a>
+                            <a class="nav-link" href="{% url 'app:batch_list' %}">
+                                <i class="bi bi-boxes me-1"></i>Batches
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'app:farm_list' %}"><i class="bi bi-tree me-1"></i>Farms</a>
+                            <a class="nav-link" href="{% url 'app:farm_list' %}">
+                                <i class="bi bi-tree me-1"></i>Farms
+                            </a>
                         </li>
                     {% elif user.role == 'trader' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'app:my_bids' %}"><i class="bi bi-hammer me-1"></i>My Bids</a>
+                            <a class="nav-link" href="{% url 'app:my_bids' %}">
+                                <i class="bi bi-hammer me-1"></i>My Bids
+                            </a>
                         </li>
                     {% elif user.role == 'product_manager' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'app:batch_list' %}"><i class="bi bi-clipboard-check me-1"></i>Review</a>
+                            <a class="nav-link" href="{% url 'app:batch_list' %}">
+                                <i class="bi bi-clipboard-check me-1"></i>Review
+                            </a>
                         </li>
                     {% endif %}
                 {% endif %}
             </ul>
+
             <ul class="navbar-nav align-items-center gap-1">
                 {% if user.is_authenticated %}
                     <li class="nav-item dropdown" id="notifBell">
-                        <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                        <a class="nav-link position-relative" href="#"
+                           role="button" data-bs-toggle="dropdown"
+                           data-bs-auto-close="outside">
                             <i class="bi bi-bell fs-5"></i>
-                            {% with unread=user.notifications.all.count %}
-                            {% if unread > 0 %}
-                            <span class="notif-count">{{ unread|stringformat:"d" }}</span>
+                            {% if user.notifications.all.count > 0 %}
+                            <span class="notif-count">{{ user.notifications.all.count }}</span>
                             {% endif %}
-                            {% endwith %}
                         </a>
                         <div class="dropdown-menu dropdown-menu-end notif-dropdown p-0">
-                            <div class="px-3 py-2 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center">
+                            <div class="px-3 py-2 border-bottom border-light border-opacity-10
+                                        d-flex justify-content-between align-items-center">
                                 <small class="text-white fw-bold">Notifications</small>
-                                <small class="text-muted">{% with unread=user.notifications.all.count %}{{ unread }} new{% endwith %}</small>
                             </div>
-                            {% with user.notifications.all as notifs %}
-                            {% if notifs %}
-                                {% for n in notifs|slice:":5" %}
+                            {% if user.notifications.all %}
+                                {% for n in user.notifications.all|slice:":5" %}
                                 <div class="notif-item{% if not n.is_read %} unread{% endif %}">
-                                    <small class="text-white d-block fw-semibold">{{ n.message|truncatechars:45 }}</small>
-                                    <small class="notif-time">{{ n.created_at|timesince }} ago</small>
+                                    <small class="text-white d-block fw-semibold">
+                                        {{ n.message|truncatechars:45 }}
+                                    </small>
+                                    <small class="notif-time">
+                                        {{ n.created_at|timesince }} ago
+                                    </small>
                                 </div>
                                 {% endfor %}
-                                <a href="#" class="d-block text-center py-2 text-accent small" style="color:var(--accent)">View All</a>
+                                <a href="{% url 'app:notification_list' %}"
+                                   class="d-block text-center py-2 small"
+                                   style="color:var(--accent)">
+                                    View All
+                                </a>
                             {% else %}
-                                <div class="text-center py-3"><small class="text-muted">No notifications</small></div>
+                                <div class="text-center py-3">
+                                    <small class="text-muted">No notifications</small>
+                                </div>
                             {% endif %}
-                            {% endwith %}
                         </div>
                     </li>
+
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center"
+                           href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle fs-5 me-1"></i>
                             <span>{{ user.username }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li><a class="dropdown-item" href="{% url 'app:dashboard' %}"><i class="bi bi-speedometer2 me-2" style="color:var(--accent)"></i> Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'app:profile' %}"><i class="bi bi-person-gear me-2" style="color:var(--accent)"></i> Profile</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'app:dashboard' %}">
+                                    <i class="bi bi-speedometer2 me-2" style="color:var(--accent)"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'app:profile' %}">
+                                    <i class="bi bi-person-gear me-2" style="color:var(--accent)"></i>
+                                    Profile
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'app:logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'app:logout' %}">
+                                    <i class="bi bi-box-arrow-right me-2"></i>
+                                    Logout
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'app:login' %}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
+                        <a class="nav-link" href="{% url 'app:login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
                     </li>
                     <li class="nav-item ms-1">
-                        <a class="btn-register-nav nav-link" href="{% url 'app:register' %}">Get Started</a>
+                        <a class="btn-register-nav nav-link" href="{% url 'app:register' %}">
+                            Get Started
+                        </a>
                     </li>
                 {% endif %}
             </ul>

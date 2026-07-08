@@ -1,9 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE
+   ============================================================ #}
 {% block title %}Orders - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   ============================================================ #}
 {% block content %}
+
+{# ============================================================
+   PAGE HEADER
+   ============================================================
+   Teal gradient banner with heading "Orders" and a subtitle
+   explaining the page shows purchases and sales. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#0d5c5c);">
     <div class="page-header-bg">
         <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
@@ -15,14 +27,25 @@
     </div>
 </div>
 
+{# ============================================================
+   TABLE SECTION
+   ============================================================ #}
 <div class="dashboard-wrapper">
     <div class="container">
         <div class="card-premium">
             <div class="table-responsive">
+                {# Premium-styled orders table. #}
                 <table class="table-premium">
+                    {# --------------------------------------------------
+                       TABLE HEADERS
+                       -------------------------------------------------- #}
                     <thead>
                         <tr>
                             <th>Order</th>
+                            {# The "Parties" column header adapts to the user's role.
+                               - Farmers see "Buyer"
+                               - Traders see "Seller"
+                               - Others (PMs/Admins) see "Parties" to show both. #}
                             <th>{% if user.role == 'farmer' %}Buyer{% elif user.role == 'trader' %}Seller{% else %}Parties{% endif %}</th>
                             <th>Batch</th>
                             <th>Qty</th>
@@ -34,9 +57,14 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {# --------------------------------------------------
+                           LOOP: iterate over every order passed from the view.
+                           -------------------------------------------------- #}
                         {% for order in orders %}
                         <tr>
+                            {# Order code (e.g. "ORD-2026-0001") in primary colour. #}
                             <td class="fw-bold" style="color:var(--primary);">{{ order.order_code }}</td>
+                            {# Show the counterparty name depending on the user's role. #}
                             <td>
                                 {% if user.role == 'farmer' %}
                                     {{ order.buyer.username }}
@@ -46,14 +74,40 @@
                                     {{ order.buyer.username }} / {{ order.seller.username }}
                                 {% endif %}
                             </td>
+                            {# The batch code associated with the order, or "-" if deleted/unlinked. #}
                             <td>{{ order.batch.batch_code|default:"-" }}</td>
+                            {# Quantity ordered. #}
                             <td>{{ order.quantity_kg }} kg</td>
+                            {# Total amount (computed by the GeneratedField in the model). #}
                             <td class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</td>
+                            {# --------------------------------------------------
+                               ORDER STATUS BADGE
+                               Dynamic colour coding:
+                               - delivered  → success (green)
+                               - pending    → warning  (yellow)
+                               - cancelled  → danger   (red)
+                               - shipped    → info     (blue)
+                               - processing → primary  (dark blue)
+                               - else       → secondary (grey)
+                               -------------------------------------------------- #}
                             <td><span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}primary{% else %}secondary{% endif %}">{{ order.get_status_display }}</span></td>
+                            {# --------------------------------------------------
+                               PAYMENT STATUS BADGE
+                               Dynamic colour coding:
+                               - paid     → success (green)
+                               - unpaid   → secondary (grey)
+                               - refunded → danger (red)
+                               - else     → warning (yellow)
+                               -------------------------------------------------- #}
                             <td><span class="badge-premium badge-premium-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'unpaid' %}secondary{% elif order.payment_status == 'refunded' %}danger{% else %}warning{% endif %}">{{ order.get_payment_status_display }}</span></td>
+                            {# Order creation date, formatted as "dd Mmm YYYY". #}
                             <td><small class="text-muted">{{ order.created_at|date:"d M Y" }}</small></td>
+                            {# "View" button linking to the order detail page. #}
                             <td><a href="{% url 'app:order_detail' order.pk %}" class="btn-premium btn-premium-outline btn-premium-sm" style="font-size:0.75rem;padding:0.3rem 1rem;">View</a></td>
                         </tr>
+                        {# --------------------------------------------------
+                           EMPTY STATE: shown when there are NO orders.
+                           The colspan=9 spans across all 9 columns. #}
                         {% empty %}
                         <tr>
                             <td colspan="9">

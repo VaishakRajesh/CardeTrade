@@ -1,53 +1,128 @@
+{# ============================================================
+   BATCH CREATE TEMPLATE
+   ============================================================
+   Purpose: Form page for farmers to register a new cardamom batch
+            for quality verification and eventual sale.
+   URL: /batches/create/
+   View: BatchCreateView (CreateView, restricted to 'farmer' role)
+   Context: form (BatchForm ModelForm instance)
+   ============================================================ #}
+
+{# Inherit the base layout (Bootstrap 5 navbar, alerts, footer) #}
 {% extends 'base.html' %}
+
+{# Load the Django static files tag so we can reference images/CSS/JS #}
 {% load static %}
 
+{# ============================================================
+   PAGE TITLE (browser tab text)
+   ============================================================ #}
 {% block title %}Create Batch - CardeTrade{% endblock %}
 
+{# ============================================================
+   MAIN CONTENT BLOCK
+   Everything inside the content block ... endblock
+   replaces the 'content' block in base.html.
+   ============================================================ #}
 {% block content %}
+
+{# --- Premium auth-style wrapper ---
+   This outer div centers the form on the page with padding and a
+   minimum height. "auth-wrapper-premium" is a custom CSS class
+   that provides the background and layout styling. #}
 <div class="auth-wrapper-premium" style="min-height: auto; padding: 7rem 0 3rem;">
+
+    {# --- Background image container ---
+       Displays a decorative photo behind the form card.
+       The 'onerror' hides the container if the image fails to load,
+       so a broken image icon never appears. #}
     <div class="auth-bg-premium">
         <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.parentElement.style.display='none'">
     </div>
+
+    {# --- The actual form card ---
+       "auth-card-premium" is the white/glass card that sits on top of
+       the background. "auth-card-premium-wide" makes it wider than
+       the default login card. The "animate-on-scroll" and "visible"
+       classes control a fade-in animation. #}
     <div class="auth-card-premium auth-card-premium-wide animate-on-scroll visible">
+
+        {# --- Card header section (logo + title + subtitle) --- #}
         <div class="auth-logo-premium">
+            {# Decorative logo image above the form heading #}
             <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
             <h3>Create New Batch</h3>
             <p>Register your cardamom harvest for quality verification</p>
         </div>
+
+        {# --- The batch creation form ---
+           method="post" sends data via HTTP POST (required for mutations).
+           novalidate disables the browser's built-in HTML5 validation so
+           that our Django form validation (and any custom logic) runs instead. #}
         <form method="post" novalidate>
+
+            {# CSRF token — a Django security measure that prevents
+               Cross-Site Request Forgery attacks. Every POST form must
+               include this tag. #}
             {% csrf_token %}
+
+            {# --- Row 1: Farm selector + Quantity --- #}
             <div class="row">
+                {# Farm dropdown — the farmer picks which of their farms
+                   produced this batch. The queryset comes from the Django
+                   form's 'farm' field. #}
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Farm</label>
                     <select name="farm" class="form-premium">
+                        {# Default empty option that prompts the user to select #}
                         <option value="">-- Select Farm --</option>
+                        {# Loop over every farm in the form field's queryset
+                           and render each as an <option> with the farm's
+                           primary key as the value and name as display text. #}
                         {% for farm in form.farm.field.queryset %}
                         <option value="{{ farm.pk }}">{{ farm.farm_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
+                {# Quantity input (decimal, kilograms) — required field #}
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Quantity (kg) *</label>
+                    {# step="0.01" allows decimal values like 100.50 #}
                     <input type="number" name="quantity_kg" step="0.01" class="form-premium" placeholder="e.g. 100" required>
                 </div>
             </div>
+
+            {# --- Row 2: Harvest date + Estimated price --- #}
             <div class="row">
+                {# Harvest date — native date picker (HTML5 input type="date") #}
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Harvest Date *</label>
                     <input type="date" name="harvest_date" class="form-premium" required>
                 </div>
+                {# Estimated price per kg — the farmer's initial price expectation.
+                   This will be replaced by the PM's verified price later. #}
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Est. Price (per kg) *</label>
                     <input type="number" name="estimated_price_per_kg" step="0.01" class="form-premium" placeholder="e.g. 45.00" required>
                 </div>
             </div>
+
+            {# --- Description textarea (optional) ---
+               Free text where the farmer can note variety, quality notes,
+               harvest conditions, or any other relevant details. #}
             <div class="mb-3">
                 <label class="form-label">Description</label>
                 <textarea name="description" class="form-premium" rows="3" placeholder="Variety, quality notes, harvest details..."></textarea>
             </div>
+
+            {# --- Submit button ---
+               "btn-premium btn-premium-primary" applies the site's
+               branded button styling. The w-100 class makes it stretch
+               full-width. The icon uses Bootstrap Icons. #}
             <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center mt-3">
                 <i class="bi bi-check-lg"></i> Submit Batch
             </button>
+
         </form>
     </div>
 </div>
