@@ -38,14 +38,23 @@ class UserAdmin(BaseUserAdmin):
     - list_filter: Filter by role, staff status, active status
     - fieldsets: Organized sections for user details
     """
-    list_display = ['username', 'email', 'role', 'is_staff', 'is_active']
-    list_filter = ['role', 'is_staff', 'is_active']
+    list_display = ['username', 'email', 'role', 'is_verified', 'is_staff', 'is_active']
+    list_filter = ['role', 'is_verified', 'is_staff', 'is_active']
+    search_fields = ['username', 'email']
+    actions = ['verify_users']
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name', 'email', 'phone', 'region', 'address')}),
+        ('Verification', {'fields': ('is_verified', 'verification_doc')}),
         ('Permissions', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
     )
+
+    def verify_users(self, request, queryset):
+        """Admin action to mark selected users as verified."""
+        updated = queryset.update(is_verified=True)
+        self.message_user(request, f'{updated} user(s) marked as verified.')
+    verify_users.short_description = 'Mark selected users as verified'
 
 
 @admin.register(Farm)

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}New Conversation - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:6rem 0 1.5rem;">
+    <div class="page-header-bg">
+        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+    </div>
+    <div class="container position-relative" style="z-index:1;">
+        <h2><i class="bi bi-plus-circle me-2"></i> New Conversation</h2>
+        <p>Start a discussion about {{ batch.batch_code }}</p>
+        <div class="header-accent-line"></div>
+    </div>
+</div>
+
+<div class="dashboard-wrapper" style="padding-top:1rem;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card-premium">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Conversation about {{ batch.batch_code }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            <strong>Batch:</strong> {{ batch.batch_code }} &middot;
+                            <strong>Farmer:</strong> {{ batch.farmer.username }} &middot;
+                            <strong>Quantity:</strong> {{ batch.quantity_kg }} kg
+                        </p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Subject</label>
+                                <input type="text" name="subject" class="form-premium" placeholder="What's this about?" maxlength="200">
+                                <div class="form-text text-muted">Optional — leave blank for a general discussion.</div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'app:conversation_list' %}" class="btn-premium btn-premium-secondary">Cancel</a>
+                                <button type="submit" class="btn-premium btn-premium-primary">
+                                    <i class="bi bi-send me-1"></i> Start Conversation
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

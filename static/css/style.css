@@ -117,17 +117,17 @@ body {
    the simplest content without distracting from it.
 */
 
-/* ── LAYER 1: GIF Background (subtle animated underlay) ──────── */
+/* ── LAYER 1: GIF Background (global subtle animated underlay) ── */
 body::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: -4;
     background: url('../image/bg.gif') center center / cover no-repeat fixed;
-    opacity: 0.15;
-    filter: saturate(0.5) brightness(1.1) contrast(0.9) blur(1px);
+    opacity: 0.08;
+    filter: saturate(0.4) brightness(1.15) contrast(0.85) blur(2px);
     pointer-events: none;
-    animation: bgCinema 60s ease-in-out infinite alternate;
+    animation: bgCinema 70s ease-in-out infinite alternate;
     will-change: transform;
 }
 
@@ -306,8 +306,8 @@ img { max-width: 100%; height: auto; }
     0%, 100% { box-shadow: 0 0 20px rgba(200,169,81,0.2); }
     50%      { box-shadow: 0 0 50px rgba(200,169,81,0.5); }
 }
+
 @keyframes pulseGlowGreen {
-    /* Green glow that pulses in and out */
     0%, 100% { box-shadow: 0 0 20px rgba(26,77,46,0.2); }
     50%      { box-shadow: 0 0 40px rgba(26,77,46,0.4); }
 }
@@ -350,11 +350,7 @@ img { max-width: 100%; height: auto; }
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
 }
-@keyframes morphBlob {
-    /* Morphing blob shape - organic, fluid movement */
-    0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-    50%      { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-}
+
 @keyframes typing {
     /* Typewriter effect - text appears character by character */
     from { width: 0; }
@@ -365,11 +361,7 @@ img { max-width: 100%; height: auto; }
     0%, 100% { border-color: transparent; }
     50%      { border-color: var(--accent); }
 }
-@keyframes confettiFall {
-    /* Confetti piece falling from top to bottom while spinning */
-    0%   { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-}
+
 @keyframes rotateY {
     /* 3D rotation around Y axis */
     from { transform: perspective(1200px) rotateY(0deg); }
@@ -638,29 +630,33 @@ img { max-width: 100%; height: auto; }
     pointer-events: none;  /* Clicks pass through to elements below */
 }
 
-/* Hero background image container */
+/* Hero background image container — bg.gif as smooth full-cover background */
 .hero-overlay {
     position: absolute;
-    inset: 0; z-index: 0;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
 }
 .hero-overlay img {
-    width: 100%; height: 100%;
-    object-fit: cover;           /* Cover entire area without distortion */
-    opacity: 0.35;               /* Dimmed so cardamom1.jpg shows as dominant background */
-    transform: scale(1.08);      /* Slightly zoomed for parallax */
-    transition: transform 0.1s linear;  /* Smooth parallax movement */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;           /* Cover entire area cleanly */
+    opacity: 0.4;                /* BG visible but not overpowering */
+    transition: opacity 0.3s ease;
 }
 
-/* Dark gradient overlay on top of image */
+/* Dark gradient overlay on top of bg.gif for readability */
 .hero-overlay::after {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg,
-        rgba(10,26,16,0.92) 0%,     /* Dark at top-left */
-        rgba(10,26,16,0.55) 40%,    /* Transition to lighter */
-        rgba(10,26,16,0.35) 65%,    /* Even lighter */
-        rgba(10,26,16,0.8) 100%     /* Dark at bottom-right */
+        rgba(10,26,16,0.88) 0%,
+        rgba(10,26,16,0.50) 40%,
+        rgba(10,26,16,0.30) 65%,
+        rgba(10,26,16,0.78) 100%
     );
 }
 
@@ -890,16 +886,7 @@ img { max-width: 100%; height: auto; }
     animation: floatUpDown 10s ease-in-out infinite reverse;
 }
 
-/* Morphing blob decoration */
-.hero-morph-blob {
-    position: absolute;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(200,169,81,0.06), transparent);
-    bottom: -200px; right: -100px;
-    animation: morphBlob 12s ease-in-out infinite;
-    z-index: 0;
-    pointer-events: none;
-}
+
 
 
 /* ------------------------------------------------------------------
@@ -1458,6 +1445,7 @@ img { max-width: 100%; height: auto; }
 }
 .table-premium tbody tr { transition: var(--transition-fast); cursor: default; }
 .table-premium tbody tr:hover td { background: rgba(200,169,81,0.05); }  /* Gold tint on hover */
+.table-premium tbody tr.table-row-hover { transform: scale(1.005); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
 .table-premium tbody tr:last-child td { border-bottom: none; }
 .table-premium tbody tr.clickable-row { cursor: pointer; }  /* Clickable rows */
 
@@ -1946,8 +1934,41 @@ img { max-width: 100%; height: auto; }
     border-radius: var(--radius-sm);
 }
 
-/* Standard section spacing */
-.section-padding { padding: 5rem 0; }
+/* Standard section spacing with consistent bg.gif background */
+.section-padding {
+    padding: 5rem 0;
+    position: relative;
+    background-attachment: fixed;
+}
+
+/* bg.gif as a consistent animated background across all homepage sections */
+.section-padding::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: url('../image/bg.gif') center center / cover no-repeat fixed;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+/* Cream overlay to keep content readable above bg.gif */
+.section-padding::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(250,243,224,0.90), transparent 60%),
+        linear-gradient(180deg, rgba(250,243,224,0.92), rgba(240,230,208,0.94));
+    pointer-events: none;
+}
+
+/* Ensure all direct children of section-padding sit above the pseudo-elements */
+.section-padding > .container {
+    position: relative;
+    z-index: 1;
+}
 
 
 /* ------------------------------------------------------------------
@@ -1993,7 +2014,10 @@ img { max-width: 100%; height: auto; }
     .page-header-premium h2 { font-size: 1.8rem; }
     
     /* Less padding on mobile */
-    .section-padding { padding: 3rem 0; }
+    .section-padding {
+        padding: 3rem 0;
+        background-attachment: scroll;  /* Prevent fixed bg stutter on mobile */
+    }
     
     /* Wider chat bubbles on mobile */
     .msg-bubble { max-width: 90%; }

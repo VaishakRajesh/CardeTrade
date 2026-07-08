@@ -92,40 +92,34 @@ document.addEventListener('DOMContentLoaded', function() {
     setupScrollAnimations('.animate-on-scroll-scale');  // Scale up
 
     // ==========================================================
-    // 4. COUNTER ANIMATION
-    //    Numbers on stat cards (e.g., "24 Batches") count up
-    //    from 0 when they scroll into view.
-    //    Uses data-target attribute for the final number.
+    // 4. COUNTER ANIMATION (requestAnimationFrame)
+    //    Numbers on stat cards count up from 0 when they scroll
+    //    into view. Uses requestAnimationFrame for smooth 60fps.
     // ==========================================================
     const counters = document.querySelectorAll('.stat-number, .counter-value');
     counters.forEach(function(el) {
-        // Get target value from data-target attribute, or parse text content
         const target = parseInt(el.getAttribute('data-target') || el.textContent.replace(/[^0-9]/g, '')) || 0;
-        
-        if (target === 0) { el.textContent = '0'; return; }  // Don't animate 0
-        
-        const duration = 1800;  // Animation duration in ms
-        const steps = 40;       // Number of steps for the count up
-        const stepVal = target / steps;  // Value to add each step
-        let current = 0;
-        
-        // Start counting when element scrolls into view
+        if (target === 0) { el.textContent = '0'; return; }
+
+        const duration = 1800;
+        let startTime = null;
+        let started = false;
+
+        function tick(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            el.textContent = Math.round(progress * target);
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+
         const obs = new IntersectionObserver(function(entries) {
-            if (!entries[0].isIntersecting) return;  // Not visible yet
-            
-            // Count up using setInterval
-            const interval = setInterval(function() {
-                current += stepVal;
-                if (current >= target) {
-                    current = target;  // Snap to final value
-                    clearInterval(interval);  // Stop counting
-                }
-                el.textContent = Math.round(current);  // Update display
-            }, duration / steps);
-            
-            obs.unobserve(el);  // Only animate once
-        }, { threshold: 0.3 });  // Trigger when 30% visible
-        
+            if (!entries[0].isIntersecting || started) return;
+            started = true;
+            requestAnimationFrame(tick);
+            obs.unobserve(el);
+        }, { threshold: 0.3 });
+
         obs.observe(el);
     });
 
@@ -257,36 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tt.map(function(el) { return new bootstrap.Tooltip(el); });
     } catch(e) {}  // Fail silently if Bootstrap JS not loaded
 
-    // ==========================================================
-    // 12. CONFETTI CELEBRATION
-    //     When user clicks the #celebrateBtn, 60 colored pieces
-    //     burst from top of screen and fall down with rotation.
-    //     Uses @keyframes confettiFall in CSS for animation.
-    // ==========================================================
-    const confettiBtn = document.getElementById('celebrateBtn');
-    if (confettiBtn) {
-        confettiBtn.addEventListener('click', function() {
-            const colors = ['#c8a951', '#d4af37', '#1a4d2e', '#e8d48b', '#fff'];
-            // Create 60 confetti pieces
-            for (let i = 0; i < 60; i++) {
-                const piece = document.createElement('div');
-                piece.style.cssText = [
-                    'position:fixed;z-index:99999;',
-                    'width:' + (Math.random() * 8 + 4) + 'px;',          /* Random width 4-12px */
-                    'height:' + (Math.random() * 8 + 4) + 'px;',         /* Random height 4-12px */
-                    'background:' + colors[Math.floor(Math.random() * colors.length)] + ';',  /* Random color */
-                    'border-radius:' + (Math.random() > 0.5 ? '50%' : '2px') + ';',  /* Round or square */
-                    'left:' + (Math.random() * 100) + 'vw;',             /* Random horizontal position */
-                    'top:-20px;',                                         /* Start above viewport */
-                    'animation:confettiFall ' + (Math.random() * 2 + 2) + 's linear forwards;',  /* Random speed */
-                    'animation-delay:' + (Math.random() * 0.5) + 's;'    /* Random delay */
-                ].join('');
-                document.body.appendChild(piece);
-                // Remove after animation completes (4s)
-                setTimeout(function() { piece.remove(); }, 4000);
-            }
-        });
-    }
+
 
     // ==========================================================
     // 13. SCROLL PROGRESS INDICATOR
@@ -354,38 +319,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================================
-    // 16. TABLE ROW HOVER HIGHLIGHT
+    // 16. TABLE ROW HOVER HIGHLIGHT (CSS class toggle)
     //     Premium table rows scale up slightly and add shadow
     //     on hover, creating a subtle depth effect.
     // ==========================================================
     document.querySelectorAll('.table-premium tbody tr').forEach(function(row) {
         row.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.005)';
-            this.style.boxShadow = '0 4px 16px rgba(0,0,0,0.04)';
+            this.classList.add('table-row-hover');
         });
         row.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-            this.style.boxShadow = '';
+            this.classList.remove('table-row-hover');
         });
     });
 
-    // ==========================================================
-    // 17. NOTIFICATION BELL PULSE
-    //     If there are unread notifications, the bell icon
-    //     gets a heartbeat animation every 5 seconds to
-    //     draw attention.
-    // ==========================================================
-    const notifBell = document.getElementById('notifBell');
-    if (notifBell) {
-        const notifCount = notifBell.querySelector('.notif-count');
-        if (notifCount && parseInt(notifCount.textContent) > 0) {
-            // Pulse heartbeat every 5 seconds
-            setInterval(function() {
-                notifBell.style.animation = 'heartbeat 1.5s ease-in-out';
-                setTimeout(function() { notifBell.style.animation = ''; }, 1500);
-            }, 5000);
-        }
-    }
+
 
     // ==========================================================
     // 18. CHAT AUTO-SCROLL TO BOTTOM

@@ -11,25 +11,16 @@ build/
 venv/
 env/
 
-# Database
-*.sqlite3
-db.sqlite3
-
-# Media
-/media/
 
 # Static
 /staticfiles/
 
 # Environment
 .env
+.env.example
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
-.DS_Store
-Thumbs.db

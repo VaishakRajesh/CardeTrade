@@ -75,19 +75,18 @@ class HomeView(TemplateView):
 
 class RegisterView(CreateView):
     """
-    User registration view for new account creation.
+    User registration view for new account creation with role-based verification.
 
     Handles:
     - Displaying the registration form
-    - Validating form data
-    - Creating new user account
+    - Validating form data including verification docs
+    - Creating new user account with pending verification for PM/Farmer
     - Auto-login after successful registration
     - Redirecting to dashboard
 
-    The RegistrationForm handles:
-    - Username validation
-    - Password confirmation
-    - Role selection (farmer/trader)
+    Verification flow:
+    - Farmer/PM: uploads doc → account created (unverified) → admin reviews
+    - Trader: auto-verified, can trade immediately
     """
 
     form_class = RegistrationForm
@@ -95,10 +94,21 @@ class RegisterView(CreateView):
     success_url = reverse_lazy('app:dashboard')
 
     def form_valid(self, form):
-        """Save user, log them in, and show welcome message."""
-        user = form.save()
-        login(self.request, user)  # Auto-login after registration
-        messages.success(self.request, f"Welcome to CardeTrade, {user.username}!")
+        """Save user, handle verification doc, show role-appropriate message."""
+        user = form.save(commit=False)
+        doc = form.cleaned_data.get('verification_doc')
+        if doc:
+            user.verification_doc = doc
+        user.save()
+        login(self.request, user)
+        if user.role in ('farmer', 'product_manager'):
+            messages.info(
+                self.request,
+                'Your account requires verification. An admin will review your documents shortly. '
+                'You can browse the platform in the meantime.'
+            )
+        else:
+            messages.success(self.request, f"Welcome to CardeTrade, {user.username}!")
         return redirect(self.get_success_url())
 
     def get_success_url(self):

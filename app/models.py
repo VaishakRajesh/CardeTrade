@@ -72,17 +72,30 @@ class User(AbstractUser):
     address = models.TextField(blank=True, default='')  # Physical address
     region = models.CharField(max_length=100, blank=True, default='')  # Geographic region
 
+    # Verification fields — Farmers & PMs must upload proof; admin approves
+    is_verified = models.BooleanField(default=False)
+    verification_doc = models.FileField(
+        upload_to='documents/verification/',
+        null=True, blank=True,
+        help_text='Upload business license, ID proof, or any verification document'
+    )
+
     def save(self, *args, **kwargs):
         """
         Override save to automatically set staff/superuser status based on role.
-        This ensures admin panel access is always consistent with the user's role.
+        Also auto-verifies Traders (no proof needed) and Admin.
         """
         if self.role == self.Role.ADMIN:
             self.is_staff = True
             self.is_superuser = True
+            self.is_verified = True
         elif self.role == self.Role.PRODUCT_MANAGER:
             self.is_staff = True
             self.is_superuser = False
+        elif self.role == self.Role.TRADER:
+            self.is_staff = False
+            self.is_superuser = False
+            self.is_verified = True  # Traders auto-verified
         else:
             self.is_staff = False
             self.is_superuser = False

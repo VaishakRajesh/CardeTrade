@@ -2,6 +2,8 @@
 
 > **Grade First, Trade Second.** A premium digital marketplace connecting cardamom farmers, traders, and product managers for transparent, verified, and fair trading.
 
+**Login with email & password.** Username is no longer used for authentication.
+
 <p align="center">
   <img src="static/image/cardamom1.jpg" alt="CardeTrade Hero" width="80%" style="border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
 </p>
@@ -12,11 +14,11 @@
 
 | Category | Features |
 |----------|----------|
-| 🎨 **Premium UI/UX** | Glass morphism, parallax hero, 3D tilt cards, particle effects, floating images, scroll animations, counter animations, confetti, ripple effects |
+| 🎨 **Premium UI/UX** | Glass morphism, parallax hero, 3D tilt cards, particle effects, floating images, scroll animations, counter animations, ripple effects |
 | 🖼️ **Image-Rich Design** | Dual cardamom image hero, image galleries throughout, floating badges, gradient overlays on every page header |
 | 🔐 **Role-Based Access** | Farmer, Trader, Product Manager, Admin — each with a custom dashboard and CRUD operations |
 | 📊 **Complete Trading Lifecycle** | 16 database tables covering batch creation, quality verification, listing, bidding, ordering, payments, disputes, messaging |
-| 🚀 **20+ Animations** | `fadeInUp`, `fadeInLeft/Right`, `scaleIn`, `floatUpDown`, `pulseGlow`, `shimmer`, `gradientShift`, `morphBlob`, `cardGlowBorder`, `rippleEffect`, `heartbeat`, `confettiFall` |
+| 🚀 **Premium Animations** | `fadeInUp`, `fadeInLeft/Right`, `scaleIn`, `floatUpDown`, `pulseGlow`, `shimmer`, `gradientShift`, `cardGlowBorder`, `rippleEffect` |
 | 📱 **Fully Responsive** | Optimized for mobile, tablet, and desktop with 3 breakpoints |
 | 💬 **Built-in Messaging** | Conversation threads, real-time chat interface, role-based participants |
 | 🔄 **Automated Workflows** | Post-save signals: auto-create listings on verification, auto-notify on bids/orders |
@@ -52,14 +54,19 @@ python manage.py runserver
 ### 🔑 Default Credentials
 | Role | Username | Password |
 |------|----------|----------|
-| 🛡️ Admin | `admin` | `admin123` |
+| 🛡️ Admin | `admin` / `admin@cardetrade.in` | `admin123` |
+| 📋 PM | `pm1` / `pm@cardetrade.in` | `pm123` |
+| 🌾 Farmer | `farmer1` / `farmer@cardetrade.in` | `farmer123` |
+| 📦 Trader | `trader1` / `trader@cardetrade.in` | `trader123` |
+
+> **Note:** Login uses **email** (not username). All seed accounts are pre-verified.
 
 ### 📌 Key URLs
 | Page | URL | Access |
 |------|-----|--------|
 | 🏠 Homepage | `/` | Public |
 | 📋 Register | `/register/` | Public |
-| 🔑 Login | `/login/` | Public |
+| 🔑 Login (email) | `/login/` | Public |
 | ⚙️ Admin | `/admin/` | Staff |
 | 📊 Dashboard | `/dashboard/` | Auth (auto-route) |
 | 🛒 Marketplace | `/listings/` | Auth |
@@ -91,10 +98,9 @@ The entire UI is hand-crafted CSS with **1000+ lines** of premium styles. No ext
 | **Scroll Animations** | `IntersectionObserver` with opacity/transform | All `.animate-on-scroll` elements |
 | **Floating Images** | `@keyframes floatUpDown` | Hero secondary image, particles |
 | **Particle System** | JS-generated floating dots with random positions | Hero section background |
-| **Counter Animation** | `setInterval` number stepping | Stat cards on all dashboards |
+| **Counter Animation** | `requestAnimationFrame` smooth stepping | Stat cards on all dashboards |
 | **Gold Shimmer Text** | `background-size: 300%` with `@keyframes shimmer` | Hero title, brand logo |
 | **Ripple Effect** | CSS `@keyframes rippleEffect` on click | All buttons |
-| **Confetti** | `@keyframes confettiFall` with random colors | Success celebration button |
 | **Card Glow** | `@keyframes cardGlowBorder` pulsing border | Cards on hover |
 
 ### Animation Catalog (25+ Keyframes)
@@ -109,10 +115,10 @@ floatUpDown, floatSlow, driftHorizontal, sway
 pulseGlow, pulseGlowGreen, shimmer, shimmerGold, gradientShift
 
 /* Interactive */
-cardGlowBorder, rippleEffect, heartbeat, spinSlow, morphBlob
+cardGlowBorder, rippleEffect, spinSlow
 
 /* Special */
-typing, blink, confettiFall, rotateY, slideReveal
+typing, blink, rotateY, slideReveal
 ```
 
 ---
