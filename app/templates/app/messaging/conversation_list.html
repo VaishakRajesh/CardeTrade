@@ -1,149 +1,109 @@
-{# ============================================================
-   FILE: conversation_list.html
-   PURPOSE: Displays a list of all conversations (messages)
-            the current user is participating in.
-   ============================================================ #}
 
-{# ============================================================
-   INHERITANCE & STATIC LOAD
-   ============================================================
-   Extend the base template so this page inherits the shared
-   layout (navbar, footer, alerts, etc.). Load the static tag
-   so we can reference images, CSS, and JS files. #}
+
 {% extends 'base.html' %}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE
-   ============================================================
-   Set the browser tab title to "Messages - CardeTrade". #}
 {% block title %}Messages - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================
-   Everything inside this block replaces the 'content' block
-   defined in base.html. #}
 {% block content %}
 
-{# ============================================================
-   PAGE HEADER / BANNER SECTION
-   ============================================================
-   A decorative hero banner at the top of the page with a
-   background gradient. Contains the page heading and subtitle. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
-    {# Background image layer - displays a cardamom photo behind the text.
-       The `onerror` attribute hides the image if it fails to load. #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    {# Wrapper that sits above the background image (z-index:1) so text is visible. #}
-    <div class="container position-relative" style="z-index:1;">
-        {# Page heading with a chat icon and the word "Conversations". #}
-        <h2><i class="bi bi-chat-dots me-2"></i> Conversations</h2>
-        {# Subtitle explaining what this page is for. #}
-        <p>Your messages and discussions</p>
-        {# A small decorative line under the heading for visual flair. #}
-        <div class="header-accent-line"></div>
-    </div>
+ <!-- Background image layer - displays a cardamom photo behind the text.
+ The `onerror` attribute hides the image if it fails to load. -->
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ {# Wrapper that sits above the background image (z-index:1) so text is visible. #}
+ <div class="container position-relative" style="z-index:1;">
+ {# Page heading with a chat icon and the word"Conversations". #}
+ <h2><i class="bi bi-chat-dots me-2"></i> Conversations</h2>
+ {# Subtitle explaining what this page is for. #}
+ <p>Your messages and discussions</p>
+ {# A small decorative line under the heading for visual flair. #}
+ <div class="header-accent-line"></div>
+ </div>
 </div>
 
-{# ============================================================
-   MAIN LIST AREA
-   ============================================================
-   The wrapper that creates the main content area below the banner. #}
 <div class="dashboard-wrapper">
-    <div class="container">
+ <div class="container">
 
-        {# ============================================================
-           CONDITIONAL: CONVERSATIONS EXIST?
-           ============================================================
-           If the 'conversations' queryset has items, display them as
-           a list of clickable cards. Otherwise, show an empty state. #}
-        {% if conversations %}
+ 
+ {% if conversations %}
 
-        {# Bootstrap row with small gutters (g-3) to space cards evenly. #}
-        <div class="row g-3">
+ {# Bootstrap row with small gutters (g-3) to space cards evenly. #}
+ <div class="row g-3">
 
-            {# ============================================================
-               LOOP: ITERATE OVER EACH CONVERSATION
-               ============================================================
-               For each Conversation object, render a card that links to
-               the conversation detail page. #}
-            {% for conversation in conversations %}
-            <div class="col-12">
-                {# The entire card is wrapped in a clickable <a> tag that
-                   navigates to the conversation detail view, passing the
-                   conversation's primary key. text-decoration-none removes
-                   the default underline from links. #}
-                <a href="{% url 'app:conversation_detail' conversation.pk %}" class="text-decoration-none">
-                    <div class="card-premium animate-on-scroll">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            {# Circular avatar placeholder - a 48x48 circle
-                               with a person icon, representing the other user. #}
-                            <div style="width:48px;height:48px;border-radius:50%;background:rgba(200,169,81,0.12);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.3rem;flex-shrink:0;">
-                                <i class="bi bi-person"></i>
-                            </div>
+ 
+ {% for conversation in conversations %}
+ <div class="col-12">
+ <!-- The entire card is wrapped in a clickable <a> tag that
+ navigates to the conversation detail view, passing the
+ conversation's primary key. text-decoration-none removes
+ the default underline from links. -->
+ <a href="{% url 'app:conversation_detail' conversation.pk %}" class="text-decoration-none">
+ <div class="card-premium">
+ <div class="card-body d-flex align-items-center gap-3">
+ <!-- Circular avatar placeholder - a 48x48 circle
+ with a person icon, representing the other user. -->
+ <div style="width:48px;height:48px;border-radius:50%;background:rgba(200,169,81,0.12);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.3rem;flex-shrink:0;">
+ <i class="bi bi-person"></i>
+ </div>
 
-                            {# Middle content area - takes remaining width
-                               (flex-grow-1) and truncates overflow text (min-width-0). #}
-                            <div class="flex-grow-1 min-width-0">
-                                {# Top row: conversation partner name on the left,
-                                   time since last message on the right. #}
-                                <div class="d-flex justify-content-between">
-                                    <h6 class="fw-bold mb-0" style="color:var(--text-dark);">
-                                        {# Loop through all participants and show every
-                                           username EXCEPT the current logged-in user. #}
-                                        {% for p in conversation.participants.all %}
-                                            {% if p.user != user %}{{ p.user.username }}{% endif %}
-                                        {% endfor %}
-                                        {# If the conversation has a subject line, append it
-                                           after a bullet character. #}
-                                        {% if conversation.subject %} · {{ conversation.subject }}{% endif %}
-                                    </h6>
-                                    {# Show how long ago the last message was sent using
-                                       Django's timesince filter. Falls back to "Just now". #}
-                                    <small class="text-muted">{{ conversation.last_message_at|timesince|default:"Just now" }} ago</small>
-                                </div>
+ <!-- Middle content area - takes remaining width
+ (flex-grow-1) and truncates overflow text (min-width-0). -->
+ <div class="flex-grow-1 min-width-0">
+ <!-- Top row: conversation partner name on the left,
+ time since last message on the right. -->
+ <div class="d-flex justify-content-between">
+ <h6 class="fw-bold mb-0" style="color:var(--text-dark);">
+ <!-- Loop through all participants and show every
+ username EXCEPT the current logged-in user. -->
+ {% for p in conversation.participants.all %}
+ {% if p.user != user %}{{ p.user.username }}{% endif %}
+ {% endfor %}
+ <!-- If the conversation has a subject line, append it
+ after a bullet character. -->
+ {% if conversation.subject %} · {{ conversation.subject }}{% endif %}
+ </h6>
+ <!-- Show how long ago the last message was sent using
+ Django's timesince filter. Falls back to"Just now". -->
+ <small class="text-muted">{{ conversation.last_message_at|timesince|default:"Just now" }} ago</small>
+ </div>
 
-                                {# Bottom row: conversation type badge and last message preview. #}
-                                <small class="text-muted">
-                                    {# Badge color changes based on conversation type:
-                                       quality_review = primary (blue),
-                                       order_support  = warning (yellow),
-                                       everything else = secondary (grey). #}
-                                    <span class="badge-premium badge-premium-{% if conversation.type == 'quality_review' %}primary{% elif conversation.type == 'order_support' %}warning{% else %}secondary{% endif %} badge-premium-sm" style="font-size:0.65rem;">{{ conversation.get_type_display }}</span>
-                                    {# Grab the last message in the conversation and show its
-                                       first 60 characters. Falls back to "No messages". #}
-                                    {% with last_msg=conversation.messages.last %}
-                                    {{ last_msg.content|truncatechars:60|default:"No messages" }}
-                                    {% endwith %}
-                                </small>
-                            </div>
+ {# Bottom row: conversation type badge and last message preview. #}
+ <small class="text-muted">
+ <!-- Badge color changes based on conversation type:
+ quality_review = primary (blue),
+ order_support = warning (yellow),
+ everything else = secondary (grey). -->
+ <span class="badge-premium badge-premium-{% if conversation.type == 'quality_review' %}primary{% elif conversation.type == 'order_support' %}warning{% else %}secondary{% endif %} badge-premium-sm" style="font-size:0.65rem;">{{ conversation.get_type_display }}</span>
+ <!-- Grab the last message in the conversation and show its
+ first 60 characters. Falls back to"No messages". -->
+ {% with last_msg=conversation.messages.last %}
+ {{ last_msg.content|truncatechars:60|default:"No messages" }}
+ {% endwith %}
+ </small>
+ </div>
 
-                            {# Right-chevron icon indicating this card is clickable. #}
-                            <i class="bi bi-chevron-right text-muted"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            {% endfor %}
+ {# Right-chevron icon indicating this card is clickable. #}
+ <i class="bi bi-chevron-right text-muted"></i>
+ </div>
+ </div>
+ </a>
+ </div>
+ {% endfor %}
 
-        </div>
+ </div>
 
-        {# ============================================================
-           EMPTY STATE (no conversations)
-           ============================================================
-           Shown when the 'conversations' queryset is empty. Includes
-           an icon, heading, and helpful message. #}
-        {% else %}
-        <div class="empty-state-premium">
-            <i class="bi bi-chat-dots empty-icon"></i>
-            <h5>No Conversations</h5>
-            <p>Start a conversation from a batch or order to discuss quality, pricing, or support.</p>
-        </div>
-        {% endif %}
+ 
+ {% else %}
+ <div class="empty-state-premium">
+ <i class="bi bi-chat-dots empty-icon"></i>
+ <h5>No Conversations</h5>
+ <p>Start a conversation from a batch or order to discuss quality, pricing, or support.</p>
+ </div>
+ {% endif %}
 
-    </div>
+ </div>
 </div>
 {% endblock %}

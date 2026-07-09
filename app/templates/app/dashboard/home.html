@@ -1,16 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{# ============================================================
-   HOME PAGE (Public Landing Page)
-   ------------------------------------------------------------
-   URL:        /
-   View:       HomeView (TemplateView — no login required)
-   Context:    stats (farmers/traders/batches/orders counts),
-               listings (active listings for trader dashboard)
-   Purpose:    Marketing landing page for anonymous visitors,
-               plus a personalized summary for logged-in users.
-   ============================================================ #}
+<!-- HOME PAGE (Public Landing Page) — / — HomeView (TemplateView, no login required). Stats (farmers/traders/batches/orders) + active listings for traders. Marketing landing for anon + personalized summary for logged-in users. -->
 
 {% block title %}CardeTrade — Premium Cardamom Trading Platform{% endblock %}
 
@@ -180,6 +171,29 @@
             {% endfor %}
         </div>
         {% endif %}
+
+        {# ---- FEATURED CARDAMOM SHOWCASE (visible to all users) ---- #}
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-5">
+                <span class="hero-badge" style="border-color:var(--primary);color:var(--primary);position:static;animation:none;"><i class="bi bi-award-fill me-1"></i> Premium Quality</span>
+                <h2 class="fw-bold mt-3" style="color:var(--primary);font-size:2.5rem;">Featured Cardamom</h2>
+                <p class="text-muted" style="max-width:550px;margin:0 auto;">Premium cardamom from the finest farms in India</p>
+            </div>
+            <div class="col-lg-8 mx-auto">
+                <div class="hero-image-container">
+                    <div class="hero-image-main">
+                        <img src="{% static 'image/cardamom2.jpg' %}" alt="Premium Cardamom Harvest" onerror="this.parentElement.style.display='none'">
+                        <div class="hero-image-badge">
+                            <i class="bi bi-star-fill"></i>
+                            <span>Premium Grade Cardamom</span>
+                        </div>
+                    </div>
+                    <div class="hero-image-floating">
+                        <img src="{% static 'image/cardamom1.jpg' %}" alt="Cardamom Pods" onerror="this.parentElement.style.display='none'">
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {# ---- MARKETING SECTIONS: only shown to anonymous visitors ---- #}
         {% if not user.is_authenticated %}

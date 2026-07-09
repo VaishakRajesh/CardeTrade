@@ -1,13 +1,4 @@
-{# ============================================================
-   BATCH DETAIL TEMPLATE
-   ============================================================
-   Purpose: Show full details of a single cardamom batch,
-            including its quality verification report and
-            action buttons (verify, view listing, back).
-   URL: /batches/<id>/
-   View: BatchDetailView (DetailView)
-   Context: batch (Batch model instance)
-   ============================================================ #}
+
 
 {# Inherit the base page layout (navbar, alerts, footer) #}
 {% extends 'base.html' %}
@@ -15,183 +6,167 @@
 {# Load Django's static file tag for referencing images/CSS/JS #}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE — set the browser tab text to show the batch code
-   ============================================================ #}
 {% block title %}Batch {{ batch.batch_code }} - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================ #}
 {% block content %}
 
-{# --- Page header with gradient background ---
-   The gradient uses two custom CSS variables (--primary-dark and --primary)
-   to create a branded dark-to-medium green header bar. #}
+<!-- --- Page header with gradient background ---
+ The gradient uses two custom CSS variables (--primary-dark and --primary)
+ to create a branded dark-to-medium green header bar. -->
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
 
-    {# Decorative background image inside the header #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
+ {# Decorative background image inside the header #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
 
-    {# Container that sits above the background image (z-index:1) #}
-    <div class="container position-relative" style="z-index:1;">
+ {# Container that sits above the background image (z-index:1) #}
+ <div class="container position-relative" style="z-index:1;">
 
-        {# --- Breadcrumb navigation ---
-           Shows the user where they are: Batches > [batch code].
-           The "Batches" link goes back to the batch list page. #}
-        <nav class="breadcrumb-premium">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'app:batch_list' %}">Batches</a></li>
-                <li class="breadcrumb-item active">{{ batch.batch_code }}</li>
-            </ol>
-        </nav>
-    </div>
+ <!-- --- Breadcrumb navigation ---
+ Shows the user where they are: Batches > [batch code].
+ The"Batches" link goes back to the batch list page. -->
+ <nav class="breadcrumb-premium">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="{% url 'app:batch_list' %}">Batches</a></li>
+ <li class="breadcrumb-item active">{{ batch.batch_code }}</li>
+ </ol>
+ </nav>
+ </div>
 </div>
 
 {# --- Main content area (two-column layout) --- #}
 <div class="container py-4">
-    <div class="row g-4">
+ <div class="row g-4">
 
-        {# ============================================================
-           LEFT COLUMN (wider — 8 of 12 Bootstrap columns)
-           Contains: batch info card + quality report card
-           ============================================================ #}
-        <div class="col-lg-8">
+ 
+ <div class="col-lg-8">
 
-            {# --- Batch information card --- #}
-            <div class="card-premium mb-4">
+ {# --- Batch information card --- #}
+ <div class="card-premium mb-4">
 
-                {# Card header with the batch code on the left and a
-                   color-coded status badge on the right #}
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0 fw-bold">{{ batch.batch_code }}</h4>
+ <!-- Card header with the batch code on the left and a
+ color-coded status badge on the right -->
+ <div class="card-header d-flex justify-content-between align-items-center">
+ <h4 class="mb-0 fw-bold">{{ batch.batch_code }}</h4>
 
-                    {# Status badge — the CSS class is dynamically selected
-                       based on the batch status string (pending=secondary,
-                       under_review=info, verified=primary, listed=success,
-                       sold=dark, anything else=danger). #}
-                    <span class="badge-premium badge-premium-{% if batch.status == 'pending' %}secondary{% elif batch.status == 'under_review' %}info{% elif batch.status == 'verified' %}primary{% elif batch.status == 'listed' %}success{% elif batch.status == 'sold' %}dark{% else %}danger{% endif %} fs-6">
-                        {# Icon also changes based on status #}
-                        <i class="bi {% if batch.status == 'pending' %}bi-clock{% elif batch.status == 'under_review' %}bi-eye{% elif batch.status == 'verified' %}bi-check{% elif batch.status == 'listed' %}bi-shop{% elif batch.status == 'sold' %}bi-check-all{% else %}bi-x{% endif %} me-1"></i>
-                        {# get_status_display returns the human-readable
-                           label (e.g. "Under Review") instead of the
-                           stored string value (e.g. "under_review") #}
-                        {{ batch.get_status_display }}
-                    </span>
-                </div>
+ <!-- Status badge — the CSS class is dynamically selected
+ based on the batch status string (pending=secondary,
+ under_review=info, verified=primary, listed=success,
+ sold=dark, anything else=danger). -->
+ <span class="badge-premium badge-premium-{% if batch.status == 'pending' %}secondary{% elif batch.status == 'under_review' %}info{% elif batch.status == 'verified' %}primary{% elif batch.status == 'listed' %}success{% elif batch.status == 'sold' %}dark{% else %}danger{% endif %} fs-6">
+ {# Icon also changes based on status #}
+ <i class="bi {% if batch.status == 'pending' %}bi-clock{% elif batch.status == 'under_review' %}bi-eye{% elif batch.status == 'verified' %}bi-check{% elif batch.status == 'listed' %}bi-shop{% elif batch.status == 'sold' %}bi-check-all{% else %}bi-x{% endif %} me-1"></i>
+ <!-- get_status_display returns the human-readable
+ label (e.g."Under Review") instead of the
+ stored string value (e.g."under_review") -->
+ {{ batch.get_status_display }}
+ </span>
+ </div>
 
-                {# --- Two-column sub-layout: image on left, details on right --- #}
-                <div class="row g-0">
-                    {# Left: decorative image of cardamom #}
-                    <div class="col-md-5">
-                        <div class="img-frame-premium" style="border-radius:0; height:100%; min-height:250px;">
-                            <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="min-height:250px;" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                    {# Right: batch metadata in a 2-column grid #}
-                    <div class="col-md-7 p-4">
-                        <div class="row">
-                            {# Each field shows a muted label above a bold value #}
-                            <div class="col-6 mb-3"><small class="text-muted">Farmer</small><p class="fw-bold mb-0">{{ batch.farmer.username }}</p></div>
-                            {# farm.farm_name uses the Django "default" filter
-                               to show a dash (-) if no farm is associated. #}
-                            <div class="col-6 mb-3"><small class="text-muted">Farm</small><p class="fw-bold mb-0">{{ batch.farm.farm_name|default:"-" }}</p></div>
-                            <div class="col-6 mb-3"><small class="text-muted">Quantity</small><p class="fw-bold mb-0">{{ batch.quantity_kg }} kg</p></div>
-                            <div class="col-6 mb-3"><small class="text-muted">Harvest</small><p class="fw-bold mb-0">{{ batch.harvest_date }}</p></div>
-                            <div class="col-6 mb-3"><small class="text-muted">Est. Price</small><p class="fw-bold mb-0">Rs{{ batch.estimated_price_per_kg }}/kg</p></div>
-                            {# The "date" filter formats the datetime object
-                               as "15 Jan 2026" (day, abbreviated month, year) #}
-                            <div class="col-6 mb-3"><small class="text-muted">Created</small><p class="fw-bold mb-0">{{ batch.created_at|date:"d M Y" }}</p></div>
-                        </div>
-                    </div>
-                </div>
+ {# --- Two-column sub-layout: image on left, details on right --- #}
+ <div class="row g-0">
+ {# Left: decorative image of cardamom #}
+ <div class="col-md-5">
+ <div class="img-frame-premium" style="border-radius:0; height:100%; min-height:250px;">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="min-height:250px;" onerror="this.style.display='none'">
+ </div>
+ </div>
+ {# Right: batch metadata in a 2-column grid #}
+ <div class="col-md-7 p-4">
+ <div class="row">
+ {# Each field shows a muted label above a bold value #}
+ <div class="col-6 mb-3"><small class="text-muted">Farmer</small><p class="fw-bold mb-0">{{ batch.farmer.username }}</p></div>
+ <!-- farm.farm_name uses the Django"default" filter
+ to show a dash (-) if no farm is associated. -->
+ <div class="col-6 mb-3"><small class="text-muted">Farm</small><p class="fw-bold mb-0">{{ batch.farm.farm_name|default:"-" }}</p></div>
+ <div class="col-6 mb-3"><small class="text-muted">Quantity</small><p class="fw-bold mb-0">{{ batch.quantity_kg }} kg</p></div>
+ <div class="col-6 mb-3"><small class="text-muted">Harvest</small><p class="fw-bold mb-0">{{ batch.harvest_date }}</p></div>
+ <div class="col-6 mb-3"><small class="text-muted">Est. Price</small><p class="fw-bold mb-0">Rs{{ batch.estimated_price_per_kg }}/kg</p></div>
+ <!-- The"date" filter formats the datetime object
+ as"15 Jan 2026" (day, abbreviated month, year) -->
+ <div class="col-6 mb-3"><small class="text-muted">Created</small><p class="fw-bold mb-0">{{ batch.created_at|date:"d M Y" }}</p></div>
+ </div>
+ </div>
+ </div>
 
-                {# Optional description — only shown if the farmer entered one #}
-                {% if batch.description %}
-                <div class="card-body"><p>{{ batch.description }}</p></div>
-                {% endif %}
-            </div>
+ {# Optional description — only shown if the farmer entered one #}
+ {% if batch.description %}
+ <div class="card-body"><p>{{ batch.description }}</p></div>
+ {% endif %}
+ </div>
 
-            {# ============================================================
-               QUALITY REPORT CARD
-               Only displayed if a QualityVerification record exists for
-               this batch (i.e., a Product Manager has verified it).
-               ============================================================ #}
-            {% if batch.verification %}
-            <div class="card-premium mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="bi bi-clipboard-check me-2" style="color:var(--accent);"></i> Quality Report
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {# 6-column grid of verification metrics #}
-                    <div class="row g-3">
-                        {# Grade (A, B, or C) shown as a large badge #}
-                        <div class="col-4 col-md-2"><span class="badge-premium badge-premium-success" style="font-size:1.1rem;">{{ batch.verification.grade }}</span></div>
-                        {# Moisture content percentage (optional) #}
-                        <div class="col-4 col-md-2"><small class="text-muted">Moisture</small><p class="fw-bold mb-0">{{ batch.verification.moisture_content_pct|default:"-" }}%</p></div>
-                        {# Aroma score out of 10 (optional) #}
-                        <div class="col-4 col-md-2"><small class="text-muted">Aroma</small><p class="fw-bold mb-0">{{ batch.verification.aroma_score|default:"-" }}/10</p></div>
-                        {# Color score out of 10 (optional) #}
-                        <div class="col-4 col-md-2"><small class="text-muted">Color</small><p class="fw-bold mb-0">{{ batch.verification.color_score|default:"-" }}/10</p></div>
-                        {# Purity percentage (optional) #}
-                        <div class="col-4 col-md-2"><small class="text-muted">Purity</small><p class="fw-bold mb-0">{{ batch.verification.purity_pct|default:"-" }}%</p></div>
-                        {# Verified price per kg (set by the PM during verification) #}
-                        <div class="col-4 col-md-2"><small class="text-muted">Price</small><p class="fw-bold mb-0" style="color:var(--primary);">Rs{{ batch.verification.verified_price_per_kg }}</p></div>
-                    </div>
+ 
+ {% if batch.verification %}
+ <div class="card-premium mb-4">
+ <div class="card-header">
+ <h5 class="mb-0 fw-bold">
+ <i class="bi bi-clipboard-check me-2" style="color:var(--accent);"></i> Quality Report
+ </h5>
+ </div>
+ <div class="card-body">
+ {# 6-column grid of verification metrics #}
+ <div class="row g-3">
+ {# Grade (A, B, or C) shown as a large badge #}
+ <div class="col-4 col-md-2"><span class="badge-premium badge-premium-success" style="font-size:1.1rem;">{{ batch.verification.grade }}</span></div>
+ {# Moisture content percentage (optional) #}
+ <div class="col-4 col-md-2"><small class="text-muted">Moisture</small><p class="fw-bold mb-0">{{ batch.verification.moisture_content_pct|default:"-" }}%</p></div>
+ {# Aroma score out of 10 (optional) #}
+ <div class="col-4 col-md-2"><small class="text-muted">Aroma</small><p class="fw-bold mb-0">{{ batch.verification.aroma_score|default:"-" }}/10</p></div>
+ {# Color score out of 10 (optional) #}
+ <div class="col-4 col-md-2"><small class="text-muted">Color</small><p class="fw-bold mb-0">{{ batch.verification.color_score|default:"-" }}/10</p></div>
+ {# Purity percentage (optional) #}
+ <div class="col-4 col-md-2"><small class="text-muted">Purity</small><p class="fw-bold mb-0">{{ batch.verification.purity_pct|default:"-" }}%</p></div>
+ {# Verified price per kg (set by the PM during verification) #}
+ <div class="col-4 col-md-2"><small class="text-muted">Price</small><p class="fw-bold mb-0" style="color:var(--primary);">Rs{{ batch.verification.verified_price_per_kg }}</p></div>
+ </div>
 
-                    {# Optional remarks from the product manager #}
-                    {% if batch.verification.remarks %}
-                    <div class="mt-3 pt-3 border-top">
-                        <small class="text-muted">Remarks:</small>
-                        <p class="mb-0">{{ batch.verification.remarks }}</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-        </div>
+ {# Optional remarks from the product manager #}
+ {% if batch.verification.remarks %}
+ <div class="mt-3 pt-3 border-top">
+ <small class="text-muted">Remarks:</small>
+ <p class="mb-0">{{ batch.verification.remarks }}</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ {% endif %}
+ </div>
 
-        {# ============================================================
-           RIGHT COLUMN (narrower — 4 of 12 columns)
-           Contains: action buttons sidebar
-           ============================================================ #}
-        <div class="col-lg-4">
+ 
+ <div class="col-lg-4">
 
-            {# --- Actions card --- #}
-            <div class="card-premium">
-                <div class="card-header">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i> Actions</h5>
-                </div>
-                <div class="card-body">
+ {# --- Actions card --- #}
+ <div class="card-premium">
+ <div class="card-header">
+ <h5 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i> Actions</h5>
+ </div>
+ <div class="card-body">
 
-                    {# "Verify Batch" button — only shown to Product Managers
-                       when the batch is still in 'pending' status #}
-                    {% if user.role == 'product_manager' and batch.status == 'pending' %}
-                    <a href="{% url 'app:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary w-100 justify-content-center mb-2">
-                        <i class="bi bi-clipboard-check"></i> Verify Batch
-                    </a>
-                    {% endif %}
+ <!--"Verify Batch" button — only shown to Product Managers
+ when the batch is still in 'pending' status -->
+ {% if user.role == 'product_manager' and batch.status == 'pending' %}
+ <a href="{% url 'app:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary w-100 justify-content-center mb-2">
+ <i class="bi bi-clipboard-check"></i> Verify Batch
+ </a>
+ {% endif %}
 
-                    {# "View Listing" button — only shown to the farmer who
-                       owns this batch, once it's been verified and listed #}
-                    {% if user.role == 'farmer' and batch.status == 'listed' and batch.listing %}
-                    <a href="{% url 'app:listing_detail' batch.listing.pk %}" class="btn-premium btn-custom-premium w-100 justify-content-center mb-2" style="border:1px solid var(--primary); color:var(--primary);">
-                        <i class="bi bi-shop"></i> View Listing
-                    </a>
-                    {% endif %}
+ <!--"View Listing" button — only shown to the farmer who
+ owns this batch, once it's been verified and listed -->
+ {% if user.role == 'farmer' and batch.status == 'listed' and batch.listing %}
+ <a href="{% url 'app:listing_detail' batch.listing.pk %}" class="btn-premium btn-custom-premium w-100 justify-content-center mb-2" style="border:1px solid var(--primary); color:var(--primary);">
+ <i class="bi bi-shop"></i> View Listing
+ </a>
+ {% endif %}
 
-                    {# "Back" button — always visible; returns to the batch list #}
-                    <a href="{% url 'app:batch_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(0,0,0,0.05); color:var(--text-muted);">
-                        <i class="bi bi-arrow-left"></i> Back
-                    </a>
+ {#"Back" button — always visible; returns to the batch list #}
+ <a href="{% url 'app:batch_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(0,0,0,0.05); color:var(--text-muted);">
+ <i class="bi bi-arrow-left"></i> Back
+ </a>
 
-                </div>
-            </div>
-        </div>
-    </div>
+ </div>
+ </div>
+ </div>
+ </div>
 </div>
 {% endblock %}

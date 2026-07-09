@@ -6,101 +6,101 @@
 {% block content %}
 
 <div class="auth-wrapper-premium">
-    <div class="auth-bg-premium">
-        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.parentElement.style.display='none'">
-    </div>
+ <div class="auth-bg-premium">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.parentElement.style.display='none'">
+ </div>
 
-    <div class="auth-card-premium auth-card-premium-wide">
-        <div class="auth-logo-premium">
-            <div class="logo-img-wrapper">
-                <img src="{% static 'image/cardamom2.jpg' %}" alt="CardeTrade" onerror="this.style.display='none'">
-            </div>
-            <h3>Join CardeTrade</h3>
-            <p>Create your account and start trading premium cardamom</p>
-        </div>
+ <div class="auth-card-premium auth-card-premium-wide">
+ <div class="auth-logo-premium">
+ <div class="logo-img-wrapper">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="CardeTrade" onerror="this.style.display='none'">
+ </div>
+ <h3>Join CardeTrade</h3>
+ <p>Create your account and start trading premium cardamom</p>
+ </div>
 
-        <form method="post" novalidate enctype="multipart/form-data">
-            {% csrf_token %}
+ <form method="post" novalidate enctype="multipart/form-data">
+ {% csrf_token %}
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Username *</label>
-                    <input type="text" name="username" class="form-premium" placeholder="Choose a username" required>
-                    {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Email *</label>
-                    <input type="email" name="email" class="form-premium" placeholder="your@email.com" required>
-                    {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
-                </div>
-            </div>
+ <div class="row">
+ <div class="col-md-6 mb-3">
+ <label class="form-label">Username *</label>
+ <input type="text" name="username" class="form-premium" placeholder="Choose a username" required>
+ {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+ </div>
+ <div class="col-md-6 mb-3">
+ <label class="form-label">Email *</label>
+ <input type="email" name="email" class="form-premium" placeholder="your@email.com" required>
+ {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+ </div>
+ </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Password *</label>
-                    <input type="password" name="password1" class="form-premium" placeholder="Create a strong password" required>
-                    {% if form.password1.errors %}<div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Confirm Password *</label>
-                    <input type="password" name="password2" class="form-premium" placeholder="Confirm your password" required>
-                    {% if form.password2.errors %}<div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>{% endif %}
-                </div>
-            </div>
+ <div class="row">
+ <div class="col-md-6 mb-3">
+ <label class="form-label">Password *</label>
+ <input type="password" name="password1" class="form-premium" placeholder="Create a strong password" required>
+ {% if form.password1.errors %}<div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>{% endif %}
+ </div>
+ <div class="col-md-6 mb-3">
+ <label class="form-label">Confirm Password *</label>
+ <input type="password" name="password2" class="form-premium" placeholder="Confirm your password" required>
+ {% if form.password2.errors %}<div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>{% endif %}
+ </div>
+ </div>
 
-            <div class="mb-3">
-                <label class="form-label">I want to join as</label>
-                <select name="role" class="form-premium" id="roleSelect" onchange="toggleVerificationDoc()">
-                    <option value="farmer">🌾 Farmer — Sell my cardamom</option>
-                    <option value="trader">📦 Trader — Buy cardamom</option>
-                    <option value="product_manager">✅ Product Manager — Verify quality</option>
-                </select>
-            </div>
+ <div class="mb-3">
+ <label class="form-label">I want to join as</label>
+ <select name="role" class="form-premium" id="roleSelect" onchange="toggleVerificationDoc()">
+ <option value="farmer">🌾 Farmer — Sell my cardamom</option>
+ <option value="trader">📦 Trader — Buy cardamom</option>
+ <option value="product_manager">✅ Product Manager — Verify quality</option>
+ </select>
+ </div>
 
-            {# Verification document upload — shown only for Farmer & PM roles #}
-            <div class="mb-3" id="verificationDocGroup" style="display:none;">
-                <label class="form-label">Verification Document *</label>
-                <div class="form-premium" style="padding:0.5rem;background:rgba(200,169,81,0.06);border-color:var(--accent);">
-                    <input type="file" name="verification_doc" class="form-control" accept=".pdf,.jpg,.jpeg,.png" style="border:none;padding:0.25rem 0;">
-                </div>
-                <small class="text-muted">Upload business license, ID proof, or certification (PDF/JPG/PNG). Admin will verify your account.</small>
-                {% if form.verification_doc.errors %}<div class="text-danger small mt-1">{{ form.verification_doc.errors.0 }}</div>{% endif %}
-            </div>
+ {# Verification document upload — shown only for Farmer & PM roles #}
+ <div class="mb-3" id="verificationDocGroup" style="display:none;">
+ <label class="form-label">Verification Document *</label>
+ <div class="form-premium" style="padding:0.5rem;background:rgba(200,169,81,0.06);border-color:var(--accent);">
+ <input type="file" name="verification_doc" class="form-control" accept=".pdf,.jpg,.jpeg,.png" style="border:none;padding:0.25rem 0;">
+ </div>
+ <small class="text-muted">Upload business license, ID proof, or certification (PDF/JPG/PNG). Admin will verify your account.</small>
+ {% if form.verification_doc.errors %}<div class="text-danger small mt-1">{{ form.verification_doc.errors.0 }}</div>{% endif %}
+ </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Phone</label>
-                    <input type="text" name="phone" class="form-premium" placeholder="Phone number (optional)">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Region</label>
-                    <input type="text" name="region" class="form-premium" placeholder="e.g. Idukki, Kerala">
-                </div>
-            </div>
+ <div class="row">
+ <div class="col-md-6 mb-3">
+ <label class="form-label">Phone</label>
+ <input type="text" name="phone" class="form-premium" placeholder="Phone number (optional)">
+ </div>
+ <div class="col-md-6 mb-3">
+ <label class="form-label">Region</label>
+ <input type="text" name="region" class="form-premium" placeholder="e.g. Idukki, Kerala">
+ </div>
+ </div>
 
-            <div class="mb-3">
-                <label class="form-label">Address</label>
-                <textarea name="address" class="form-premium" rows="2" placeholder="Your address (optional)"></textarea>
-            </div>
+ <div class="mb-3">
+ <label class="form-label">Address</label>
+ <textarea name="address" class="form-premium" rows="2" placeholder="Your address (optional)"></textarea>
+ </div>
 
-            <button type="submit" class="btn-premium btn-premium-primary w-100 mt-2 justify-content-center">
-                <i class="bi bi-person-check-fill"></i> Create Account
-            </button>
-        </form>
+ <button type="submit" class="btn-premium btn-premium-primary w-100 mt-2 justify-content-center">
+ <i class="bi bi-person-check-fill"></i> Create Account
+ </button>
+ </form>
 
 <script>
 function toggleVerificationDoc() {
-    var role = document.getElementById('roleSelect').value;
-    var group = document.getElementById('verificationDocGroup');
-    group.style.display = (role === 'farmer' || role === 'product_manager') ? 'block' : 'none';
+ var role = document.getElementById('roleSelect').value;
+ var group = document.getElementById('verificationDocGroup');
+ group.style.display = (role === 'farmer' || role === 'product_manager') ? 'block' : 'none';
 }
 // Run on load in case of form validation errors
 document.addEventListener('DOMContentLoaded', toggleVerificationDoc);
 </script>
 
-        <div class="text-center mt-4">
-            <p class="text-muted">Already have an account? <a href="{% url 'app:login' %}" class="fw-bold">Login here</a></p>
-        </div>
-    </div>
+ <div class="text-center mt-4">
+ <p class="text-muted">Already have an account? <a href="{% url 'app:login' %}" class="fw-bold">Login here</a></p>
+ </div>
+ </div>
 </div>
 {% endblock %}

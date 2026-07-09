@@ -6,65 +6,65 @@
 {% block content %}
 
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    <div class="container position-relative" style="z-index:1;">
-        <h2><i class="bi bi-person-gear me-2"></i> My Profile</h2>
-        <p>Manage your account information and preferences</p>
-        <div class="header-accent-line"></div>
-    </div>
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ <div class="container position-relative" style="z-index:1;">
+ <h2><i class="bi bi-person-gear me-2"></i> My Profile</h2>
+ <p>Manage your account information and preferences</p>
+ <div class="header-accent-line"></div>
+ </div>
 </div>
 
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card-premium">
-                <div class="card-header"><h4 class="mb-0 fw-bold"><i class="bi bi-person-circle me-2"></i> {{ user.username }}</h4></div>
-                <div class="card-body p-4">
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <label class="fw-semibold small">First Name</label>
-                                <input type="text" name="first_name" class="form-premium" value="{{ form.first_name.value|default:'' }}" placeholder="First name">
-                            </div>
-                            <div class="col-6">
-                                <label class="fw-semibold small">Last Name</label>
-                                <input type="text" name="last_name" class="form-premium" value="{{ form.last_name.value|default:'' }}" placeholder="Last name">
-                            </div>
-                            <div class="col-6">
-                                <label class="fw-semibold small">Username</label>
-                                <input type="text" class="form-premium" value="{{ user.username }}" disabled style="opacity:0.7;cursor:not-allowed;">
-                            </div>
-                            <div class="col-6">
-                                <label class="fw-semibold small">Role</label>
-                                <input type="text" class="form-premium" value="{{ user.get_role_display }}" disabled style="opacity:0.7;cursor:not-allowed;">
-                            </div>
-                            <div class="col-12">
-                                <label class="fw-semibold small">Email</label>
-                                <input type="email" name="email" class="form-premium" value="{{ form.email.value|default:'' }}">
-                            </div>
-                            <div class="col-6">
-                                <label class="fw-semibold small">Phone</label>
-                                <input type="text" name="phone" class="form-premium" value="{{ form.phone.value|default:'' }}">
-                            </div>
-                            <div class="col-6">
-                                <label class="fw-semibold small">Region</label>
-                                <input type="text" name="region" class="form-premium" value="{{ form.region.value|default:'' }}" placeholder="e.g. Idukki, Kerala">
-                            </div>
-                            <div class="col-12">
-                                <label class="fw-semibold small">Address</label>
-                                <textarea name="address" class="form-premium" rows="2" placeholder="Your address">{{ form.address.value|default:'' }}</textarea>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-premium btn-premium-primary justify-content-center w-100 mt-4">
-                            <i class="bi bi-check-lg"></i> Update Profile
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+ <div class="row justify-content-center">
+ <div class="col-md-8 col-lg-6">
+ <div class="card-premium">
+ <div class="card-header"><h4 class="mb-0 fw-bold"><i class="bi bi-person-circle me-2"></i> {{ user.username }}</h4></div>
+ <div class="card-body p-4">
+ <form method="post" novalidate>
+ {% csrf_token %}
+ <div class="row g-3">
+ <div class="col-6">
+ <label class="fw-semibold small">First Name</label>
+ <input type="text" name="first_name" class="form-premium" value="{{ form.first_name.value|default:'' }}" placeholder="First name">
+ </div>
+ <div class="col-6">
+ <label class="fw-semibold small">Last Name</label>
+ <input type="text" name="last_name" class="form-premium" value="{{ form.last_name.value|default:'' }}" placeholder="Last name">
+ </div>
+ <div class="col-6">
+ <label class="fw-semibold small">Username</label>
+ <input type="text" class="form-premium" value="{{ user.username }}" disabled style="opacity:0.7;cursor:not-allowed;">
+ </div>
+ <div class="col-6">
+ <label class="fw-semibold small">Role</label>
+ <input type="text" class="form-premium" value="{{ user.get_role_display }}" disabled style="opacity:0.7;cursor:not-allowed;">
+ </div>
+ <div class="col-12">
+ <label class="fw-semibold small">Email</label>
+ <input type="email" name="email" class="form-premium" value="{{ form.email.value|default:'' }}">
+ </div>
+ <div class="col-6">
+ <label class="fw-semibold small">Phone</label>
+ <input type="text" name="phone" class="form-premium" value="{{ form.phone.value|default:'' }}">
+ </div>
+ <div class="col-6">
+ <label class="fw-semibold small">Region</label>
+ <input type="text" name="region" class="form-premium" value="{{ form.region.value|default:'' }}" placeholder="e.g. Idukki, Kerala">
+ </div>
+ <div class="col-12">
+ <label class="fw-semibold small">Address</label>
+ <textarea name="address" class="form-premium" rows="2" placeholder="Your address">{{ form.address.value|default:'' }}</textarea>
+ </div>
+ </div>
+ <button type="submit" class="btn-premium btn-premium-primary justify-content-center w-100 mt-4">
+ <i class="bi bi-check-lg"></i> Update Profile
+ </button>
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
 </div>
 {% endblock %}

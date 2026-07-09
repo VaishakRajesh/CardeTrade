@@ -1,134 +1,81 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE
-   ============================================================
-   Sets the browser tab title shown when viewing the
-   marketplace listing page. #}
 {% block title %}Marketplace - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================
-   Everything between the content block and endblock
-   is rendered inside the base.html <main> tag. #}
 {% block content %}
 
-{# ============================================================
-   HERO / PAGE HEADER SECTION
-   ============================================================
-   A gradient-background hero banner at the top of the page
-   with a background image, heading, and subheading.
-   Uses "Premium" CSS classes for styling. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#1a3a2e);">
-    {# Background image container — img is hidden if it fails to load (onerror). #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    {# Text content is layered above the background using z-index. #}
-    <div class="container position-relative" style="z-index:1;">
-        <h2><i class="bi bi-shop me-2"></i> Marketplace</h2>
-        <p>Browse verified cardamom batches from farmers across India</p>
-        {# A decorative horizontal accent line under the heading. #}
-        <div class="header-accent-line"></div>
-    </div>
+ {# Background image container — img is hidden if it fails to load (onerror). #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ {# Text content is layered above the background using z-index. #}
+ <div class="container position-relative" style="z-index:1;">
+ <h2><i class="bi bi-shop me-2"></i> Marketplace</h2>
+ <p>Browse verified cardamom batches from farmers across India</p>
+ {# A decorative horizontal accent line under the heading. #}
+ <div class="header-accent-line"></div>
+ </div>
 </div>
 
-{# ============================================================
-   LISTINGS GRID SECTION
-   ============================================================
-   Displays each listing as a card in a responsive 3-column
-   grid. On mobile it collapses to 2 or 1 column. #}
 <div class="container py-4">
-    <div class="row g-4">
-        {# --------------------------------------------------
-           Loop: iterate over every listing passed from the
-           Django view via the context variable "listings".
-           -------------------------------------------------- #}
-        {% for listing in listings %}
-        {# Each listing card occupies 4/12 cols on large screens (3 per row)
-           and 6/12 on medium screens (2 per row). #}
-        <div class="col-lg-4 col-md-6 animate-on-scroll">
-            {# The card wrapper with premium styling. #}
-            <div class="listing-card-premium">
-                {# --------------------------------------------------
-                   BADGE: listing type indicator (Auction or Fixed Price)
-                   Changes background colour based on type:
-                   - Auction: yellow background with black text
-                   - Fixed Price: blue background with white text
-                   -------------------------------------------------- #}
-                <div class="listing-type-badge" style="background: {% if listing.listing_type == 'auction' %}rgba(255,193,7,0.9); color:#000{% else %}rgba(13,110,253,0.9); color:#fff{% endif %};">
-                    {# Dynamically pick the Bootstrap icon: hammer for auction, tag for fixed price. #}
-                    <i class="bi {% if listing.listing_type == 'auction' %}bi-hammer{% else %}bi-tag-fill{% endif %} me-1"></i>
-                    {# get_listing_type_display() returns the human-readable label (e.g. "Auction" or "Fixed Price"). #}
-                    {{ listing.get_listing_type_display }}
-                </div>
-                {# --------------------------------------------------
-                   CARD IMAGE SECTION
-                   Displays a product photo (cardamom).
-                   The onerror hides the image if the file is missing.
-                   -------------------------------------------------- #}
-                <div class="listing-image">
-                    <img src="{% static 'image/cardamom1.jpg' %}" alt="Cardamom" onerror="this.style.display='none'">
-                    {# Absolute-positioned badge showing the quality grade
-                       (e.g. "Grade A") — only shown if a verification exists. #}
-                    <div style="position:absolute; top:1rem; right:1rem; z-index:2;">
-                        {% if listing.batch.verification %}
-                        <span class="badge-premium badge-premium-success">Grade {{ listing.batch.verification.grade }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {# --------------------------------------------------
-                   CARD BODY: textual details
-                   -------------------------------------------------- #}
-                <div class="listing-body">
-                    {# Row with batch code on the left and an optional "Inactive" badge. #}
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="fw-bold mb-0">{{ listing.batch.batch_code }}</h5>
-                        {# Show "Inactive" badge only if the listing is no longer active. #}
-                        {% if not listing.is_active %}<span class="badge-premium badge-premium-secondary">Inactive</span>{% endif %}
-                    </div>
-                    {# Farmer name and optional region from the associated farm. #}
-                    <p class="text-muted small mb-1">
-                        <i class="bi bi-person"></i> {{ listing.farmer.username }}
-                        {% if listing.batch.farm and listing.batch.farm.region %}
-                        · <i class="bi bi-geo-alt"></i> {{ listing.batch.farm.region }}
-                        {% endif %}
-                    </p>
-                    {# --------------------------------------------------
-                       PRICE & AVAILABILITY
-                       Displays the price per kilogram and how much
-                       quantity is still available for purchase.
-                       -------------------------------------------------- #}
-                    <div class="d-flex justify-content-between align-items-end mt-2">
-                        <div>
-                            <span class="listing-price">Rs{{ listing.price_per_kg }}</span>
-                            <small class="text-muted">/ kg</small>
-                        </div>
-                        <span class="text-muted small">{{ listing.available_qty_kg }}kg avail.</span>
-                    </div>
-                    {# "View Details" link — navigates to the full listing detail page. #}
-                    <a href="{% url 'app:listing_detail' listing.pk %}" class="btn-premium btn-custom-premium justify-content-center w-100 mt-3" style="border: 2px solid var(--primary); color: var(--primary);">
-                        View Details <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        {# --------------------------------------------------
-           EMPTY STATE: shown when there are NO listings
-           (the for loop's "empty" clause).
-           -------------------------------------------------- #}
-        {% empty %}
-        <div class="col-12">
-            <div class="empty-state-premium">
-                <i class="bi bi-basket2"></i>
-                <h5>No Listings Available</h5>
-                <p>There are no active cardamom listings at the moment. Please check back later.</p>
-                <a href="{% url 'app:dashboard' %}" class="btn-premium btn-premium-primary">Go to Dashboard</a>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+ <div class="row g-4">
+ {% for listing in listings %}
+ <div class="col-lg-4 col-md-6">
+ <div class="listing-card-premium">
+ <div class="listing-type-badge" style="background: {% if listing.listing_type == 'auction' %}rgba(255,193,7,0.9); color:#000{% else %}rgba(13,110,253,0.9); color:#fff{% endif %};">
+ {# Dynamically pick the Bootstrap icon: hammer for auction, tag for fixed price. #}
+ <i class="bi {% if listing.listing_type == 'auction' %}bi-hammer{% else %}bi-tag-fill{% endif %} me-1"></i>
+ {# get_listing_type_display() returns the human-readable label (e.g."Auction" or"Fixed Price"). #}
+ {{ listing.get_listing_type_display }}
+ </div>
+ <div class="listing-image">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="Cardamom" onerror="this.style.display='none'">
+ <div style="position:absolute; top:1rem; right:1rem; z-index:2;">
+ {% if listing.batch.verification %}
+ <span class="badge-premium badge-premium-success">Grade {{ listing.batch.verification.grade }}</span>
+ {% endif %}
+ </div>
+ </div>
+ <div class="listing-body">
+ {# Row with batch code on the left and an optional"Inactive" badge. #}
+ <div class="d-flex justify-content-between align-items-start mb-2">
+ <h5 class="fw-bold mb-0">{{ listing.batch.batch_code }}</h5>
+ {# Show"Inactive" badge only if the listing is no longer active. #}
+ {% if not listing.is_active %}<span class="badge-premium badge-premium-secondary">Inactive</span>{% endif %}
+ </div>
+ {# Farmer name and optional region from the associated farm. #}
+ <p class="text-muted small mb-1">
+ <i class="bi bi-person"></i> {{ listing.farmer.username }}
+ {% if listing.batch.farm and listing.batch.farm.region %}
+ · <i class="bi bi-geo-alt"></i> {{ listing.batch.farm.region }}
+ {% endif %}
+ </p>
+ <div class="d-flex justify-content-between align-items-end mt-2">
+ <div>
+ <span class="listing-price">Rs{{ listing.price_per_kg }}</span>
+ <small class="text-muted">/ kg</small>
+ </div>
+ <span class="text-muted small">{{ listing.available_qty_kg }}kg avail.</span>
+ </div>
+ {#"View Details" link — navigates to the full listing detail page. #}
+ <a href="{% url 'app:listing_detail' listing.pk %}" class="btn-premium btn-custom-premium justify-content-center w-100 mt-3" style="border: 2px solid var(--primary); color: var(--primary);">
+ View Details <i class="bi bi-arrow-right ms-1"></i>
+ </a>
+ </div>
+ </div>
+ </div>
+ {% empty %}
+ <div class="col-12">
+ <div class="empty-state-premium">
+ <i class="bi bi-basket2"></i>
+ <h5>No Listings Available</h5>
+ <p>There are no active cardamom listings at the moment. Please check back later.</p>
+ <a href="{% url 'app:dashboard' %}" class="btn-premium btn-premium-primary">Go to Dashboard</a>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
 </div>
 {% endblock %}

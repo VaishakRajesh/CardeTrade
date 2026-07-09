@@ -1,246 +1,216 @@
-{# ============================================================
-   FILE HEADER — FARMER DASHBOARD
-   ============================================================
-   This template renders the main dashboard page for users
-   with the "farmer" role. It shows a summary of the farmer's
-   activity: total batches, active listings, orders received,
-   pending bids, plus detailed tables for recent batches,
-   bids, listings, and orders.
-   URL: /dashboard/
-   View: FarmerDashboardView (LoginRequiredMixin, role_required('farmer'))
-   ============================================================ #}
 
-{% extends 'base.html' %}  {# Inherit the main site layout from the shared base template #}
-{% load static %}          {# Enable the static tag for referencing images, CSS, and JS files #}
 
-{% block title %}Farmer Dashboard - CardeTrade{% endblock %}  {# Browser tab title #}
+{% extends 'base.html' %} {# Inherit the main site layout from the shared base template #}
+{% load static %} {# Enable the static tag for referencing images, CSS, and JS files #}
 
-{% block content %}        {# Begin the content section — everything here is injected into base.html's content block #}
+{% block title %}Farmer Dashboard - CardeTrade{% endblock %} {# Browser tab title #}
 
-{# ============================================================
-   PAGE HEADER — Gradient banner with title and action buttons
-   ============================================================
-   A decorative dark-green gradient header that includes the
-   page title "Farmer Dashboard" and two action buttons for
-   quickly creating a new farm or a new batch.
-   ============================================================ #}
+{% block content %} {# Begin the content section — everything here is injected into base.html's content block #}
+
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#1a4d2e);">
-    {# Background image behind the header text; hidden on load failure #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    {# Content overlay with z-index to sit above the background image #}
-    <div class="container position-relative" style="z-index:1;">
-        {# Flex container: title on the left, action buttons on the right (wraps on small screens) #}
-        <div class="d-flex flex-wrap justify-content-between align-items-end">
-            <div>
-                <h2><i class="bi bi-person-arms-up me-2"></i> Farmer Dashboard</h2>
-                <p>Manage your farms, batches, and orders</p>
-                <div class="header-accent-line"></div>  {# Decorative accent underline #}
-            </div>
-            {# Action button group — quick links to create new entities #}
-            <div class="d-flex gap-2 mt-3">
-                {# farm_create URL generates the link to the farm creation page #}
-                <a href="{% url 'app:farm_create' %}" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-plus-lg"></i> New Farm</a>
-                {# batch_create URL generates the link to the batch creation page #}
-                <a href="{% url 'app:batch_create' %}" class="btn-premium btn-premium-secondary btn-premium-sm"><i class="bi bi-plus-lg"></i> New Batch</a>
-            </div>
-        </div>
-    </div>
+ {# Background image behind the header text; hidden on load failure #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ {# Content overlay with z-index to sit above the background image #}
+ <div class="container position-relative" style="z-index:1;">
+ {# Flex container: title on the left, action buttons on the right (wraps on small screens) #}
+ <div class="d-flex flex-wrap justify-content-between align-items-end">
+ <div>
+ <h2><i class="bi bi-person-arms-up me-2"></i> Farmer Dashboard</h2>
+ <p>Manage your farms, batches, and orders</p>
+ <div class="header-accent-line"></div> {# Decorative accent underline #}
+ </div>
+ {# Action button group — quick links to create new entities #}
+ <div class="d-flex gap-2 mt-3">
+ {# farm_create URL generates the link to the farm creation page #}
+ <a href="{% url 'app:farm_create' %}" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-plus-lg"></i> New Farm</a>
+ {# batch_create URL generates the link to the batch creation page #}
+ <a href="{% url 'app:batch_create' %}" class="btn-premium btn-premium-secondary btn-premium-sm"><i class="bi bi-plus-lg"></i> New Batch</a>
+ </div>
+ </div>
+ </div>
 </div>
 
-{# ============================================================
-   DASHBOARD CONTENT — Stats cards and data tables
-   ============================================================ #}
 <div class="dashboard-wrapper">
-    <div class="container">
+ <div class="container">
 
-        {# ============================================================
-           STATISTICS ROW — Four summary cards (top of dashboard)
-           ============================================================
-           Each card shows a key metric: total batches, active
-           listings, orders received, and pending bids. Values
-           come from the `stats` dictionary passed by the view.
-           ============================================================ #}
-        <div class="row g-3 mb-4">
-            {# Card 1: Total Batches #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-green animate-on-scroll">
-                    <i class="bi bi-box-seam stat-icon"></i>                     {# Icon representing batches #}
-                    <div class="stat-number">{{ stats.total_batches }}</div>     {# Dynamic count from the view's context #}
-                    <div class="stat-label">Total Batches</div>                  {# Label underneath the number #}
-                </div>
-            </div>
-            {# Card 2: Active Listings #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-blue animate-on-scroll">
-                    <i class="bi bi-shop stat-icon"></i>
-                    <div class="stat-number">{{ stats.active_listings }}</div>
-                    <div class="stat-label">Active Listings</div>
-                </div>
-            </div>
-            {# Card 3: Orders Received #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-teal animate-on-scroll">
-                    <i class="bi bi-truck stat-icon"></i>
-                    <div class="stat-number">{{ stats.total_orders }}</div>
-                    <div class="stat-label">Orders Received</div>
-                </div>
-            </div>
-            {# Card 4: Pending Bids #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-rose animate-on-scroll">
-                    <i class="bi bi-hand-index stat-icon"></i>
-                    <div class="stat-number">{{ stats.pending_bids }}</div>
-                    <div class="stat-label">Pending Bids</div>
-                </div>
-            </div>
-        </div>
+ 
+ <div class="row g-3 mb-4">
+ {# Card 1: Total Batches #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-green">
+ <i class="bi bi-box-seam stat-icon"></i> {# Icon representing batches #}
+ <div class="stat-number">{{ stats.total_batches }}</div> {# Dynamic count from the view's context #}
+ <div class="stat-label">Total Batches</div> {# Label underneath the number #}
+ </div>
+ </div>
+ {# Card 2: Active Listings #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-blue">
+ <i class="bi bi-shop stat-icon"></i>
+ <div class="stat-number">{{ stats.active_listings }}</div>
+ <div class="stat-label">Active Listings</div>
+ </div>
+ </div>
+ {# Card 3: Orders Received #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-teal">
+ <i class="bi bi-truck stat-icon"></i>
+ <div class="stat-number">{{ stats.total_orders }}</div>
+ <div class="stat-label">Orders Received</div>
+ </div>
+ </div>
+ {# Card 4: Pending Bids #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-rose">
+ <i class="bi bi-hand-index stat-icon"></i>
+ <div class="stat-number">{{ stats.pending_bids }}</div>
+ <div class="stat-label">Pending Bids</div>
+ </div>
+ </div>
+ </div>
 
-        {# ============================================================
-           ROW 1 — Two-column layout: Recent Batches + Recent Bids
-           ============================================================ #}
-        <div class="row g-4">
+ 
+ <div class="row g-4">
 
-            {# ---- LEFT COLUMN: Recent Batches table ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    {# Card header with title and "View All" link #}
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i> Recent Batches</h5>
-                        <a href="{% url 'app:batch_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
-                    </div>
-                    {# Responsive table showing the farmer's most recent batches #}
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Code</th><th>Qty</th><th>Status</th><th>Date</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `batches` queryset from the view (limited to recent entries) #}
-                                {% for batch in batches %}
-                                {# `clickable-row` makes the entire row clickable, navigating to the batch detail page #}
-                                <tr class="clickable-row" onclick="window.location='{% url 'app:batch_detail' batch.pk %}'">
-                                    <td><span class="fw-bold" style="color:var(--primary);">{{ batch.batch_code }}</span></td>  {# Unique batch identifier (e.g. CDM-2026-0001) #}
-                                    <td>{{ batch.quantity_kg }} kg</td>           {# Quantity in kilograms #}
-                                    {# Status badge — color changes based on the batch's current status using conditional CSS classes #}
-                                    <td><span class="badge-premium badge-premium-{% if batch.status == 'pending' %}secondary{% elif batch.status == 'under_review' %}info{% elif batch.status == 'verified' %}primary{% elif batch.status == 'listed' %}success{% elif batch.status == 'sold' %}dark{% else %}danger{% endif %}">{{ batch.get_status_display }}</span></td>
-                                    <td><small class="text-muted">{{ batch.created_at|date:"d M" }}</small></td>  {# Creation date formatted as "dd Mon" (e.g. "07 Jul") #}
-                                </tr>
-                                {% empty %}
-                                {# If there are no batches, show an empty-state message with a link to create one #}
-                                <tr><td colspan="4" class="text-center py-4 text-muted">No batches yet. <a href="{% url 'app:batch_create' %}" class="fw-bold">Create one</a></td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+ {# ---- LEFT COLUMN: Recent Batches table ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ {# Card header with title and"View All" link #}
+ <div class="card-header d-flex justify-content-between align-items-center">
+ <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i> Recent Batches</h5>
+ <a href="{% url 'app:batch_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+ </div>
+ {# Responsive table showing the farmer's most recent batches #}
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Code</th><th>Qty</th><th>Status</th><th>Date</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `batches` queryset from the view (limited to recent entries) #}
+ {% for batch in batches %}
+ {# `clickable-row` makes the entire row clickable, navigating to the batch detail page #}
+ <tr class="clickable-row" onclick="window.location='{% url 'app:batch_detail' batch.pk %}'">
+ <td><span class="fw-bold" style="color:var(--primary);">{{ batch.batch_code }}</span></td> {# Unique batch identifier (e.g. CDM-2026-0001) #}
+ <td>{{ batch.quantity_kg }} kg</td> {# Quantity in kilograms #}
+ {# Status badge — color changes based on the batch's current status using conditional CSS classes #}
+ <td><span class="badge-premium badge-premium-{% if batch.status == 'pending' %}secondary{% elif batch.status == 'under_review' %}info{% elif batch.status == 'verified' %}primary{% elif batch.status == 'listed' %}success{% elif batch.status == 'sold' %}dark{% else %}danger{% endif %}">{{ batch.get_status_display }}</span></td>
+ <td><small class="text-muted">{{ batch.created_at|date:"d M" }}</small></td> {# Creation date formatted as"dd Mon" (e.g."07 Jul") #}
+ </tr>
+ {% empty %}
+ {# If there are no batches, show an empty-state message with a link to create one #}
+ <tr><td colspan="4" class="text-center py-4 text-muted">No batches yet. <a href="{% url 'app:batch_create' %}" class="fw-bold">Create one</a></td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
 
-            {# ---- RIGHT COLUMN: Recent Bids table ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    {# Card header with "View All" link to the bids page #}
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-hand-index me-2"></i> Recent Bids</h5>
-                        <a href="{% url 'app:my_bids' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Trader</th><th>Price/kg</th><th>Qty</th><th>Status</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `bids` queryset — bids placed on this farmer's listings #}
-                                {% for bid in bids %}
-                                <tr>
-                                    <td><i class="bi bi-person me-1 text-muted"></i>{{ bid.trader.username }}</td>  {# Trader who placed the bid #}
-                                    <td class="fw-bold" style="color:var(--primary);">Rs {{ bid.bid_price_per_kg }}</td>  {# Bid price per kilogram #}
-                                    <td>{{ bid.quantity_kg }} kg</td>     {# Quantity the trader wants #}
-                                    {# Status badge colored by bid status: active/primary, accepted/success, rejected/danger, others/secondary #}
-                                    <td><span class="badge-premium badge-premium-{% if bid.status == 'active' %}primary{% elif bid.status == 'accepted' %}success{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %}">{{ bid.get_status_display }}</span></td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="4" class="text-center py-4 text-muted">No bids received yet.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+ {# ---- RIGHT COLUMN: Recent Bids table ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ {# Card header with"View All" link to the bids page #}
+ <div class="card-header d-flex justify-content-between align-items-center">
+ <h5 class="mb-0"><i class="bi bi-hand-index me-2"></i> Recent Bids</h5>
+ <a href="{% url 'app:my_bids' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+ </div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Trader</th><th>Price/kg</th><th>Qty</th><th>Status</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `bids` queryset — bids placed on this farmer's listings #}
+ {% for bid in bids %}
+ <tr>
+ <td><i class="bi bi-person me-1 text-muted"></i>{{ bid.trader.username }}</td> {# Trader who placed the bid #}
+ <td class="fw-bold" style="color:var(--primary);">Rs {{ bid.bid_price_per_kg }}</td> {# Bid price per kilogram #}
+ <td>{{ bid.quantity_kg }} kg</td> {# Quantity the trader wants #}
+ {# Status badge colored by bid status: active/primary, accepted/success, rejected/danger, others/secondary #}
+ <td><span class="badge-premium badge-premium-{% if bid.status == 'active' %}primary{% elif bid.status == 'accepted' %}success{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %}">{{ bid.get_status_display }}</span></td>
+ </tr>
+ {% empty %}
+ <tr><td colspan="4" class="text-center py-4 text-muted">No bids received yet.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
 
-        {# ============================================================
-           ROW 2 — Two-column layout: My Listings + Recent Orders
-           ============================================================ #}
-        <div class="row g-4 mt-3">
+ 
+ <div class="row g-4 mt-3">
 
-            {# ---- LEFT COLUMN: My Listings table ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-shop me-2"></i> My Listings</h5>
-                        <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Batch</th><th>Type</th><th>Price</th><th>Active</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `listings` queryset — batches that have been listed for sale #}
-                                {% for listing in listings %}
-                                <tr>
-                                    {# Clickable batch code link that goes to the listing detail page #}
-                                    <td><a href="{% url 'app:listing_detail' listing.pk %}" style="color:var(--primary);font-weight:600;">{{ listing.batch.batch_code }}</a></td>
-                                    {# Badge showing whether this is an auction or fixed-price listing #}
-                                    <td><span class="badge-premium {% if listing.listing_type == 'auction' %}badge-premium-warning{% else %}badge-premium-info{% endif %}">{{ listing.get_listing_type_display }}</span></td>
-                                    <td class="fw-bold">Rs {{ listing.price_per_kg }}/kg</td>  {# Price per kilogram #}
-                                    {# Green checkmark if active, red X if inactive #}
-                                    <td>{% if listing.is_active %}<i class="bi bi-check-circle-fill" style="color:#166534;"></i>{% else %}<i class="bi bi-x-circle-fill text-danger"></i>{% endif %}</td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="4" class="text-center py-4 text-muted">No listings yet.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+ {# ---- LEFT COLUMN: My Listings table ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ <div class="card-header d-flex justify-content-between align-items-center">
+ <h5 class="mb-0"><i class="bi bi-shop me-2"></i> My Listings</h5>
+ <a href="{% url 'app:listing_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+ </div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Batch</th><th>Type</th><th>Price</th><th>Active</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `listings` queryset — batches that have been listed for sale #}
+ {% for listing in listings %}
+ <tr>
+ {# Clickable batch code link that goes to the listing detail page #}
+ <td><a href="{% url 'app:listing_detail' listing.pk %}" style="color:var(--primary);font-weight:600;">{{ listing.batch.batch_code }}</a></td>
+ {# Badge showing whether this is an auction or fixed-price listing #}
+ <td><span class="badge-premium {% if listing.listing_type == 'auction' %}badge-premium-warning{% else %}badge-premium-info{% endif %}">{{ listing.get_listing_type_display }}</span></td>
+ <td class="fw-bold">Rs {{ listing.price_per_kg }}/kg</td> {# Price per kilogram #}
+ {# Green checkmark if active, red X if inactive #}
+ <td>{% if listing.is_active %}<i class="bi bi-check-circle-fill" style="color:#166534;"></i>{% else %}<i class="bi bi-x-circle-fill text-danger"></i>{% endif %}</td>
+ </tr>
+ {% empty %}
+ <tr><td colspan="4" class="text-center py-4 text-muted">No listings yet.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
 
-            {# ---- RIGHT COLUMN: Recent Orders table ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-truck me-2"></i> Recent Orders</h5>
-                        <a href="{% url 'app:order_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Order</th><th>Buyer</th><th>Amount</th><th>Status</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `orders` queryset — orders received from buyers for this farmer's listings #}
-                                {% for order in orders %}
-                                <tr>
-                                    {# Clickable order code linking to the order detail page #}
-                                    <td><a href="{% url 'app:order_detail' order.pk %}" style="color:var(--primary);font-weight:600;">{{ order.order_code }}</a></td>
-                                    <td>{{ order.buyer.username }}</td>  {# Buyer's username #}
-                                    <td class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</td>  {# Total order amount (calculated by the model) #}
-                                    {# Status badge colored by order status: delivered/green, pending/yellow, cancelled/red, others/blue #}
-                                    <td><span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span></td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="4" class="text-center py-4 text-muted">No orders yet.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+ {# ---- RIGHT COLUMN: Recent Orders table ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ <div class="card-header d-flex justify-content-between align-items-center">
+ <h5 class="mb-0"><i class="bi bi-truck me-2"></i> Recent Orders</h5>
+ <a href="{% url 'app:order_list' %}" class="btn-premium btn-premium-sm" style="background:rgba(255,255,255,0.2);color:#fff;">View All</a>
+ </div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Order</th><th>Buyer</th><th>Amount</th><th>Status</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `orders` queryset — orders received from buyers for this farmer's listings #}
+ {% for order in orders %}
+ <tr>
+ {# Clickable order code linking to the order detail page #}
+ <td><a href="{% url 'app:order_detail' order.pk %}" style="color:var(--primary);font-weight:600;">{{ order.order_code }}</a></td>
+ <td>{{ order.buyer.username }}</td> {# Buyer's username #}
+ <td class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</td> {# Total order amount (calculated by the model) #}
+ {# Status badge colored by order status: delivered/green, pending/yellow, cancelled/red, others/blue #}
+ <td><span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span></td>
+ </tr>
+ {% empty %}
+ <tr><td colspan="4" class="text-center py-4 text-muted">No orders yet.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    </div>
+ </div>
 </div>
-{% endblock %}  {# Close the content block — everything above is inserted into base.html #}
+{% endblock %} {# Close the content block — everything above is inserted into base.html #}

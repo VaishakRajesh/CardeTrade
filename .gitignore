@@ -6,17 +6,11 @@ dist/
 build/
 *.egg
 
-# Virtual environment
-.env/
-venv/
-env/
-
 
 # Static
 /staticfiles/
 
 # Environment
-.env
 .env.example
 
 # IDE

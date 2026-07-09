@@ -552,7 +552,9 @@ img { max-width: 100%; height: auto; }
 .navbar-premium .nav-link.active { color: var(--accent) !important; }  /* Gold text */
 
 /* "Get Started" button with gold gradient */
-.navbar-premium .btn-register-nav {
+.navbar-premium .btn-register-nav,
+.navbar-premium .btn-register-nav:hover,
+.navbar-premium .btn-register-nav.active {
     background: linear-gradient(135deg, var(--accent), var(--gold));
     color: var(--primary-dark) !important;
     font-weight: 700;
@@ -561,9 +563,14 @@ img { max-width: 100%; height: auto; }
     transition: var(--transition);
     border: none;
 }
-.navbar-premium .btn-register-nav:hover {
+.navbar-premium .btn-register-nav::after {
+    display: none;
+}
+.navbar-premium .btn-register-nav:hover,
+.navbar-premium .btn-register-nav.active {
     transform: translateY(-3px);      /* Lift up */
     box-shadow: var(--shadow-glow);   /* Gold glow */
+    color: var(--primary-dark) !important;
 }
 
 /* Dropdown menu (user profile dropdown) */
@@ -782,11 +789,26 @@ img { max-width: 100%; height: auto; }
 .hero-image-container {
     position: relative;
     z-index: 2;
-    animation: fadeInRight 1s ease-out 0.5s both;
+    animation:
+        heroImageReveal 1.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.3s both,
+        heroFloat 10s ease-in-out 2s infinite;
 }
 
-/* Main hero image with 3D perspective tilt */
-.hero-image-main {
+/* Premium entrance: slide in from right + scale up + blur dissolve */
+@keyframes heroImageReveal {
+    0%   { opacity: 0; transform: translateX(100px) scale(0.85); filter: blur(8px); }
+    60%  { opacity: 1; transform: translateX(-6px) scale(1.02); filter: blur(0); }
+    100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+
+/* Continuous gentle drift after entrance (preserve scale from entrance) */
+@keyframes heroFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-8px) scale(1); }
+}
+
+/* Main hero image with 3D perspective tilt (hero context only) */
+.hero-premium .hero-image-main {
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -794,21 +816,39 @@ img { max-width: 100%; height: auto; }
     transform: perspective(1200px) rotateY(-7deg) rotateX(2deg) scale(0.95);  /* 3D tilt */
     transition: var(--transition-slow);
 }
-.hero-image-main:hover {
+.hero-premium .hero-image-main:hover {
     transform: perspective(1200px) rotateY(0deg) rotateX(0deg) scale(1);  /* Straighten on hover */
     box-shadow: 0 40px 100px rgba(0,0,0,0.6);
 }
-.hero-image-main img {
+
+/* Flat image in non-hero contexts (featured showcase, sections) */
+.hero-image-main {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-slow);
+}
+.hero-image-main:hover {
+    box-shadow: var(--shadow-xl);
+}
+.hero-premium .hero-image-main img {
     width: 100%;
     height: 520px;
     object-fit: cover;
     display: block;
     transition: transform 0.8s ease;
 }
+.hero-image-main img {
+    width: 100%;
+    display: block;
+    transition: transform 0.8s ease;
+}
+.hero-premium .hero-image-main:hover img,
 .hero-image-main:hover img { transform: scale(1.05); }  /* Zoom on hover */
 
-/* Gradient overlay at bottom of hero image */
-.hero-image-main::after {
+/* Gradient overlay at bottom of hero image (hero context only) */
+.hero-premium .hero-image-main::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -833,7 +873,7 @@ img { max-width: 100%; height: auto; }
 }
 .hero-image-badge i { color: var(--accent); }
 
-/* Small floating image offset from main image - animates up/down */
+/* Small floating image offset from main image - natural float + sway */
 .hero-image-floating {
     position: absolute;
     bottom: -30px;
@@ -843,9 +883,17 @@ img { max-width: 100%; height: auto; }
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-    border: 4px solid rgba(255,255,255,0.12);
-    animation: floatUpDown 5s ease-in-out infinite;  /* Bobs up and down */
+    border: 4px solid rgba(255,255,255,0.2);
+    animation: floatSway 6s ease-in-out infinite;
     z-index: 3;
+}
+
+/* Natural floating with subtle rotation */
+@keyframes floatSway {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25%      { transform: translateY(-16px) rotate(-3deg); }
+    50%      { transform: translateY(-8px) rotate(1.5deg); }
+    75%      { transform: translateY(6px) rotate(-1deg); }
 }
 .hero-image-floating img {
     width: 100%; height: 100%;
@@ -1979,13 +2027,13 @@ img { max-width: 100%; height: auto; }
 
 /* Extra large screens (1200px and below) */
 @media (max-width: 1200px) {
-    .hero-image-main img { height: 400px; }
+    .hero-premium .hero-image-main img { height: 400px; }
     .hero-image-floating { width: 150px; height: 150px; bottom: -20px; right: -20px; }
 }
 
 /* Large screens / tablets (992px and below) */
 @media (max-width: 992px) {
-    .hero-image-main img { height: 320px; }
+    .hero-premium .hero-image-main img { height: 320px; }
     .hero-image-floating { width: 120px; height: 120px; bottom: -15px; right: -15px; }
     .hero-stat-item h3 { font-size: 1.6rem; }
     .hero-stats-premium { gap: 2rem; flex-wrap: wrap; }
@@ -2001,8 +2049,8 @@ img { max-width: 100%; height: auto; }
     .hero-buttons { justify-content: center; }
     .hero-stats-premium { justify-content: center; gap: 1.5rem; }
     .hero-image-container { padding-top: 2rem; }
-    .hero-image-main { transform: none; }  /* Remove 3D tilt on mobile */
-    .hero-image-main img { height: 250px; }
+    .hero-premium .hero-image-main { transform: none; }  /* Remove 3D tilt on mobile */
+    .hero-premium .hero-image-main img { height: 250px; }
     .hero-image-floating { display: none; }  /* Hide floating image */
     .navbar-premium { background: rgba(10,26,16,0.96); backdrop-filter: blur(20px); }  /* Always opaque on mobile */
     .auth-card-premium { margin: 0.5rem; padding: 1.5rem; }

@@ -1,147 +1,106 @@
-{# ============================================================
-   FILE: list.html (Notifications)
-   PURPOSE: Displays the current user's notifications in a list.
-            Shows an icon, message text, timestamp, and type badge
-            for each notification. Includes a "Mark All Read" button.
-   ============================================================ #}
 
-{# ============================================================
-   INHERITANCE & STATIC LOAD
-   ============================================================
-   Extends the base template for the shared layout (navbar, footer,
-   alerts). Loads the static tag for referencing assets. #}
+
 {% extends 'base.html' %}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE
-   ============================================================
-   Sets the browser tab title to "Notifications - CardeTrade". #}
 {% block title %}Notifications - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================
-   Replaces the 'content' block from base.html. #}
 {% block content %}
 
-{# ============================================================
-   PAGE HEADER / BANNER
-   ============================================================
-   A decorative hero banner with a gradient background. Contains
-   the heading, subtitle, and a "Mark All Read" button aligned
-   to the right. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
-    {# Background image layer (cardamom photo); hidden on error. #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    {# Text overlay container (z-index:1 ensures it appears above the image). #}
-    <div class="container position-relative" style="z-index:1;">
-        {# Flex container that wraps on small screens. Puts heading on the left
-           and the "Mark All Read" button on the right (aligned to bottom). #}
-        <div class="d-flex flex-wrap justify-content-between align-items-end">
-            <div>
-                {# Heading with a bell icon. #}
-                <h2><i class="bi bi-bell me-2"></i> Notifications</h2>
-                {# Subtitle explaining what notifications are for. #}
-                <p>Stay updated on your batches, orders, and bids</p>
-                {# Decorative accent line under the heading. #}
-                <div class="header-accent-line"></div>
-            </div>
-            {# "Mark All Read" button: only shown when there ARE notifications.
-               POSTs to the notification_mark_read URL to mark every notification as read. #}
-            {% if notifications %}
-            <form method="post" action="{% url 'app:notification_mark_read' %}" class="mt-3">
-                {# CSRF token required by Django for POST forms. #}
-                {% csrf_token %}
-                <button type="submit" class="btn-premium btn-premium-outline btn-premium-sm"><i class="bi bi-check-all"></i> Mark All Read</button>
-            </form>
-            {% endif %}
-        </div>
-    </div>
+ {# Background image layer (cardamom photo); hidden on error. #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ {# Text overlay container (z-index:1 ensures it appears above the image). #}
+ <div class="container position-relative" style="z-index:1;">
+ <!-- Flex container that wraps on small screens. Puts heading on the left
+ and the"Mark All Read" button on the right (aligned to bottom). -->
+ <div class="d-flex flex-wrap justify-content-between align-items-end">
+ <div>
+ {# Heading with a bell icon. #}
+ <h2><i class="bi bi-bell me-2"></i> Notifications</h2>
+ {# Subtitle explaining what notifications are for. #}
+ <p>Stay updated on your batches, orders, and bids</p>
+ {# Decorative accent line under the heading. #}
+ <div class="header-accent-line"></div>
+ </div>
+ <!--"Mark All Read" button: only shown when there ARE notifications.
+ POSTs to the notification_mark_read URL to mark every notification as read. -->
+ {% if notifications %}
+ <form method="post" action="{% url 'app:notification_mark_read' %}" class="mt-3">
+ {# CSRF token required by Django for POST forms. #}
+ {% csrf_token %}
+ <button type="submit" class="btn-premium btn-premium-outline btn-premium-sm"><i class="bi bi-check-all"></i> Mark All Read</button>
+ </form>
+ {% endif %}
+ </div>
+ </div>
 </div>
 
-{# ============================================================
-   NOTIFICATIONS LIST
-   ============================================================
-   The main content area below the banner. Either shows the list
-   of notifications or an empty-state message. #}
 <div class="dashboard-wrapper">
-    <div class="container">
+ <div class="container">
 
-        {# ============================================================
-           CONDITIONAL: NOTIFICATIONS EXIST?
-           ============================================================
-           If the 'notifications' queryset has items, render each as
-           a card. Otherwise, show a "No Notifications" empty state. #}
-        {% if notifications %}
+ 
+ {% if notifications %}
 
-        {# Row with small vertical gutters (g-2) between cards. #}
-        <div class="row g-2">
+ {# Row with small vertical gutters (g-2) between cards. #}
+ <div class="row g-2">
 
-            {# ============================================================
-               LOOP: ITERATE OVER EACH NOTIFICATION
-               ============================================================
-               For each Notification object, render a card with an icon,
-               message text, timestamp, and type badge. #}
-            {% for n in notifications %}
-            <div class="col-12">
-                {# Card styling: if the notification is UNREAD (n.is_read is False),
-                   add a golden left border (4px solid accent) to highlight it. #}
-                <div class="card-premium animate-on-scroll" style="{% if not n.is_read %}border-left:4px solid var(--accent);{% endif %}">
-                    <div class="card-body d-flex align-items-center gap-3 py-3">
-                        {# Circular icon container. The icon itself changes based on
-                           the notification type:
-                             bid_received / bid_accepted    → hammer (auction)
-                             order_placed / order_shipped   → truck (shipping)
-                             payment_received               → credit card
-                             batch_verified                  → checkmark circle
-                             dispute_raised                  → warning triangle
-                             everything else                 → generic bell #}
-                        <div style="width:40px;height:40px;border-radius:50%;background:rgba(200,169,81,0.1);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;">
-                            <i class="bi {% if n.type == 'bid_received' or n.type == 'bid_accepted' %}bi-hammer{% elif n.type == 'order_placed' or n.type == 'order_shipped' %}bi-truck{% elif n.type == 'payment_received' %}bi-credit-card{% elif n.type == 'batch_verified' %}bi-check-circle{% elif n.type == 'dispute_raised' %}bi-exclamation-triangle{% else %}bi-bell{% endif %}"></i>
-                        </div>
+ 
+ {% for n in notifications %}
+ <div class="col-12">
+ <!-- Card styling: if the notification is UNREAD (n.is_read is False),
+ add a golden left border (4px solid accent) to highlight it. -->
+ <div class="card-premium" style="{% if not n.is_read %}border-left:4px solid var(--accent);{% endif %}">
+ <div class="card-body d-flex align-items-center gap-3 py-3">
+ <!-- Circular icon container. The icon itself changes based on
+ the notification type:
+ bid_received / bid_accepted → hammer (auction)
+ order_placed / order_shipped → truck (shipping)
+ payment_received → credit card
+ batch_verified → checkmark circle
+ dispute_raised → warning triangle
+ everything else → generic bell -->
+ <div style="width:40px;height:40px;border-radius:50%;background:rgba(200,169,81,0.1);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;">
+ <i class="bi {% if n.type == 'bid_received' or n.type == 'bid_accepted' %}bi-hammer{% elif n.type == 'order_placed' or n.type == 'order_shipped' %}bi-truck{% elif n.type == 'payment_received' %}bi-credit-card{% elif n.type == 'batch_verified' %}bi-check-circle{% elif n.type == 'dispute_raised' %}bi-exclamation-triangle{% else %}bi-bell{% endif %}"></i>
+ </div>
 
-                        {# Text content area — expands to fill remaining width. #}
-                        <div class="flex-grow-1">
-                            {# Top row: message text on the left, relative time on the right. #}
-                            <div class="d-flex justify-content-between">
-                                {# The notification message body. #}
-                                <span class="fw-semibold small">{{ n.message }}</span>
-                                {# How long ago the notification was created (e.g., "5 minutes ago"). #}
-                                <small class="text-muted" style="font-size:0.7rem;">{{ n.created_at|timesince }} ago</small>
-                            </div>
-                            {# Bottom row: type badge with dynamic color:
-                               dispute_raised   → danger (red),
-                               bid_received/accepted → warning (yellow),
-                               order_placed/shipped  → info (blue),
-                               payment_received      → success (green),
-                               batch_verified        → primary (blue),
-                               everything else       → secondary (grey). #}
-                            <small class="text-muted">
-                                <span class="badge-premium badge-premium-{% if n.type == 'dispute_raised' %}danger{% elif n.type == 'bid_received' or n.type == 'bid_accepted' %}warning{% elif n.type == 'order_placed' or n.type == 'order_shipped' %}info{% elif n.type == 'payment_received' %}success{% elif n.type == 'batch_verified' %}primary{% else %}secondary{% endif %}" style="font-size:0.6rem;">{{ n.get_type_display }}</span>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+ {# Text content area — expands to fill remaining width. #}
+ <div class="flex-grow-1">
+ {# Top row: message text on the left, relative time on the right. #}
+ <div class="d-flex justify-content-between">
+ {# The notification message body. #}
+ <span class="fw-semibold small">{{ n.message }}</span>
+ {# How long ago the notification was created (e.g.,"5 minutes ago"). #}
+ <small class="text-muted" style="font-size:0.7rem;">{{ n.created_at|timesince }} ago</small>
+ </div>
+ <!-- Bottom row: type badge with dynamic color:
+ dispute_raised → danger (red),
+ bid_received/accepted → warning (yellow),
+ order_placed/shipped → info (blue),
+ payment_received → success (green),
+ batch_verified → primary (blue),
+ everything else → secondary (grey). -->
+ <small class="text-muted">
+ <span class="badge-premium badge-premium-{% if n.type == 'dispute_raised' %}danger{% elif n.type == 'bid_received' or n.type == 'bid_accepted' %}warning{% elif n.type == 'order_placed' or n.type == 'order_shipped' %}info{% elif n.type == 'payment_received' %}success{% elif n.type == 'batch_verified' %}primary{% else %}secondary{% endif %}" style="font-size:0.6rem;">{{ n.get_type_display }}</span>
+ </small>
+ </div>
+ </div>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
 
-        {# ============================================================
-           EMPTY STATE (no notifications)
-           ============================================================
-           Shown when the notifications queryset is empty. Uses a
-           bell-slash icon to indicate the user is all caught up. #}
-        {% else %}
-        <div class="empty-state-premium">
-            <i class="bi bi-bell-slash empty-icon"></i>
-            <h5>No Notifications</h5>
-            <p>You're all caught up! Notifications about bids, orders, and verifications will appear here.</p>
-        </div>
-        {% endif %}
+ 
+ {% else %}
+ <div class="empty-state-premium">
+ <i class="bi bi-bell-slash empty-icon"></i>
+ <h5>No Notifications</h5>
+ <p>You're all caught up! Notifications about bids, orders, and verifications will appear here.</p>
+ </div>
+ {% endif %}
 
-    </div>
+ </div>
 </div>
 {% endblock %}

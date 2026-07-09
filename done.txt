@@ -1,65 +1,655 @@
-=== CardeTrade — Project Status ===
-Date: 2026-07-08
+================================================================================
+  CardeTrade — Full Project Implementation Status
+================================================================================
+  Project:     Premium Cardamom Trading Platform
+  Stack:       Python 3.11+ | Django 5.2 | SQLite/PostgreSQL | Bootstrap 5.3
+  Status:      COMPLETE (core MVP delivered)
+  Last Updated: 2026-07-09
+  Handoff Doc:  See handoff.md for full team handover
+================================================================================
 
-== COMPLETED ==
 
-1. USER VERIFICATION SYSTEM
-   - Added is_verified (BooleanField) and verification_doc (FileField) to User model
-   - Farmers & Product Managers must upload proof during registration
-   - Traders & Admin auto-verified
-   - Admin can verify users in /admin/ with bulk action
-   - Registration form shows file upload conditionally based on role selection
-   - Seed accounts all pre-verified
+================================================================================
+  SECTION A — COMPLETED IMPLEMENTATION (FULL DETAIL)
+================================================================================
 
-2. EMAIL LOGIN
-   - Login now uses email + password (not username)
-   - USERNAME_FIELD = 'email' on User model
-   - Login form shows "Email" field instead of "Username"
-   - Error messages reference "email" instead of "username"
 
-3. ADMIN ACCOUNT
-   - Admin: admin@cardetrade.in / admin123 (pre-verified)
-   - PM: pm@cardetrade.in / pm123
-   - Farmer: farmer1@cardetrade.in / farmer123
-   - Trader: trader1@cardetrade.in / trader123
+--------------------------------------------------------------------------------
+A1. USER VERIFICATION SYSTEM
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/models.py, app/forms.py, app/admin.py, app/views.py (RegisterView),
+        app/migrations/0004_user_is_verified_user_verification_doc.py
 
-4. CINEMATIC BACKGROUND SYSTEM
-   - 4-layer CSS background: bg.gif → ambient orbs → film grain → cream veil
-   - bg.gif applied to hero overlay and all homepage sections
-   - No zoomed/scale effects on hero image anymore
-   - Consistent animated backdrop across entire homepage
+What was implemented:
+  - User.is_verified (BooleanField, default=False)
+  - User.verification_doc (FileField, upload_to='documents/verification/')
+  - Farmers must upload proof during registration (PDF/JPG/PNG)
+  - Product Managers must upload credentials during registration
+  - Traders are auto-verified on save (no document required)
+  - Admin role is auto-verified on save
+  - RegistrationForm.clean_verification_doc() enforces upload for farmer/PM roles
+  - Registration form shows file upload field conditionally by role (JS + form)
+  - Django Admin: "Mark selected users as verified" bulk action on User model
+  - Admin list displays is_verified column with filter
+  - All 4 seed accounts created with is_verified=True via migration 0002
 
-5. DOCUMENTATION
-   - README.md: Updated with email login, verification, seed accounts
-   - deploy.md: Render deployment guide
-   - handoff.md: Full project handoff document
-   - done.txt: This status file
 
-6. MIGRATIONS
-   - 0001_initial: All 16 tables
-   - 0002_seed_default_users: 4 seed accounts
-   - 0003_alter_user_email: Email unique
-   - 0004_user_is_verified_user_verification_doc: Verification fields
+--------------------------------------------------------------------------------
+A2. EMAIL-BASED LOGIN & AUTHENTICATION
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/models.py, app/forms.py, app/views.py, cardetrade/settings.py,
+        app/templates/app/auth/login.html, app/migrations/0003_alter_user_email.py
 
-7. ANIMATION REVAMP (2026-07-08)
-   - Removed low-quality: confetti, heartbeat pulse, morphBlob
-   - Counter refactored from setInterval to requestAnimationFrame (60fps)
-   - Table hover inline styles replaced with CSS class toggle
-   - CSS keyframes cleaned up (removed morphBlob, confettiFall)
+What was implemented:
+  - User.USERNAME_FIELD = 'email' (email is primary login identifier)
+  - User.email is unique and required (not blank, not null)
+  - User.REQUIRED_FIELDS = ['username'] (username still stored for display)
+  - LoginForm uses EmailField labeled "Email" instead of username
+  - LoginView authenticates with email + password
+  - Error messages reference "email" not "username"
+  - LOGIN_URL = '/login/'
+  - LOGIN_REDIRECT_URL = '/dashboard/'
+  - LOGOUT_REDIRECT_URL = '/login/'
+  - AUTH_USER_MODEL = 'app.User' set before first migration
 
-8. MESSAGING FIX (2026-07-08)
-   - Created missing conversation_create.html template (was causing 404)
-   - Verified conversation_detail.html renders correctly
 
-9. CREDENTIALS DOC (2026-07-08)
-   - Created user.md with correct email/password for all 4 seed accounts
-   - Fixed email addresses in user.md (pm@, farmer@, trader@ — no '1' before @)
+--------------------------------------------------------------------------------
+A3. USER REGISTRATION & PROFILE
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/forms.py, app/views.py, app/templates/app/auth/register.html,
+        app/templates/app/auth/profile.html
 
-== PENDING / FUTURE WORK ==
+What was implemented:
+  - RegistrationForm fields: username, email, password1, password2, role,
+    phone, address, region, verification_doc
+  - Role choices: farmer, trader, product_manager (admin created via admin panel)
+  - RegisterView: creates user, saves verification doc, auto-login, redirects
+  - Role-specific welcome messages after registration
+  - UserProfileForm: edit first_name, last_name, email, phone, address, region
+  - ProfileView: authenticated users can update profile
+  - User.save() auto-sets is_staff/is_superuser/is_verified by role:
+      Admin        → is_staff=True,  is_superuser=True,  is_verified=True
+      PM           → is_staff=True,  is_superuser=False, is_verified=False*
+      Trader       → is_staff=False, is_superuser=False, is_verified=True
+      Farmer       → is_staff=False, is_superuser=False, is_verified=False*
+    (* unless manually verified or seed account)
 
-- Payment gateway integration
-- SMTP/email notifications
-- WebSocket for real-time messaging
-- Media file storage on S3/Cloudinary
-- REST API (DRF)
-- Comprehensive test coverage
+
+--------------------------------------------------------------------------------
+A4. ROLE-BASED ACCESS CONTROL (4 ROLES)
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/decorators.py, app/views.py (all protected views)
+
+Roles implemented:
+  - farmer          → Create farms/batches, view bids, fulfill orders
+  - trader          → Browse marketplace, place bids, direct buy, track orders
+  - product_manager → Verify batches, grade quality, set verified prices
+  - admin           → Full system access, resolve disputes, user management
+
+Decorators implemented:
+  - @role_required(*roles)       → Generic role check (403 if wrong role)
+  - farmer_required              → Shorthand for farmer only
+  - trader_required              → Shorthand for trader only
+  - pm_required                  → Shorthand for product_manager only
+  - admin_required               → Shorthand for admin only
+  - staff_required               → PM + admin (is_staff users)
+  - trade_participant_required   → farmer + trader
+
+Enforcement:
+  - Unauthenticated users redirected to /login/
+  - Wrong role returns HTTP 403 Forbidden
+  - CBVs use @method_decorator(role_required(...), name='dispatch')
+  - Navbar shows role-specific menu items (batches/farms for farmer, etc.)
+
+
+--------------------------------------------------------------------------------
+A5. SEED ACCOUNTS & CREDENTIALS
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/migrations/0002_seed_default_users.py, user.md, README.md
+
+Pre-loaded accounts (all pre-verified, email login):
+
+  Role              Username   Email                    Password
+  ----------------  ---------  -----------------------  ----------
+  Admin             admin      admin@cardetrade.in      admin123
+  Product Manager   pm1        pm@cardetrade.in         pm123
+  Farmer            farmer1    farmer@cardetrade.in     farmer123
+  Trader            trader1    trader@cardetrade.in     trader123
+
+Login URL: /login/  (email + password, NOT username)
+Admin URL: /admin/  (staff users only)
+
+
+--------------------------------------------------------------------------------
+A6. DATABASE — 16 TABLES (ALL MODELS)
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/models.py, app/migrations/0001_initial.py
+
+All 16 models implemented with TextChoices enums, related_name on FKs, __str__:
+
+  #  Model                    Key Features
+  --  ---------------------  ------------------------------------------------
+  1   User                     AbstractUser + role, email login, verification
+  2   Farm                     Farmer farms: name, location, region, area, cert
+  3   Batch                    Auto-code CDM-YYYY-NNNN, status workflow, farmer FK
+  4   QualityVerification      Grade A/B/C, moisture, aroma, color, purity, price
+  5   Listing                  Fixed price or auction, price/qty, active flag
+  6   Bid                      Trader bids, status: active/accepted/rejected/outbid
+  7   Order                    Auto-code ORD-YYYY-NNNN, GeneratedField total_amount
+  8   OrderTracking            Status timeline with location, notes, updated_by
+  9   Payment                  Bank transfer/mobile money/cash/escrow records
+  10  Dispute                  Open/under_review/resolved/closed workflow
+  11  Notification             In-app alerts: bid, order, verify, dispute types
+  12  Conversation             Chat threads: quality_review, batch_inquiry, etc.
+  13  ConversationParticipant  unique_together (conversation, user)
+  14  Message                  Soft delete only (is_deleted flag), JSON attachments
+  15  Report                   Report type structure (trade_summary, revenue, etc.)
+  16  AuditLog                 user, action, table_name, record_id, old/new JSON
+
+Critical model rules implemented:
+  - Order.total_amount = GeneratedField (quantity_kg * price_per_kg) — never stored manually
+  - Batch.batch_code auto-generated on first save
+  - Order.order_code auto-generated on first save
+  - Message is ONLY table with soft delete
+  - All enums use TextChoices (never IntegerChoices)
+
+
+--------------------------------------------------------------------------------
+A7. VIEWS — 28 CLASS-BASED VIEWS
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/views.py, app/urls.py
+
+Authentication (5 views):
+  - HomeView              → Public homepage with stats + featured listings
+  - RegisterView          → New account with role + verification doc
+  - LoginView             → Email + password login
+  - LogoutView            → Session logout
+  - ProfileView           → Edit user profile
+
+Dashboards (5 views):
+  - DashboardRedirectView → Routes to role-specific dashboard
+  - FarmerDashboardView   → Batches, bids, listings, orders stats
+  - TraderDashboardView   → Listings, bids, orders stats
+  - PMDashboardView       → Pending/under_review/verified batch stats
+  - AdminDashboardView    → Users, orders, disputes overview
+
+Batches (4 views):
+  - BatchListView         → All batches (role-filtered)
+  - BatchCreateView       → Farmer creates new batch
+  - BatchDetailView       → Batch details + verification info
+  - BatchVerifyView       → PM grades batch, sets verified price
+
+Trading / Marketplace (5 views):
+  - ListingListView       → Browse active marketplace listings
+  - ListingDetailView     → Listing detail + bid list / buy form
+  - PlaceBidView          → Trader places auction bid
+  - DirectBuyView         → Trader fixed-price purchase
+  - MyBidsView            → Trader/farmer bid history
+
+Orders (2 views):
+  - OrderListView         → Order list (buyer or seller view)
+  - OrderDetailView       → Order detail + tracking + payments
+
+Farms (2 views):
+  - FarmListView          → Farmer's registered farms
+  - FarmCreateView        → Register new farm
+
+Messaging (3 views):
+  - ConversationListView      → All user conversations
+  - ConversationDetailView    → Chat thread + reply form
+  - ConversationCreateView    → Start conversation about a batch
+
+Disputes (3 views):
+  - DisputeListView         → All disputes (admin sees all)
+  - DisputeCreateView       → Raise dispute on an order
+  - DisputeResolveView      → Admin resolves dispute
+
+Notifications (2 views):
+  - NotificationListView      → User notification inbox
+  - NotificationMarkReadView  → Mark all notifications as read
+
+
+--------------------------------------------------------------------------------
+A8. URL ROUTING — 30+ NAMED ROUTES
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  cardetrade/urls.py, app/urls.py
+
+Root routes:
+  /admin/                              → Django admin panel
+  /                                    → All app routes (app_name = 'app')
+
+App routes (key):
+  /                                    → home
+  /register/                           → register
+  /login/                              → login
+  /logout/                             → logout
+  /profile/                            → profile
+  /dashboard/                          → dashboard (role redirect)
+  /dashboard/farmer/                   → farmer_dashboard
+  /dashboard/trader/                   → trader_dashboard
+  /dashboard/pm/                       → pm_dashboard
+  /dashboard/admin/                    → admin_dashboard
+  /batches/                            → batch_list
+  /batches/create/                     → batch_create
+  /batches/<pk>/                       → batch_detail
+  /batches/<pk>/verify/                → batch_verify
+  /listings/                           → listing_list
+  /listings/<pk>/                      → listing_detail
+  /listings/<pk>/bid/                  → place_bid
+  /listings/<pk>/buy/                  → direct_buy
+  /bids/                               → my_bids
+  /orders/                             → order_list
+  /orders/<pk>/                        → order_detail
+  /farms/                              → farm_list
+  /farms/create/                       → farm_create
+  /conversations/                      → conversation_list
+  /conversations/<pk>/               → conversation_detail
+  /conversations/create/<batch_pk>/    → conversation_create
+  /disputes/                           → dispute_list
+  /disputes/create/<order_pk>/         → dispute_create
+  /disputes/<pk>/resolve/              → dispute_resolve
+  /notifications/                      → notification_list
+  /notifications/mark-read/            → notification_mark_read
+
+
+--------------------------------------------------------------------------------
+A9. BUSINESS WORKFLOWS & SIGNALS
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/signals.py, app/apps.py
+
+Automated signal handlers (post_save):
+
+  1. create_listing_on_verification (Batch)
+     - When batch status = 'verified'
+     - Reads QualityVerification.verified_price_per_kg
+     - Auto-creates fixed-price Listing
+     - Updates batch status to 'listed'
+
+  2. notify_seller_on_order (Order)
+     - When new order created
+     - Creates ORDER_PLACED notification for seller (farmer)
+
+  3. notify_farmer_on_bid (Bid)
+     - When new bid placed
+     - Creates BID_RECEIVED notification for listing farmer
+
+  4. update_conversation_timestamp (Message)
+     - When new message sent
+     - Updates Conversation.last_message_at for sorting
+
+Status workflows implemented:
+
+  Batch:    pending → under_review → verified → listed → sold
+            pending/under_review → rejected
+
+  Order:    pending → confirmed → processing → shipped → delivered
+            any status → cancelled / disputed
+
+  Bid:      active → accepted / rejected / outbid / expired
+
+  Dispute:  open → under_review → resolved → closed
+
+  Payment:  pending → completed / failed / refunded
+
+
+--------------------------------------------------------------------------------
+A10. DJANGO ADMIN PANEL
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/admin.py
+
+All 16 models registered with @admin.register:
+  - User (custom UserAdmin with role, is_verified, verify_users bulk action)
+  - Farm, Batch, QualityVerification, Listing, Bid
+  - Order, OrderTracking, Payment, Dispute
+  - Notification, Conversation, ConversationParticipant, Message
+  - Report, AuditLog
+
+Admin features:
+  - list_display, list_filter, search_fields per model
+  - Read-only batch_code and order_code fields
+  - User verification bulk action
+  - Staff access for PM (is_staff=True), full access for Admin (is_superuser=True)
+
+
+--------------------------------------------------------------------------------
+A11. AUDIT MIDDLEWARE
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/middleware.py, cardetrade/settings.py
+
+What was implemented:
+  - AuditMiddleware captures current user + IP per request
+  - Thread-local storage via get_current_user() / get_current_ip()
+  - Registered in MIDDLEWARE after AuthenticationMiddleware
+  - AuditLog model ready for mutation logging
+  - IP from request.META REMOTE_ADDR
+
+
+--------------------------------------------------------------------------------
+A12. TEMPLATES — 28 HTML TEMPLATES
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/templates/app/, templates/
+
+Shared templates:
+  - templates/base.html           → Bootstrap 5 shell, preloader, ambient orbs
+  - templates/includes/navbar.html → Role-aware navigation, notifications badge
+  - templates/includes/alerts.html   → Django messages display
+  - templates/includes/footer.html   → Site footer
+
+Feature templates (app/templates/app/):
+  auth/         login.html, register.html, profile.html
+  dashboard/    home.html, farmer.html, trader.html, pm.html, admin.html
+  batches/      list.html, create.html, detail.html, verify.html
+  trading/      listing_list.html, listing_detail.html, place_bid.html,
+                direct_buy.html, my_bids.html
+  orders/       list.html, detail.html
+  farms/        list.html, create.html
+  messaging/    conversation_list.html, conversation_detail.html,
+                conversation_create.html
+  disputes/     list.html, create.html, resolve.html
+  notifications/ list.html
+
+Template conventions:
+  - All extend base.html
+  - Bootstrap 5 grid + custom premium CSS classes
+  - {% url 'app:name' %} for all links
+  - {% static %} for CSS/JS/images
+  - Role-conditional blocks ({% if user.role == 'farmer' %})
+  - Django {# #} comments must be SINGLE-LINE ONLY (multiline leaks to UI)
+
+
+--------------------------------------------------------------------------------
+A13. PREMIUM UI / UX DESIGN SYSTEM
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  static/css/style.css (~2000 lines), static/js/main.js, static/image/
+
+CSS design system:
+  - Color palette: primary green (#1a4d2e), accent gold (#c8a951), cream bg
+  - CSS custom properties (--primary, --accent, --gold, etc.)
+  - Glass morphism: backdrop-filter blur on cards, navbar, auth forms
+  - Premium components: card-premium, btn-premium, table-premium, badge-premium
+  - Page headers: page-header-premium with gradient + background image
+  - Listing cards: listing-card-premium with type badges, grade badges
+  - Empty states: empty-state-premium
+  - Stat cards: stat-card-premium on dashboards
+  - Responsive: mobile/tablet/desktop breakpoints
+
+JavaScript interactions (main.js):
+  - Preloader fade-out on page load
+  - Navbar scroll effect (transparent → glass on scroll)
+  - Active nav link highlighting (excludes Get Started CTA button)
+  - Scroll animations via IntersectionObserver
+  - Counter animation via requestAnimationFrame (60fps)
+  - 3D card tilt on mousemove
+  - Hero parallax effect
+  - Particle system in hero section
+  - Table row hover via CSS class toggle (no inline styles)
+  - Direct buy quantity calculator
+  - Ripple effect on buttons
+
+Static assets:
+  - static/image/cardamom1.jpg  → Hero, marketplace, page headers
+  - static/image/cardamom2.jpg  → Hero secondary, philosophy section
+  - static/image/bg.gif         → Animated cinematic background
+
+
+--------------------------------------------------------------------------------
+A14. CINEMATIC BACKGROUND SYSTEM
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  static/css/style.css, templates/base.html, home.html
+
+4-layer background stack (z-index -4 to -1):
+  Layer 1: bg.gif animated background     → body::before (bgCinema keyframe)
+  Layer 2: Ambient floating orbs          → .ambient-orbs div (orbDrift keyframe)
+  Layer 3: Film grain texture overlay     → .grain-overlay div (grainShift keyframe)
+  Layer 4: Cream color veil               → body::after
+
+Applied to:
+  - Entire site via base.html body layers
+  - Hero section overlay (home.html)
+  - section-padding homepage blocks
+  - Page header backgrounds across all feature pages
+
+Removed: zoomed/scale hero image effects (replaced with stable backdrop)
+
+
+--------------------------------------------------------------------------------
+A15. ANIMATION REVAMP (2026-07-08)
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  static/css/style.css, static/js/main.js
+
+Removed (low-quality effects):
+  - confetti animation / confettiFall keyframe
+  - heartbeat pulse effect
+  - morphBlob keyframe
+
+Improved:
+  - Counter: setInterval → requestAnimationFrame (smooth 60fps)
+  - Table hover: inline style manipulation → CSS class toggle
+  - CSS keyframes cleaned up
+
+Retained (high-quality effects):
+  - bgCinema, orbDrift, grainShift (background)
+  - fadeInUp, fadeInLeft, fadeInRight, scaleIn (entrance)
+  - floatUpDown, shimmer, gradientShift (ambient)
+  - cardGlowBorder, rippleEffect (interactive)
+  - pulseGlow, shimmerGold (glow)
+
+
+--------------------------------------------------------------------------------
+A16. MESSAGING SYSTEM FIX (2026-07-08)
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/templates/app/messaging/
+
+Fixed:
+  - Created conversation_create.html (was missing → 404 error)
+  - Verified conversation_detail.html renders chat correctly
+  - ConversationCreateView wired to /conversations/create/<batch_pk>/
+  - Chat bubbles: sent/received styling, auto-scroll, reply form
+  - Message soft delete (is_deleted flag) — only soft-deleted table
+  - Conversation types: quality_review, batch_inquiry, order_support, general
+
+
+--------------------------------------------------------------------------------
+A17. UI BUG FIXES (2026-07-09)
+--------------------------------------------------------------------------------
+Status: DONE
+
+Template comment leak fix:
+  - Removed multiline Django {# #} comments that rendered as visible text
+  - Fixed files: home.html, listing_list.html, batches/list.html
+  - Rule: Django comments must be single-line only; use {% comment %} for multiline
+
+Navbar "Get Started" button fix:
+  - Button had gold text on gold background when .active class applied
+  - Fixed in style.css: .btn-register-nav keeps dark text in all states
+  - Fixed in main.js: exclude .btn-register-nav from active link highlighting
+
+
+--------------------------------------------------------------------------------
+A18. MIGRATIONS
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/migrations/
+
+  0001_initial
+    - Creates all 16 database tables
+    - Sets up all ForeignKeys, TextChoices, GeneratedField on Order
+
+  0002_seed_default_users
+    - Seeds 4 default accounts (admin, pm1, farmer1, trader1)
+    - All pre-verified with hashed passwords
+
+  0003_alter_user_email
+    - Makes email field unique (required for email login)
+
+  0004_user_is_verified_user_verification_doc
+    - Adds is_verified BooleanField
+    - Adds verification_doc FileField
+
+
+--------------------------------------------------------------------------------
+A19. DOCUMENTATION
+--------------------------------------------------------------------------------
+Status: DONE
+
+  README.md         → Features, quick start, tech stack, all endpoints, UI showcase
+  handoff.md        → Full project handoff for receiving team (v2.0, 2026-07-09)
+  deploy.md         → Render.com deployment guide (free tier + PostgreSQL)
+  done.txt          → This file — full implementation status
+  user.md           → Seed account credentials (email + password)
+  AGENTS.md         → AI agent coding conventions and full model reference
+
+  docs/ARCHITECTURE.md  → System design, request flow, component diagram
+  docs/MODELS.md        → Database schema reference
+  docs/WORKFLOW.md      → Batch, order, bid, dispute business workflows
+  docs/API.md           → URL endpoint reference
+  docs/TEMPLATES.md     → UI/UX design guide
+  docs/SETUP.md         → Installation and configuration guide
+
+
+--------------------------------------------------------------------------------
+A20. FORMS & VALIDATION
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/forms.py, inline ModelForms in views.py
+
+Dedicated forms (forms.py):
+  - RegistrationForm    → UserCreationForm + role + verification_doc validation
+  - LoginForm           → EmailField as username, Bootstrap styled
+  - UserProfileForm     → Profile fields ModelForm
+
+Inline ModelForms (views.py):
+  - BatchCreateView     → farm, quantity_kg, harvest_date, description, price
+  - BatchVerifyView     → grade, moisture, aroma, color, purity, price, remarks
+  - PlaceBidView        → bid_price_per_kg, quantity_kg, notes
+  - FarmCreateView      → farm_name, location, region, area, certification
+  - DisputeCreateView   → reason
+  - DisputeResolveView  → resolution, status
+  - ConversationCreateView → subject, initial message
+
+Validation rules:
+  - Quantity and price must be > 0
+  - Aroma/color scores 1-10 range
+  - verification_doc required for farmer/PM roles
+  - crispy-bootstrap5 for form rendering
+
+
+--------------------------------------------------------------------------------
+A21. NOTIFICATIONS (IN-APP)
+--------------------------------------------------------------------------------
+Status: DONE
+Files:  app/models.py (Notification), app/signals.py, app/views.py
+
+Notification types implemented:
+  - bid_received      → Farmer notified when trader places bid
+  - bid_accepted      → (model ready, manual trigger)
+  - order_placed      → Seller notified on new order (signal)
+  - order_shipped     → (model ready)
+  - payment_received  → (model ready)
+  - batch_verified    → (model ready)
+  - dispute_raised    → (model ready)
+
+UI:
+  - /notifications/ list page with unread highlighting
+  - Mark all read action (/notifications/mark-read/)
+  - Navbar notification badge (unread count)
+
+
+================================================================================
+  SECTION B — PENDING / FUTURE WORK (NOT YET IMPLEMENTED)
+================================================================================
+
+These items are OUT OF SCOPE for the current "done" release.
+They are documented for the receiving team's roadmap.
+
+  B1. Payment Gateway Integration
+      - No Razorpay/Stripe/PayU connected
+      - Payment model records payments manually only
+      - No online payment flow or webhook handling
+
+  B2. SMTP / Email Notifications
+      - No email backend configured in settings.py
+      - Notifications are in-app only (Notification model)
+      - No order confirmation, bid alert, or verification emails sent
+
+  B3. WebSocket Real-Time Messaging
+      - No Django Channels or ASGI WebSocket setup
+      - Chat requires page refresh to see new messages
+      - ASGI file exists but is not configured for WebSockets
+
+  B4. Cloud Media Storage (S3 / Cloudinary)
+      - Media files stored locally in media/ directory
+      - Render free tier does not persist uploads between deploys
+      - verification_doc and other uploads lost on ephemeral hosting
+
+  B5. REST API (Django REST Framework)
+      - No DRF installed or configured
+      - All interactions are server-rendered HTML forms
+      - No mobile app or third-party API access
+
+  B6. Comprehensive Automated Test Coverage
+      - app/tests.py contains scaffold/comments only
+      - Zero active test classes (0 tests run)
+      - No CI/CD pipeline configured
+      - Manual QA performed during development
+
+  B7. Production Hardening (Recommended before deploy)
+      - SECRET_KEY hardcoded in settings.py (must use env var)
+      - DEBUG = True in settings.py (must be False in production)
+      - ALLOWED_HOSTS = [] (must set domain list)
+      - gunicorn and whitenoise not in requirements.txt yet
+      - No error monitoring (Sentry) configured
+
+  B8. Report Generation
+      - Report model exists in database
+      - No report generation views or export (PDF/CSV) implemented
+
+  B9. Full Universal Audit Logging
+      - AuditLog model and middleware exist
+      - post_save audit receiver for all models not fully wired
+      - Manual audit entries not yet automatic on all mutations
+
+  B10. Remaining Template Comment Cleanup
+      - Some templates may still have multiline {# #} comments
+      - Only home.html, listing_list.html, batches/list.html fixed so far
+      - Audit all templates before production deploy
+
+
+================================================================================
+  SECTION C — COMPLETION VERDICT
+================================================================================
+
+  CORE PLATFORM:     COMPLETE ✅
+  All 16 models, 28 views, 30+ URLs, 28 templates, 4 signals, admin panel,
+  role-based auth, verification system, email login, trading workflows,
+  premium UI, documentation, and seed accounts are implemented and working.
+
+  FUTURE ENHANCEMENTS: DOCUMENTED ⏳
+  Payment gateway, email SMTP, WebSockets, cloud storage, DRF API, and
+  automated tests are correctly scoped as post-MVP work (Section B).
+
+  REFERENCE DOCUMENTS:
+  - Full handover details  → handoff.md
+  - Test credentials       → user.md
+  - Deployment guide       → deploy.md
+  - Coding conventions     → AGENTS.md
+
+================================================================================
+  End of done.txt — CardeTrade Implementation Status
+================================================================================

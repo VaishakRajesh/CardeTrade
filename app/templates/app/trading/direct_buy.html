@@ -1,125 +1,98 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE
-   ============================================================
-   The browser tab shows "Buy [batch_code] - CardeTrade". #}
 {% block title %}Buy {{ listing.batch.batch_code }} - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================ #}
 {% block content %}
 
-{# ============================================================
-   PAGE HEADER WITH BREADCRUMB
-   ============================================================
-   Green gradient header with breadcrumb navigation:
-   Marketplace > [Batch Code] > Buy Now. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#166534);">
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    <div class="container position-relative" style="z-index:1;">
-        <nav class="breadcrumb-premium">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'app:listing_list' %}">Marketplace</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'app:listing_detail' listing.pk %}">{{ listing.batch.batch_code }}</a></li>
-                <li class="breadcrumb-item active">Buy Now</li>
-            </ol>
-        </nav>
-        <h2><i class="bi bi-bag-check me-2"></i> Complete Your Purchase</h2>
-        <p>{{ listing.batch.batch_code }} — Fixed Price</p>
-    </div>
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ <div class="container position-relative" style="z-index:1;">
+ <nav class="breadcrumb-premium">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="{% url 'app:listing_list' %}">Marketplace</a></li>
+ <li class="breadcrumb-item"><a href="{% url 'app:listing_detail' listing.pk %}">{{ listing.batch.batch_code }}</a></li>
+ <li class="breadcrumb-item active">Buy Now</li>
+ </ol>
+ </nav>
+ <h2><i class="bi bi-bag-check me-2"></i> Complete Your Purchase</h2>
+ <p>{{ listing.batch.batch_code }} — Fixed Price</p>
+ </div>
 </div>
 
-{# ============================================================
-   TWO-COLUMN PURCHASE LAYOUT
-   ============================================================
-   Left column: order summary with listing details.
-   Right column: quantity selector + payment confirmation. #}
 <div class="container py-5">
-    <div class="row justify-content-center g-4">
+ <div class="row justify-content-center g-4">
 
-        {# ==========================================================
-           LEFT COLUMN — ORDER SUMMARY
-           ==========================================================
-           Shows a snapshot of what the trader is about to buy:
-           batch image, code, farmer, price, available quantity,
-           and optionally the quality grade. #}
-        <div class="col-lg-5">
-            <div class="card-premium">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Order Summary</h5></div>
-                <div class="card-body">
-                    {# Batch image thumbnail. #}
-                    <div class="img-frame-premium mb-3" style="height:180px;">
-                        <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
-                    </div>
-                    {# Key details displayed as labelled rows. #}
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Batch</span><span class="fw-bold">{{ listing.batch.batch_code }}</span></div>
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Farmer</span><span class="fw-bold">{{ listing.farmer.username }}</span></div>
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Price</span><span class="fw-bold" style="color:var(--primary);">Rs {{ listing.price_per_kg }}/kg</span></div>
-                    <div class="d-flex justify-content-between"><span class="text-muted">Available</span><span class="fw-bold">{{ listing.available_qty_kg }} kg</span></div>
-                    {# If the batch has been quality-verified, show the grade badge and verified price. #}
-                    {% if listing.batch.verification %}
-                    <div class="mt-3 pt-3 border-top">
-                        <span class="grade-badge grade-{{ listing.batch.verification.grade }}">{{ listing.batch.verification.grade }}</span>
-                        <small class="text-muted ms-2">{{ listing.batch.verification.verified_price_per_kg }}/kg verified</small>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+ 
+ <div class="col-lg-5">
+ <div class="card-premium">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Order Summary</h5></div>
+ <div class="card-body">
+ {# Batch image thumbnail. #}
+ <div class="img-frame-premium mb-3" style="height:180px;">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+ </div>
+ {# Key details displayed as labelled rows. #}
+ <div class="d-flex justify-content-between mb-2"><span class="text-muted">Batch</span><span class="fw-bold">{{ listing.batch.batch_code }}</span></div>
+ <div class="d-flex justify-content-between mb-2"><span class="text-muted">Farmer</span><span class="fw-bold">{{ listing.farmer.username }}</span></div>
+ <div class="d-flex justify-content-between mb-2"><span class="text-muted">Price</span><span class="fw-bold" style="color:var(--primary);">Rs {{ listing.price_per_kg }}/kg</span></div>
+ <div class="d-flex justify-content-between"><span class="text-muted">Available</span><span class="fw-bold">{{ listing.available_qty_kg }} kg</span></div>
+ {# If the batch has been quality-verified, show the grade badge and verified price. #}
+ {% if listing.batch.verification %}
+ <div class="mt-3 pt-3 border-top">
+ <span class="grade-badge grade-{{ listing.batch.verification.grade }}">{{ listing.batch.verification.grade }}</span>
+ <small class="text-muted ms-2">{{ listing.batch.verification.verified_price_per_kg }}/kg verified</small>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ </div>
 
-        {# ==========================================================
-           RIGHT COLUMN — PAYMENT / CONFIRMATION FORM
-           ==========================================================
-           The trader chooses the quantity (up to what's available)
-           and then confirms the purchase. A pricing summary shows
-           the per-kg cost, quantity, and calculated total. #}
-        <div class="col-lg-5">
-            <div class="card-premium">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-credit-card me-2"></i> Payment</h5></div>
-                <div class="card-body p-4">
-                    {# The form POSTs back to the same direct_buy view. #}
-                    <form method="post">
-                        {% csrf_token %}
+ 
+ <div class="col-lg-5">
+ <div class="card-premium">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-credit-card me-2"></i> Payment</h5></div>
+ <div class="card-body p-4">
+ {# The form POSTs back to the same direct_buy view. #}
+ <form method="post">
+ {% csrf_token %}
 
-                        {# Quantity input — pre-filled with the full available quantity. #}
-                        <div class="mb-3">
-                            <label class="fw-semibold small">Quantity (kg) *</label>
-                            <input type="number" name="quantity_kg" step="0.01" max="{{ listing.available_qty_kg }}" class="form-premium" value="{{ listing.available_qty_kg }}" required>
-                            <small class="text-muted">Max: {{ listing.available_qty_kg }} kg</small>
-                        </div>
+ {# Quantity input — pre-filled with the full available quantity. #}
+ <div class="mb-3">
+ <label class="fw-semibold small">Quantity (kg) *</label>
+ <input type="number" name="quantity_kg" step="0.01" max="{{ listing.available_qty_kg }}" class="form-premium" value="{{ listing.available_qty_kg }}" required>
+ <small class="text-muted">Max: {{ listing.available_qty_kg }} kg</small>
+ </div>
 
-                        {# --------------------------------------------------
-                           PRICING SUMMARY BOX
-                           Shows three rows:
-                           1. Price per kg (from the listing)
-                           2. Quantity (user-chosen, defaults to available)
-                           3. Total (calculated using Django's widthratio tag
-                              which multiplies price × quantity)
-                           -------------------------------------------------- #}
-                        <div class="pricing-summary mb-3">
-                            <div class="pricing-row"><span>Price per kg</span><span class="fw-bold" data-price="{{ listing.price_per_kg }}">Rs {{ listing.price_per_kg }}</span></div>
-                            <div class="pricing-row"><span>Quantity</span><span class="fw-bold"><span id="qtyDisplay">{{ listing.available_qty_kg }}</span> kg</span></div>
-                            {# Total line — Django's widthratio computes
-                               (price_per_kg / 1) × available_qty_kg = total. #}
-                            <div class="pricing-total d-flex justify-content-between align-items-center">
-                                <span>Total</span>
-                                <span id="totalDisplay" style="font-size:inherit;">Rs {% widthratio listing.price_per_kg|floatformat:0 1 listing.available_qty_kg|floatformat:0 %}</span>
-                            </div>
-                        </div>
+ <!-- --------------------------------------------------
+ PRICING SUMMARY BOX
+ Shows three rows:
+ 1. Price per kg (from the listing)
+ 2. Quantity (user-chosen, defaults to available)
+ 3. Total (calculated using Django's widthratio tag
+ which multiplies price × quantity)
+ -------------------------------------------------- -->
+ <div class="pricing-summary mb-3">
+ <div class="pricing-row"><span>Price per kg</span><span class="fw-bold" data-price="{{ listing.price_per_kg }}">Rs {{ listing.price_per_kg }}</span></div>
+ <div class="pricing-row"><span>Quantity</span><span class="fw-bold"><span id="qtyDisplay">{{ listing.available_qty_kg }}</span> kg</span></div>
+ <!-- Total line — Django's widthratio computes
+ (price_per_kg / 1) × available_qty_kg = total. -->
+ <div class="pricing-total d-flex justify-content-between align-items-center">
+ <span>Total</span>
+ <span id="totalDisplay" style="font-size:inherit;">Rs {% widthratio listing.price_per_kg|floatformat:0 1 listing.available_qty_kg|floatformat:0 %}</span>
+ </div>
+ </div>
 
-                        {# Submit button — creates the order. #}
-                        <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center">
-                            <i class="bi bi-check-lg"></i> Confirm Purchase
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+ {# Submit button — creates the order. #}
+ <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center">
+ <i class="bi bi-check-lg"></i> Confirm Purchase
+ </button>
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
 </div>
 {% endblock %}

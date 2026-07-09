@@ -9,11 +9,9 @@
    FEATURES:
     1. Preloader: Hides loading spinner after page loads
     2. Navbar Scroll: Makes navbar opaque when scrolling down
-    3. Scroll Animations: Elements fade/slide in when visible
-    4. Counter: Numbers count up from 0 to target value
-    5. Alerts: Auto-dismiss success/error messages after 5s
-    6. 3D Tilt: Cards tilt based on mouse position
-    7. Parallax: Hero image moves slowly when scrolling
+     3. Counter: Numbers count up from 0 to target value
+    4. Alerts: Auto-dismiss success/error messages after 5s
+    5. Parallax: Hero image moves slowly when scrolling
     8. Particles: Floating dots in hero section background
     9. Active Nav: Highlights current page in navbar
     10. Quantity Calc: Live price calculation on purchase page
@@ -61,35 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { passive: true });  // passive: true for better scroll performance
     }
 
-    // ==========================================================
-    // 3. SCROLL ANIMATIONS (IntersectionObserver)
-    //    Detects when elements scroll into view, then adds
-    //    a 'visible' class to trigger CSS animations.
-    // ==========================================================
-    function setupScrollAnimations(selector, className) {
-        // Find all elements with the given selector
-        const els = document.querySelectorAll(selector);
-        if (!els.length) return;  // No elements found, skip
-        
-        // Create an observer that watches when elements enter viewport
-        const obs = new IntersectionObserver(function(entries) {
-            entries.forEach(function(e) {
-                if (e.isIntersecting) {
-                    // Element is visible — add class to animate it in
-                    e.target.classList.add(className || 'visible');
-                }
-            });
-        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });  // Trigger when 8% visible
-
-        // Start watching all matching elements
-        els.forEach(function(el) { obs.observe(el); });
-    }
-    
-    // Set up scroll animations for different directions
-    setupScrollAnimations('.animate-on-scroll');        // Fade in + slide up
-    setupScrollAnimations('.animate-on-scroll-left');   // Slide in from left
-    setupScrollAnimations('.animate-on-scroll-right');  // Slide in from right
-    setupScrollAnimations('.animate-on-scroll-scale');  // Scale up
 
     // ==========================================================
     // 4. COUNTER ANIMATION (requestAnimationFrame)
@@ -137,29 +106,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);  // 5 seconds
     });
 
-    // ==========================================================
-    // 6. CARD HOVER TILT EFFECT (3D)
-    //    Cards tilt in 3D space based on mouse position.
-    //    Uses CSS perspective + rotateX/Y transforms.
-    //    Creates a subtle 3D parallax effect on card hover.
-    // ==========================================================
-    document.querySelectorAll('.card-premium, .listing-card-premium, .feature-card-premium').forEach(function(card) {
-        card.addEventListener('mousemove', function(e) {
-            const rect = card.getBoundingClientRect();  // Card position on screen
-            const x = e.clientX - rect.left;  // Mouse X relative to card
-            const y = e.clientY - rect.top;   // Mouse Y relative to card
-            const cx = rect.width / 2;         // Center X of card
-            const cy = rect.height / 2;        // Center Y of card
-            // Calculate rotation: further from center = more tilt
-            const rx = (y - cy) / 18;  // Rotate X (tilt forward/back)
-            const ry = (cx - x) / 18;  // Rotate Y (tilt left/right)
-            card.style.transform = 'perspective(1000px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-4px)';
-        });
-        // Reset transform when mouse leaves
-        card.addEventListener('mouseleave', function() {
-            card.style.transform = '';
-        });
-    });
 
     // ==========================================================
     // 7. PARALLAX ON HERO IMAGE
@@ -210,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //    'active' class. Compares link href with current URL.
     // ==========================================================
     const path = window.location.pathname;
-    document.querySelectorAll('.navbar-premium .nav-link').forEach(function(link) {
+    document.querySelectorAll('.navbar-premium .nav-link:not(.btn-register-nav)').forEach(function(link) {
         const href = link.getAttribute('href');
         if (href && href !== '/' && path.startsWith(href)) {
             link.classList.add('active');  // Match by URL prefix

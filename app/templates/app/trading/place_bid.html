@@ -1,176 +1,144 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE
-   ============================================================
-   The tab title includes "Place Bid" followed by the batch
-   code so the user knows exactly which listing they're
-   bidding on. #}
 {% block title %}Place Bid - {{ listing.batch.batch_code }} - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================ #}
 {% block content %}
 
-{# ============================================================
-   PAGE HEADER WITH BREADCRUMB
-   ============================================================
-   Purple gradient header showing the breadcrumb trail:
-   Marketplace > [Batch Code] > Place Bid. #}
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#7c3aed);">
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    <div class="container position-relative" style="z-index:1;">
-        <nav class="breadcrumb-premium">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'app:listing_list' %}">Marketplace</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'app:listing_detail' listing.pk %}">{{ listing.batch.batch_code }}</a></li>
-                <li class="breadcrumb-item active">Place Bid</li>
-            </ol>
-        </nav>
-        <h2><i class="bi bi-hammer me-2"></i> Place Your Bid</h2>
-        <p>{{ listing.batch.batch_code }} — Auction</p>
-    </div>
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ <div class="container position-relative" style="z-index:1;">
+ <nav class="breadcrumb-premium">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="{% url 'app:listing_list' %}">Marketplace</a></li>
+ <li class="breadcrumb-item"><a href="{% url 'app:listing_detail' listing.pk %}">{{ listing.batch.batch_code }}</a></li>
+ <li class="breadcrumb-item active">Place Bid</li>
+ </ol>
+ </nav>
+ <h2><i class="bi bi-hammer me-2"></i> Place Your Bid</h2>
+ <p>{{ listing.batch.batch_code }} — Auction</p>
+ </div>
 </div>
 
-{# ============================================================
-   TWO-COLUMN BID FORM LAYOUT
-   ============================================================
-   Left column: listing summary card showing key details.
-   Right column: the bid submission form. #}
 <div class="container py-5">
-    <div class="row justify-content-center g-4">
+ <div class="row justify-content-center g-4">
 
-        {# ==========================================================
-           LEFT COLUMN — LISTING SUMMARY
-           ==========================================================
-           A read-only card displaying the batch image, code,
-           farmer name, base price, and available quantity so
-           the bidder can review before submitting. #}
-        <div class="col-lg-5">
-            <div class="card-premium">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Listing Summary</h5></div>
-                <div class="card-body">
-                    {# Product image thumbnail at the top of the card. #}
-                    <div class="img-frame-premium mb-3" style="height:180px;">
-                        <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
-                    </div>
-                    {# Key-value pairs summarising the listing details. #}
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Batch</span><span class="fw-bold">{{ listing.batch.batch_code }}</span></div>
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Farmer</span><span class="fw-bold">{{ listing.farmer.username }}</span></div>
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Base Price</span><span class="fw-bold" style="color:var(--primary);">Rs {{ listing.price_per_kg }}/kg</span></div>
-                    <div class="d-flex justify-content-between"><span class="text-muted">Available</span><span class="fw-bold">{{ listing.available_qty_kg }} kg</span></div>
-                </div>
-            </div>
-        </div>
+ 
+ <div class="col-lg-5">
+ <div class="card-premium">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Listing Summary</h5></div>
+ <div class="card-body">
+ {# Product image thumbnail at the top of the card. #}
+ <div class="img-frame-premium mb-3" style="height:180px;">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="height:100%;object-fit:cover;" onerror="this.style.display='none'">
+ </div>
+ {# Key-value pairs summarising the listing details. #}
+ <div class="d-flex justify-content-between mb-2"><span class="text-muted">Batch</span><span class="fw-bold">{{ listing.batch.batch_code }}</span></div>
+ <div class="d-flex justify-content-between mb-2"><span class="text-muted">Farmer</span><span class="fw-bold">{{ listing.farmer.username }}</span></div>
+ <div class="d-flex justify-content-between mb-2"><span class="text-muted">Base Price</span><span class="fw-bold" style="color:var(--primary);">Rs {{ listing.price_per_kg }}/kg</span></div>
+ <div class="d-flex justify-content-between"><span class="text-muted">Available</span><span class="fw-bold">{{ listing.available_qty_kg }} kg</span></div>
+ </div>
+ </div>
+ </div>
 
-        {# ==========================================================
-           RIGHT COLUMN — BID SUBMISSION FORM
-           ========================================================== #}
-        <div class="col-lg-5">
-            <div class="card-premium">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-send me-2"></i> Submit Your Bid</h5></div>
-                <div class="card-body p-4">
-                    {# The form POSTs back to the same URL (place_bid view).
-                       novalidate disables browser-native validation so
-                       the server-side validation and our custom JS take
-                       control. #}
-                    <form method="post" novalidate>
-                        {# CSRF token is a Django security requirement that
-                           prevents cross-site request forgery attacks. #}
-                        {% csrf_token %}
+ 
+ <div class="col-lg-5">
+ <div class="card-premium">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-send me-2"></i> Submit Your Bid</h5></div>
+ <div class="card-body p-4">
+ <!-- The form POSTs back to the same URL (place_bid view).
+ novalidate disables browser-native validation so
+ the server-side validation and our custom JS take
+ control. -->
+ <form method="post" novalidate>
+ <!-- CSRF token is a Django security requirement that
+ prevents cross-site request forgery attacks. -->
+ {% csrf_token %}
 
-                        {# --------------------------------------------------
-                           FIELD: Bid Price per kg
-                           --------------------------------------------------
-                           A number input with a "Rs" prefix in the input group.
-                           The minimum value is the listing's base price; the
-                           trader cannot bid below this. #}
-                        <div class="mb-3">
-                            <label class="fw-semibold small">Your Bid Price (per kg) *</label>
-                            <div class="input-group mt-1">
-                                <span class="input-group-text" style="background:var(--accent);color:var(--primary-dark);font-weight:700;">Rs</span>
-                                <input type="number" name="bid_price_per_kg" step="0.01" class="form-premium" placeholder="e.g. 50.00" min="{{ listing.price_per_kg }}" required>
-                            </div>
-                            {# Helper text reminding the user of the minimum allowed bid. #}
-                            <small class="text-muted">Minimum bid: Rs {{ listing.price_per_kg }}/kg</small>
-                        </div>
+ <!-- --------------------------------------------------
+ FIELD: Bid Price per kg
+ --------------------------------------------------
+ A number input with a"Rs" prefix in the input group.
+ The minimum value is the listing's base price; the
+ trader cannot bid below this. -->
+ <div class="mb-3">
+ <label class="fw-semibold small">Your Bid Price (per kg) *</label>
+ <div class="input-group mt-1">
+ <span class="input-group-text" style="background:var(--accent);color:var(--primary-dark);font-weight:700;">Rs</span>
+ <input type="number" name="bid_price_per_kg" step="0.01" class="form-premium" placeholder="e.g. 50.00" min="{{ listing.price_per_kg }}" required>
+ </div>
+ {# Helper text reminding the user of the minimum allowed bid. #}
+ <small class="text-muted">Minimum bid: Rs {{ listing.price_per_kg }}/kg</small>
+ </div>
 
-                        {# --------------------------------------------------
-                           FIELD: Quantity in kg
-                           --------------------------------------------------
-                           The user specifies how many kg they want to bid on.
-                           The maximum value is the listing's remaining quantity. #}
-                        <div class="mb-3">
-                            <label class="fw-semibold small">Quantity (kg) *</label>
-                            <input type="number" name="quantity_kg" step="0.01" class="form-premium" placeholder="e.g. 100" max="{{ listing.available_qty_kg }}" required>
-                            <small class="text-muted">Maximum available: {{ listing.available_qty_kg }} kg</small>
-                        </div>
+ <!-- --------------------------------------------------
+ FIELD: Quantity in kg
+ --------------------------------------------------
+ The user specifies how many kg they want to bid on.
+ The maximum value is the listing's remaining quantity. -->
+ <div class="mb-3">
+ <label class="fw-semibold small">Quantity (kg) *</label>
+ <input type="number" name="quantity_kg" step="0.01" class="form-premium" placeholder="e.g. 100" max="{{ listing.available_qty_kg }}" required>
+ <small class="text-muted">Maximum available: {{ listing.available_qty_kg }} kg</small>
+ </div>
 
-                        {# --------------------------------------------------
-                           FIELD: Notes (optional)
-                           --------------------------------------------------
-                           An optional textarea where the trader can send a
-                           message to the farmer along with the bid. #}
-                        <div class="mb-3">
-                            <label class="fw-semibold small">Notes (optional)</label>
-                            <textarea name="notes" class="form-premium" rows="2" placeholder="Message to the farmer..."></textarea>
-                        </div>
+ <!-- --------------------------------------------------
+ FIELD: Notes (optional)
+ --------------------------------------------------
+ An optional textarea where the trader can send a
+ message to the farmer along with the bid. -->
+ <div class="mb-3">
+ <label class="fw-semibold small">Notes (optional)</label>
+ <textarea name="notes" class="form-premium" rows="2" placeholder="Message to the farmer..."></textarea>
+ </div>
 
-                        {# --------------------------------------------------
-                           LIVE PRICING SUMMARY
-                           --------------------------------------------------
-                           Displays the calculated total (price × quantity)
-                           and updates dynamically via JavaScript as the user
-                           types in the two fields above. #}
-                        <div class="pricing-summary mb-3">
-                            <div class="pricing-row"><span>Bid Total</span><span class="fw-bold" style="color:var(--primary);" id="bidTotalDisplay">Rs 0.00</span></div>
-                        </div>
+ <!-- --------------------------------------------------
+ LIVE PRICING SUMMARY
+ --------------------------------------------------
+ Displays the calculated total (price × quantity)
+ and updates dynamically via JavaScript as the user
+ types in the two fields above. -->
+ <div class="pricing-summary mb-3">
+ <div class="pricing-row"><span>Bid Total</span><span class="fw-bold" style="color:var(--primary);" id="bidTotalDisplay">Rs 0.00</span></div>
+ </div>
 
-                        {# Submit button to send the bid. #}
-                        <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center">
-                            <i class="bi bi-send"></i> Submit Bid
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+ {# Submit button to send the bid. #}
+ <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center">
+ <i class="bi bi-send"></i> Submit Bid
+ </button>
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
 </div>
 {% endblock %}
 
-{# ============================================================
-   EXTRA JAVASCRIPT BLOCK
-   ============================================================
-   This block is rendered after the main content and before
-   the closing </body> tag (see base.html). It provides a
-   live total calculation as the user types their bid. #}
 {% block extra_js %}
 <script>
 // Wait for the DOM to finish loading before attaching event listeners.
 document.addEventListener('DOMContentLoaded', function() {
-    // Grab references to the two number inputs and the total display span.
-    var priceInput = document.querySelector('input[name="bid_price_per_kg"]');
-    var qtyInput = document.querySelector('input[name="quantity_kg"]');
-    var totalDisplay = document.getElementById('bidTotalDisplay');
+ // Grab references to the two number inputs and the total display span.
+ var priceInput = document.querySelector('input[name="bid_price_per_kg"]');
+ var qtyInput = document.querySelector('input[name="quantity_kg"]');
+ var totalDisplay = document.getElementById('bidTotalDisplay');
 
-    // updateTotal: reads the current values of price and quantity,
-    // multiplies them together, and displays the formatted result.
-    function updateTotal() {
-        var price = parseFloat(priceInput.value) || 0;  // Default to 0 if blank/invalid.
-        var qty = parseFloat(qtyInput.value) || 0;       // Same for quantity.
-        totalDisplay.textContent = 'Rs ' + (price * qty).toFixed(2);
-    }
+ // updateTotal: reads the current values of price and quantity,
+ // multiplies them together, and displays the formatted result.
+ function updateTotal() {
+ var price = parseFloat(priceInput.value) || 0; // Default to 0 if blank/invalid.
+ var qty = parseFloat(qtyInput.value) || 0; // Same for quantity.
+ totalDisplay.textContent = 'Rs ' + (price * qty).toFixed(2);
+ }
 
-    // Only attach listeners if both input elements exist on the page.
-    if (priceInput && qtyInput) {
-        // Recalculate the total whenever the user types in either field.
-        priceInput.addEventListener('input', updateTotal);
-        qtyInput.addEventListener('input', updateTotal);
-    }
+ // Only attach listeners if both input elements exist on the page.
+ if (priceInput && qtyInput) {
+ // Recalculate the total whenever the user types in either field.
+ priceInput.addEventListener('input', updateTotal);
+ qtyInput.addEventListener('input', updateTotal);
+ }
 });
 </script>
 {% endblock %}

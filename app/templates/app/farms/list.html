@@ -1,14 +1,4 @@
-{# ============================================================
-   FARM LIST TEMPLATE
-   ============================================================
-   Purpose: Display all farms owned by the logged-in farmer
-            in a responsive card grid. Each card shows the
-            farm name, location, area in acres, batch count,
-            and any certifications.
-   URL: /farms/
-   View: FarmListView (ListView, restricted to 'farmer')
-   Context: farms (queryset of Farm objects for current user)
-   ============================================================ #}
+
 
 {# Inherit the base page layout (navbar, alerts, footer) #}
 {% extends 'base.html' %}
@@ -16,137 +6,123 @@
 {# Load Django's static file tag for referencing images/CSS/JS #}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE — browser tab text
-   ============================================================ #}
 {% block title %}My Farms - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================ #}
 {% block content %}
 
-{# --- Page header with gradient background ---
-   Uses custom CSS variables (--primary-dark, --primary) for
-   a branded dark-to-light green gradient. #}
+<!-- --- Page header with gradient background ---
+ Uses custom CSS variables (--primary-dark, --primary) for
+ a branded dark-to-light green gradient. -->
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));">
 
-    {# Decorative background image behind the header text #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
+ {# Decorative background image behind the header text #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
 
-    {# Container that floats above the background (z-index:1) #}
-    <div class="container position-relative" style="z-index:1;">
+ {# Container that floats above the background (z-index:1) #}
+ <div class="container position-relative" style="z-index:1;">
 
-        {# Flex row: title on the left, "Register Farm" button on the right #}
-        <div class="d-flex flex-wrap justify-content-between align-items-end">
-            <div>
-                <h2><i class="bi bi-tree me-2"></i> My Farms</h2>
-                <p>Manage your registered cardamom farms</p>
-                {# Decorative accent line under the heading #}
-                <div class="header-accent-line"></div>
-            </div>
-            {# Link to create a new farm — always visible on this page #}
-            <a href="{% url 'app:farm_create' %}" class="btn-premium btn-premium-primary btn-premium-sm mt-3">
-                <i class="bi bi-plus-lg"></i> Register Farm
-            </a>
-        </div>
-    </div>
+ {# Flex row: title on the left,"Register Farm" button on the right #}
+ <div class="d-flex flex-wrap justify-content-between align-items-end">
+ <div>
+ <h2><i class="bi bi-tree me-2"></i> My Farms</h2>
+ <p>Manage your registered cardamom farms</p>
+ {# Decorative accent line under the heading #}
+ <div class="header-accent-line"></div>
+ </div>
+ {# Link to create a new farm — always visible on this page #}
+ <a href="{% url 'app:farm_create' %}" class="btn-premium btn-premium-primary btn-premium-sm mt-3">
+ <i class="bi bi-plus-lg"></i> Register Farm
+ </a>
+ </div>
+ </div>
 </div>
 
 {# --- Main content area (dashboard-style card grid) --- #}
 <div class="dashboard-wrapper">
-    <div class="container">
-        <div class="row g-4">
+ <div class="container">
+ <div class="row g-4">
 
-            {# ============================================================
-               LOOP: Render each farm as a card in a 3-column grid
-               On medium screens (md): 2 columns (col-md-6)
-               On large screens (lg): 3 columns (col-lg-4)
-               ============================================================ #}
-            {% for farm in farms %}
-            <div class="col-md-6 col-lg-4">
+ 
+ {% for farm in farms %}
+ <div class="col-md-6 col-lg-4">
 
-                {# Each card has equal height (h-100) and a fade-in
-                   animation class "animate-on-scroll" #}
-                <div class="card-premium h-100 animate-on-scroll">
-                    <div class="card-body">
+ <!-- Each card has equal height (h-100) and a fade-in
+ animation class"" -->
+ <div class="card-premium h-100">
+ <div class="card-body">
 
-                        {# --- Farm identity row: icon + name + location --- #}
-                        <div class="d-flex align-items-center mb-3">
-                            {# Tree icon in a rounded square background #}
-                            <div style="width:50px;height:50px;background:rgba(26,77,46,0.1);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.5rem;margin-right:1rem;">
-                                <i class="bi bi-tree"></i>
-                            </div>
-                            <div>
-                                {# Farm name in bold #}
-                                <h5 class="fw-bold mb-0">{{ farm.farm_name }}</h5>
-                                {# Location and/or region — only shown if at least
-                                   one of them is filled in. The inline conditional
-                                   handles the comma separator between them. #}
-                                {% if farm.location or farm.region %}
-                                <small class="text-muted">
-                                    <i class="bi bi-geo-alt"></i> {{ farm.location|default:"" }}{% if farm.location and farm.region %}, {% endif %}{{ farm.region|default:"" }}
-                                </small>
-                                {% endif %}
-                            </div>
-                        </div>
+ {# --- Farm identity row: icon + name + location --- #}
+ <div class="d-flex align-items-center mb-3">
+ {# Tree icon in a rounded square background #}
+ <div style="width:50px;height:50px;background:rgba(26,77,46,0.1);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.5rem;margin-right:1rem;">
+ <i class="bi bi-tree"></i>
+ </div>
+ <div>
+ {# Farm name in bold #}
+ <h5 class="fw-bold mb-0">{{ farm.farm_name }}</h5>
+ <!-- Location and/or region — only shown if at least
+ one of them is filled in. The inline conditional
+ handles the comma separator between them. -->
+ {% if farm.location or farm.region %}
+ <small class="text-muted">
+ <i class="bi bi-geo-alt"></i> {{ farm.location|default:"" }}{% if farm.location and farm.region %}, {% endif %}{{ farm.region|default:"" }}
+ </small>
+ {% endif %}
+ </div>
+ </div>
 
-                        {# --- Stats row: area + batch count --- #}
-                        <div class="row g-2 text-center mt-3">
-                            {# Total area in acres (or "-" if not provided) #}
-                            <div class="col-6">
-                                <div class="p-3" style="background:rgba(200,169,81,0.08);border-radius:var(--radius-sm);">
-                                    <h4 class="fw-bold" style="color:var(--primary);">{{ farm.total_area_acres|default:"-" }}</h4>
-                                    <small class="text-muted">Acres</small>
-                                </div>
-                            </div>
-                            {# Number of batches associated with this farm.
-                               farm.batches.count uses Django's reverse relation
-                               (the related_name='batches' on the Farm FK). #}
-                            <div class="col-6">
-                                <div class="p-3" style="background:rgba(26,77,46,0.06);border-radius:var(--radius-sm);">
-                                    <h4 class="fw-bold" style="color:var(--primary);">{{ farm.batches.count }}</h4>
-                                    <small class="text-muted">Batches</small>
-                                </div>
-                            </div>
-                        </div>
+ {# --- Stats row: area + batch count --- #}
+ <div class="row g-2 text-center mt-3">
+ {# Total area in acres (or"-" if not provided) #}
+ <div class="col-6">
+ <div class="p-3" style="background:rgba(200,169,81,0.08);border-radius:var(--radius-sm);">
+ <h4 class="fw-bold" style="color:var(--primary);">{{ farm.total_area_acres|default:"-" }}</h4>
+ <small class="text-muted">Acres</small>
+ </div>
+ </div>
+ <!-- Number of batches associated with this farm.
+ farm.batches.count uses Django's reverse relation
+ (the related_name='batches' on the Farm FK). -->
+ <div class="col-6">
+ <div class="p-3" style="background:rgba(26,77,46,0.06);border-radius:var(--radius-sm);">
+ <h4 class="fw-bold" style="color:var(--primary);">{{ farm.batches.count }}</h4>
+ <small class="text-muted">Batches</small>
+ </div>
+ </div>
+ </div>
 
-                        {# --- Certification badge (optional) ---
-                           If the farm has a certification value (e.g. "Organic"),
-                           display it as a gold-colored badge with an award icon. #}
-                        {% if farm.certification %}
-                        <div class="mt-3">
-                            <span class="badge-premium badge-premium-gold">
-                                <i class="bi bi-award"></i> {{ farm.certification }}
-                            </span>
-                        </div>
-                        {% endif %}
+ <!-- --- Certification badge (optional) ---
+ If the farm has a certification value (e.g."Organic"),
+ display it as a gold-colored badge with an award icon. -->
+ {% if farm.certification %}
+ <div class="mt-3">
+ <span class="badge-premium badge-premium-gold">
+ <i class="bi bi-award"></i> {{ farm.certification }}
+ </span>
+ </div>
+ {% endif %}
 
-                    </div>
-                </div>
-            </div>
+ </div>
+ </div>
+ </div>
 
-            {# ============================================================
-               EMPTY STATE — shown when the farmer has zero farms
-               registered. The empty clause fires when the for
-               loop's queryset is empty.
-               ============================================================ #}
-            {% empty %}
-            <div class="col-12">
-                <div class="empty-state-premium">
-                    {# Large tree icon as a visual indicator #}
-                    <i class="bi bi-tree empty-icon"></i>
-                    <h5>No Farms Registered</h5>
-                    <p>Register your farm to start creating cardamom batches for verification and sale.</p>
-                    {# Call-to-action button to create the first farm #}
-                    <a href="{% url 'app:farm_create' %}" class="btn-premium btn-premium-primary">Register Your First Farm</a>
-                </div>
-            </div>
-            {% endfor %}
+ 
+ {% empty %}
+ <div class="col-12">
+ <div class="empty-state-premium">
+ {# Large tree icon as a visual indicator #}
+ <i class="bi bi-tree empty-icon"></i>
+ <h5>No Farms Registered</h5>
+ <p>Register your farm to start creating cardamom batches for verification and sale.</p>
+ {# Call-to-action button to create the first farm #}
+ <a href="{% url 'app:farm_create' %}" class="btn-premium btn-premium-primary">Register Your First Farm</a>
+ </div>
+ </div>
+ {% endfor %}
 
-        </div>{# /.row.g-4 #}
-    </div>{# /.container #}
+ </div>{# /.row.g-4 #}
+ </div>{# /.container #}
 </div>{# /.dashboard-wrapper #}
 {% endblock %}

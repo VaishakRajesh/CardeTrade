@@ -1,192 +1,163 @@
-{# ============================================================
-   FILE HEADER — PRODUCT MANAGER DASHBOARD
-   ============================================================
-   This template renders the main dashboard page for users
-   with the "product_manager" role. Product Managers (PMs)
-   are responsible for reviewing and verifying the quality
-   of farmer batches. This page shows pending batches, batches
-   under review, and recent verifications performed by the PM.
-   URL: /dashboard/
-   View: PMDashboardView (LoginRequiredMixin, role_required('product_manager'))
-   ============================================================ #}
 
-{% extends 'base.html' %}  {# Inherit the main site layout from base.html #}
-{% load static %}          {# Enable the static tag for referencing images, CSS, and JS files #}
 
-{% block title %}Product Manager Dashboard - CardeTrade{% endblock %}  {# Browser tab title #}
+{% extends 'base.html' %} {# Inherit the main site layout from base.html #}
+{% load static %} {# Enable the static tag for referencing images, CSS, and JS files #}
 
-{% block content %}        {# Open the content block — everything here is injected into base.html #}
+{% block title %}Product Manager Dashboard - CardeTrade{% endblock %} {# Browser tab title #}
 
-{# ============================================================
-   PAGE HEADER — Gradient banner with title and "All Batches" link
-   ============================================================
-   A teal/green gradient header that displays the PM dashboard
-   title and a button to view all batches.
-   ============================================================ #}
+{% block content %} {# Open the content block — everything here is injected into base.html #}
+
 <div class="page-header-premium" style="background:linear-gradient(135deg,#1a3a2e,#2d5a4f);">
-    {# Decorative background image behind the header text #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    <div class="container position-relative" style="z-index:1;">
-        <div class="d-flex flex-wrap justify-content-between align-items-end">
-            <div>
-                <h2><i class="bi bi-clipboard-check me-2"></i> Product Manager Dashboard</h2>
-                <p>Verify batch quality and manage the listing pipeline</p>
-                <div class="header-accent-line"></div>  {# Decorative accent line #}
-            </div>
-            {# Quick link to view all batches in the system #}
-            <a href="{% url 'app:batch_list' %}" class="btn-premium btn-premium-primary btn-premium-sm mt-3"><i class="bi bi-list-check"></i> All Batches</a>
-        </div>
-    </div>
+ {# Decorative background image behind the header text #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ <div class="container position-relative" style="z-index:1;">
+ <div class="d-flex flex-wrap justify-content-between align-items-end">
+ <div>
+ <h2><i class="bi bi-clipboard-check me-2"></i> Product Manager Dashboard</h2>
+ <p>Verify batch quality and manage the listing pipeline</p>
+ <div class="header-accent-line"></div> {# Decorative accent line #}
+ </div>
+ {# Quick link to view all batches in the system #}
+ <a href="{% url 'app:batch_list' %}" class="btn-premium btn-premium-primary btn-premium-sm mt-3"><i class="bi bi-list-check"></i> All Batches</a>
+ </div>
+ </div>
 </div>
 
-{# ============================================================
-   DASHBOARD CONTENT — Stats cards + tables
-   ============================================================ #}
 <div class="dashboard-wrapper">
-    <div class="container">
+ <div class="container">
 
-        {# ============================================================
-           STATISTICS ROW — Four summary cards
-           ============================================================
-           These cards give the PM a quick overview of their
-           workload: batch count pending review, currently under
-           review, verified today by this PM, and total verified.
-           ============================================================ #}
-        <div class="row g-3 mb-4">
-            {# Card 1: Pending Review (batches waiting to be picked up) #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-gold animate-on-scroll">
-                    <i class="bi bi-hourglass-split stat-icon"></i>                  {# Hourglass icon = waiting #}
-                    <div class="stat-number">{{ stats.pending_review }}</div>        {# Count of batches with status 'pending' #}
-                    <div class="stat-label">Pending Review</div>
-                </div>
-            </div>
-            {# Card 2: Under Review (batches currently being inspected) #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-blue animate-on-scroll">
-                    <i class="bi bi-eye stat-icon"></i>                            {# Eye icon = being examined #}
-                    <div class="stat-number">{{ stats.under_review }}</div>         {# Count of batches with status 'under_review' #}
-                    <div class="stat-label">Under Review</div>
-                </div>
-            </div>
-            {# Card 3: My Verifications (verified today by this PM) #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-green animate-on-scroll">
-                    <i class="bi bi-check2-all stat-icon"></i>                     {# Double-check icon = completed verifications #}
-                    <div class="stat-number">{{ stats.verified_today }}</div>       {# Count of batches verified today #}
-                    <div class="stat-label">My Verifications</div>
-                </div>
-            </div>
-            {# Card 4: Total Verified (all time, across all PMs) #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-teal animate-on-scroll">
-                    <i class="bi bi-bar-chart stat-icon"></i>                      {# Bar chart icon = cumulative metric #}
-                    <div class="stat-number">{{ stats.total_verified }}</div>      {# Total verified batches in system #}
-                    <div class="stat-label">Total Verified</div>
-                </div>
-            </div>
-        </div>
+ 
+ <div class="row g-3 mb-4">
+ {# Card 1: Pending Review (batches waiting to be picked up) #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-gold">
+ <i class="bi bi-hourglass-split stat-icon"></i> {# Hourglass icon = waiting #}
+ <div class="stat-number">{{ stats.pending_review }}</div> {# Count of batches with status 'pending' #}
+ <div class="stat-label">Pending Review</div>
+ </div>
+ </div>
+ {# Card 2: Under Review (batches currently being inspected) #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-blue">
+ <i class="bi bi-eye stat-icon"></i> {# Eye icon = being examined #}
+ <div class="stat-number">{{ stats.under_review }}</div> {# Count of batches with status 'under_review' #}
+ <div class="stat-label">Under Review</div>
+ </div>
+ </div>
+ {# Card 3: My Verifications (verified today by this PM) #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-green">
+ <i class="bi bi-check2-all stat-icon"></i> {# Double-check icon = completed verifications #}
+ <div class="stat-number">{{ stats.verified_today }}</div> {# Count of batches verified today #}
+ <div class="stat-label">My Verifications</div>
+ </div>
+ </div>
+ {# Card 4: Total Verified (all time, across all PMs) #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-teal">
+ <i class="bi bi-bar-chart stat-icon"></i> {# Bar chart icon = cumulative metric #}
+ <div class="stat-number">{{ stats.total_verified }}</div> {# Total verified batches in system #}
+ <div class="stat-label">Total Verified</div>
+ </div>
+ </div>
+ </div>
 
-        {# ============================================================
-           ROW 1 — Two-column layout: Pending Batches + Under Review
-           ============================================================ #}
-        <div class="row g-4">
+ 
+ <div class="row g-4">
 
-            {# ---- LEFT COLUMN: Pending Batches (need a PM to claim them) ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i> Pending Batches</h5></div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Code</th><th>Farmer</th><th>Qty</th><th>Est. Price</th><th>Action</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `pending_batches` queryset — batches with status 'pending' that haven't been reviewed yet #}
-                                {% for batch in pending_batches %}
-                                <tr>
-                                    <td class="fw-bold">{{ batch.batch_code }}</td>                          {# Unique batch code (e.g. CDM-2026-0001) #}
-                                    <td><i class="bi bi-person me-1 text-muted"></i>{{ batch.farmer.username }}</td>  {# Farmer who submitted this batch #}
-                                    <td>{{ batch.quantity_kg }} kg</td>                                      {# Quantity in kilograms #}
-                                    <td>Rs {{ batch.estimated_price_per_kg }}</td>                            {# Price the farmer estimated #}
-                                    {# Action button: takes the PM to the verification page for this batch #}
-                                    <td><a href="{% url 'app:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-clipboard-check"></i> Verify</a></td>
-                                </tr>
-                                {% empty %}
-                                {# Empty state: all batches have been picked up; green checkmark for satisfaction #}
-                                <tr><td colspan="5" class="text-center py-4 text-muted">No pending batches. <i class="bi bi-check-circle-fill text-success ms-2"></i></td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+ {# ---- LEFT COLUMN: Pending Batches (need a PM to claim them) ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i> Pending Batches</h5></div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Code</th><th>Farmer</th><th>Qty</th><th>Est. Price</th><th>Action</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `pending_batches` queryset — batches with status 'pending' that haven't been reviewed yet #}
+ {% for batch in pending_batches %}
+ <tr>
+ <td class="fw-bold">{{ batch.batch_code }}</td> {# Unique batch code (e.g. CDM-2026-0001) #}
+ <td><i class="bi bi-person me-1 text-muted"></i>{{ batch.farmer.username }}</td> {# Farmer who submitted this batch #}
+ <td>{{ batch.quantity_kg }} kg</td> {# Quantity in kilograms #}
+ <td>Rs {{ batch.estimated_price_per_kg }}</td> {# Price the farmer estimated #}
+ {# Action button: takes the PM to the verification page for this batch #}
+ <td><a href="{% url 'app:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-clipboard-check"></i> Verify</a></td>
+ </tr>
+ {% empty %}
+ {# Empty state: all batches have been picked up; green checkmark for satisfaction #}
+ <tr><td colspan="5" class="text-center py-4 text-muted">No pending batches. <i class="bi bi-check-circle-fill text-success ms-2"></i></td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
 
-            {# ---- RIGHT COLUMN: Under Review (being inspected by any PM) ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-eye me-2"></i> Under Review</h5></div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Code</th><th>Farmer</th><th>Qty</th><th>Est. Price</th><th>Action</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `under_review` queryset — batches with status 'under_review' #}
-                                {% for batch in under_review %}
-                                <tr>
-                                    <td class="fw-bold">{{ batch.batch_code }}</td>
-                                    <td>{{ batch.farmer.username }}</td>
-                                    <td>{{ batch.quantity_kg }} kg</td>
-                                    <td>Rs {{ batch.estimated_price_per_kg }}</td>
-                                    {# Action button: "View Details" — read-only view of the batch (cannot verify again if another PM is reviewing) #}
-                                    <td><a href="{% url 'app:batch_detail' batch.pk %}" class="btn-premium btn-premium-outline btn-premium-sm">View Details</a></td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="5" class="text-center py-4 text-muted">No batches under review.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+ {# ---- RIGHT COLUMN: Under Review (being inspected by any PM) ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-eye me-2"></i> Under Review</h5></div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Code</th><th>Farmer</th><th>Qty</th><th>Est. Price</th><th>Action</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `under_review` queryset — batches with status 'under_review' #}
+ {% for batch in under_review %}
+ <tr>
+ <td class="fw-bold">{{ batch.batch_code }}</td>
+ <td>{{ batch.farmer.username }}</td>
+ <td>{{ batch.quantity_kg }} kg</td>
+ <td>Rs {{ batch.estimated_price_per_kg }}</td>
+ {# Action button:"View Details" — read-only view of the batch (cannot verify again if another PM is reviewing) #}
+ <td><a href="{% url 'app:batch_detail' batch.pk %}" class="btn-premium btn-premium-outline btn-premium-sm">View Details</a></td>
+ </tr>
+ {% empty %}
+ <tr><td colspan="5" class="text-center py-4 text-muted">No batches under review.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
 
-        {# ============================================================
-           ROW 2 — Full-width: Recent Verifications log
-           ============================================================ #}
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card-premium animate-on-scroll">
-                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-check2-all me-2"></i> Recent Verifications</h5></div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Batch</th><th>Grade</th><th>Verified Price</th><th>Date</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `recent_verifications` queryset — QualityVerification records #}
-                                {% for v in recent_verifications %}
-                                <tr>
-                                    {# Clickable batch code linking to the batch detail page #}
-                                    <td><a href="{% url 'app:batch_detail' v.batch.pk %}" style="color:var(--primary);font-weight:600;">{{ v.batch.batch_code }}</a></td>
-                                    {# Grade badge — colored circle/badge showing A, B, or C grade (CSS class `grade-{A|B|C}`) #}
-                                    <td><span class="grade-badge grade-{{ v.grade }}">{{ v.grade }}</span></td>
-                                    <td class="fw-bold">Rs {{ v.verified_price_per_kg }}/kg</td>  {# Price set by the PM after verification #}
-                                    {# Verification timestamp formatted as "dd Mon YYYY HH:mm" (e.g. "07 Jul 2026 14:30") #}
-                                    <td><small class="text-muted">{{ v.verified_at|date:"d M Y H:i" }}</small></td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="4" class="text-center py-4 text-muted">No verifications yet.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+ 
+ <div class="row mt-4">
+ <div class="col-12">
+ <div class="card-premium">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-check2-all me-2"></i> Recent Verifications</h5></div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Batch</th><th>Grade</th><th>Verified Price</th><th>Date</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `recent_verifications` queryset — QualityVerification records #}
+ {% for v in recent_verifications %}
+ <tr>
+ {# Clickable batch code linking to the batch detail page #}
+ <td><a href="{% url 'app:batch_detail' v.batch.pk %}" style="color:var(--primary);font-weight:600;">{{ v.batch.batch_code }}</a></td>
+ {# Grade badge — colored circle/badge showing A, B, or C grade (CSS class `grade-{A|B|C}`) #}
+ <td><span class="grade-badge grade-{{ v.grade }}">{{ v.grade }}</span></td>
+ <td class="fw-bold">Rs {{ v.verified_price_per_kg }}/kg</td> {# Price set by the PM after verification #}
+ {# Verification timestamp formatted as"dd Mon YYYY HH:mm" (e.g."07 Jul 2026 14:30") #}
+ <td><small class="text-muted">{{ v.verified_at|date:"d M Y H:i" }}</small></td>
+ </tr>
+ {% empty %}
+ <tr><td colspan="4" class="text-center py-4 text-muted">No verifications yet.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 </div>
-{% endblock %}  {# Close the content block #}
+{% endblock %} {# Close the content block #}

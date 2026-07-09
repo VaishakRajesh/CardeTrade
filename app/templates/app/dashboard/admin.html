@@ -1,227 +1,197 @@
-{# ============================================================
-   FILE HEADER — ADMIN DASHBOARD
-   ============================================================
-   This template renders the main dashboard page for users
-   with the "admin" role (superusers). Admins have full
-   system oversight: they can see user registration stats,
-   batch and order totals, revenue, recent users, recent
-   orders, open disputes, and quick links to the Django
-   admin panel.
-   URL: /dashboard/
-   View: AdminDashboardView (LoginRequiredMixin, role_required('admin'))
-   ============================================================ #}
 
-{% extends 'base.html' %}  {# Inherit the main site layout from base.html #}
-{% load static %}          {# Enable the static tag for referencing images, CSS, and JS files #}
 
-{% block title %}Admin Dashboard - CardeTrade{% endblock %}  {# Browser tab title #}
+{% extends 'base.html' %} {# Inherit the main site layout from base.html #}
+{% load static %} {# Enable the static tag for referencing images, CSS, and JS files #}
 
-{% block content %}        {# Open the content block — everything here is injected into base.html #}
+{% block title %}Admin Dashboard - CardeTrade{% endblock %} {# Browser tab title #}
 
-{# ============================================================
-   PAGE HEADER — Gradient banner with title and Django Admin link
-   ============================================================
-   Very dark green gradient header with the "Admin Dashboard"
-   title and a button that opens the Django admin interface
-   in a new browser tab.
-   ============================================================ #}
+{% block content %} {# Open the content block — everything here is injected into base.html #}
+
 <div class="page-header-premium" style="background:linear-gradient(135deg,#0d1a10,#1a3a2e);">
-    {# Decorative background image #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
-    <div class="container position-relative" style="z-index:1;">
-        <div class="d-flex flex-wrap justify-content-between align-items-end">
-            <div>
-                <h2><i class="bi bi-shield-check me-2"></i> Admin Dashboard</h2>
-                <p>Full system oversight and management</p>
-                <div class="header-accent-line"></div>  {# Decorative accent line #}
-            </div>
-            {# Link to Django's built-in admin panel (opens in a new tab via target="_blank") #}
-            <a href="/admin/" class="btn-premium btn-premium-primary btn-premium-sm mt-3" target="_blank"><i class="bi bi-gear"></i> Django Admin</a>
-        </div>
-    </div>
+ {# Decorative background image #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ <div class="container position-relative" style="z-index:1;">
+ <div class="d-flex flex-wrap justify-content-between align-items-end">
+ <div>
+ <h2><i class="bi bi-shield-check me-2"></i> Admin Dashboard</h2>
+ <p>Full system oversight and management</p>
+ <div class="header-accent-line"></div> {# Decorative accent line #}
+ </div>
+ {# Link to Django's built-in admin panel (opens in a new tab via target="_blank") #}
+ <a href="/admin/" class="btn-premium btn-premium-primary btn-premium-sm mt-3" target="_blank"><i class="bi bi-gear"></i> Django Admin</a>
+ </div>
+ </div>
 </div>
 
-{# ============================================================
-   DASHBOARD CONTENT — Stats + data tables
-   ============================================================ #}
 <div class="dashboard-wrapper">
-    <div class="container">
+ <div class="container">
 
-        {# ============================================================
-           STATISTICS ROW — Four summary cards
-           ============================================================
-           Shows: total users (with farmer/trader/PM breakdown),
-           total batches, total orders, and total revenue.
-           ============================================================ #}
-        <div class="row g-3 mb-4">
-            {# Card 1: Total Users with role breakdown #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-blue animate-on-scroll">
-                    <i class="bi bi-people stat-icon"></i>                         {# People icon #}
-                    <div class="stat-number">{{ stats.total_users }}</div>         {# Total registered users #}
-                    {# Sub-label showing breakdown: F=farmers, T=traders, P=product managers #}
-                    <div class="stat-label">Users · F{{ stats.farmers }} T{{ stats.traders }} P{{ stats.pms }}</div>
-                    <div class="stat-trend"><i class="bi bi-arrow-up"></i> Registered</div>  {# Trend indicator #}
-                </div>
-            </div>
-            {# Card 2: Total Batches #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-green animate-on-scroll">
-                    <i class="bi bi-box-seam stat-icon"></i>
-                    <div class="stat-number">{{ stats.total_batches }}</div>       {# All batches in the system #}
-                    <div class="stat-label">Total Batches</div>
-                </div>
-            </div>
-            {# Card 3: Total Orders #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-teal animate-on-scroll">
-                    <i class="bi bi-truck stat-icon"></i>
-                    <div class="stat-number">{{ stats.total_orders }}</div>        {# All orders placed #}
-                    <div class="stat-label">Total Orders</div>
-                </div>
-            </div>
-            {# Card 4: Total Revenue (formatted as integer, no decimals) #}
-            <div class="col-md-3">
-                <div class="stat-card-premium stat-card-gold animate-on-scroll">
-                    <i class="bi bi-currency-rupee stat-icon"></i>
-                    <div class="stat-number">Rs {{ stats.revenue|floatformat:0 }}</div>  {# `floatformat:0` rounds to whole rupees #}
-                    <div class="stat-label">Total Revenue</div>
-                </div>
-            </div>
-        </div>
+ 
+ <div class="row g-3 mb-4">
+ {# Card 1: Total Users with role breakdown #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-blue">
+ <i class="bi bi-people stat-icon"></i> {# People icon #}
+ <div class="stat-number">{{ stats.total_users }}</div> {# Total registered users #}
+ {# Sub-label showing breakdown: F=farmers, T=traders, P=product managers #}
+ <div class="stat-label">Users · F{{ stats.farmers }} T{{ stats.traders }} P{{ stats.pms }}</div>
+ <div class="stat-trend"><i class="bi bi-arrow-up"></i> Registered</div> {# Trend indicator #}
+ </div>
+ </div>
+ {# Card 2: Total Batches #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-green">
+ <i class="bi bi-box-seam stat-icon"></i>
+ <div class="stat-number">{{ stats.total_batches }}</div> {# All batches in the system #}
+ <div class="stat-label">Total Batches</div>
+ </div>
+ </div>
+ {# Card 3: Total Orders #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-teal">
+ <i class="bi bi-truck stat-icon"></i>
+ <div class="stat-number">{{ stats.total_orders }}</div> {# All orders placed #}
+ <div class="stat-label">Total Orders</div>
+ </div>
+ </div>
+ {# Card 4: Total Revenue (formatted as integer, no decimals) #}
+ <div class="col-md-3">
+ <div class="stat-card-premium stat-card-gold">
+ <i class="bi bi-currency-rupee stat-icon"></i>
+ <div class="stat-number">Rs {{ stats.revenue|floatformat:0 }}</div> {# `floatformat:0` rounds to whole rupees #}
+ <div class="stat-label">Total Revenue</div>
+ </div>
+ </div>
+ </div>
 
-        {# ============================================================
-           ROW 1 — Two-column layout: Recent Users + Recent Orders
-           ============================================================ #}
-        <div class="row g-4">
+ 
+ <div class="row g-4">
 
-            {# ---- LEFT COLUMN: Recent Users table ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-people me-2"></i> Recent Users</h5></div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Username</th><th>Role</th><th>Email</th><th>Joined</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `users` queryset — most recently registered users #}
-                                {% for u in users %}
-                                <tr>
-                                    <td class="fw-bold">{{ u.username }}</td>  {# Username #}
-                                    {# Role badge colored by role: farmer/green, trader/blue, PM/info-blue, admin/dark #}
-                                    <td><span class="badge-premium badge-premium-{% if u.role == 'farmer' %}success{% elif u.role == 'trader' %}primary{% elif u.role == 'product_manager' %}info{% else %}dark{% endif %}">{{ u.get_role_display }}</span></td>
-                                    <td>{{ u.email|default:"-" }}</td>  {# Email or dash if empty #}
-                                    <td><small class="text-muted">{{ u.date_joined|date:"d M" }}</small></td>  {# Account creation date, formatted as "dd Mon" #}
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="4" class="text-center py-4 text-muted">No users yet.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+ {# ---- LEFT COLUMN: Recent Users table ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-people me-2"></i> Recent Users</h5></div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Username</th><th>Role</th><th>Email</th><th>Joined</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `users` queryset — most recently registered users #}
+ {% for u in users %}
+ <tr>
+ <td class="fw-bold">{{ u.username }}</td> {# Username #}
+ {# Role badge colored by role: farmer/green, trader/blue, PM/info-blue, admin/dark #}
+ <td><span class="badge-premium badge-premium-{% if u.role == 'farmer' %}success{% elif u.role == 'trader' %}primary{% elif u.role == 'product_manager' %}info{% else %}dark{% endif %}">{{ u.get_role_display }}</span></td>
+ <td>{{ u.email|default:"-" }}</td> {# Email or dash if empty #}
+ <td><small class="text-muted">{{ u.date_joined|date:"d M" }}</small></td> {# Account creation date, formatted as"dd Mon" #}
+ </tr>
+ {% empty %}
+ <tr><td colspan="4" class="text-center py-4 text-muted">No users yet.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
 
-            {# ---- RIGHT COLUMN: Recent Orders table ---- #}
-            <div class="col-md-6">
-                <div class="card-premium h-100 animate-on-scroll">
-                    <div class="card-header"><h5 class="mb-0"><i class="bi bi-truck me-2"></i> Recent Orders</h5></div>
-                    <div class="table-responsive">
-                        <table class="table-premium">
-                            <thead>
-                                <tr><th>Order</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th></tr>
-                            </thead>
-                            <tbody>
-                                {# Loop over the `recent_orders` queryset — most recent orders across the platform #}
-                                {% for order in recent_orders %}
-                                <tr>
-                                    <td class="fw-bold">{{ order.order_code }}</td>  {# Unique order code (e.g. ORD-2026-0001) #}
-                                    <td>{{ order.buyer.username }}</td>               {# Trader who bought #}
-                                    <td>{{ order.seller.username }}</td>               {# Farmer who sold #}
-                                    <td class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</td>  {# Total order value #}
-                                    {# Status badge colored by delivery status #}
-                                    <td><span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span></td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="5" class="text-center py-4 text-muted">No orders yet.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+ {# ---- RIGHT COLUMN: Recent Orders table ---- #}
+ <div class="col-md-6">
+ <div class="card-premium h-100">
+ <div class="card-header"><h5 class="mb-0"><i class="bi bi-truck me-2"></i> Recent Orders</h5></div>
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Order</th><th>Buyer</th><th>Seller</th><th>Amount</th><th>Status</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `recent_orders` queryset — most recent orders across the platform #}
+ {% for order in recent_orders %}
+ <tr>
+ <td class="fw-bold">{{ order.order_code }}</td> {# Unique order code (e.g. ORD-2026-0001) #}
+ <td>{{ order.buyer.username }}</td> {# Trader who bought #}
+ <td>{{ order.seller.username }}</td> {# Farmer who sold #}
+ <td class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</td> {# Total order value #}
+ {# Status badge colored by delivery status #}
+ <td><span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span></td>
+ </tr>
+ {% empty %}
+ <tr><td colspan="5" class="text-center py-4 text-muted">No orders yet.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </div>
+ </div>
 
-        {# ============================================================
-           ROW 2 — Two-column layout: Open Disputes + Quick Actions
-           ============================================================ #}
-        <div class="row g-4 mt-2">
+ 
+ <div class="row g-4 mt-2">
 
-            {# ---- LEFT COLUMN: Open Disputes table ---- #}
-            <div class="col-md-6">
-                <div class="card-premium animate-on-scroll">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i> Open Disputes</h5>
-                        {# Badge showing the count of open disputes (danger/red color draws attention) #}
-                        <span class="badge-premium badge-premium-danger">{{ stats.open_disputes }} open</span>
-                    </div>
-                    <div class="card-body p-0">
-                        {# Only show the dispute table if there are pending disputes; otherwise show "All Clear!" #}
-                        {% if pending_disputes %}
-                        <div class="table-responsive">
-                            <table class="table-premium">
-                                <thead>
-                                    <tr><th>Order</th><th>Raised By</th><th>Reason</th><th>Date</th></tr>
-                                </thead>
-                                <tbody>
-                                    {# Loop over the `pending_disputes` queryset — disputes with status 'open' or 'under_review' #}
-                                    {% for dispute in pending_disputes %}
-                                    <tr>
-                                        <td class="fw-bold">{{ dispute.order.order_code }}</td>  {# Code of the disputed order #}
-                                        <td>{{ dispute.raised_by.username }}</td>                 {# User who filed the dispute #}
-                                        <td><small>{{ dispute.reason|truncatewords:6 }}</small></td>  {# Dispute reason, truncated to 6 words for compact display #}
-                                        <td><small class="text-muted">{{ dispute.created_at|date:"d M" }}</small></td>  {# Date dispute was opened #}
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        {# Empty state: no disputes — show a success message with a large green checkmark #}
-                        <div class="text-center py-4">
-                            <i class="bi bi-check-circle-fill" style="font-size:2.5rem;color:#166534;"></i>
-                            <h5 class="mt-2 fw-bold">All Clear!</h5>
-                            <p class="text-muted mb-0">No open disputes at the moment.</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+ {# ---- LEFT COLUMN: Open Disputes table ---- #}
+ <div class="col-md-6">
+ <div class="card-premium">
+ <div class="card-header d-flex justify-content-between align-items-center">
+ <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i> Open Disputes</h5>
+ {# Badge showing the count of open disputes (danger/red color draws attention) #}
+ <span class="badge-premium badge-premium-danger">{{ stats.open_disputes }} open</span>
+ </div>
+ <div class="card-body p-0">
+ {# Only show the dispute table if there are pending disputes; otherwise show"All Clear!" #}
+ {% if pending_disputes %}
+ <div class="table-responsive">
+ <table class="table-premium">
+ <thead>
+ <tr><th>Order</th><th>Raised By</th><th>Reason</th><th>Date</th></tr>
+ </thead>
+ <tbody>
+ {# Loop over the `pending_disputes` queryset — disputes with status 'open' or 'under_review' #}
+ {% for dispute in pending_disputes %}
+ <tr>
+ <td class="fw-bold">{{ dispute.order.order_code }}</td> {# Code of the disputed order #}
+ <td>{{ dispute.raised_by.username }}</td> {# User who filed the dispute #}
+ <td><small>{{ dispute.reason|truncatewords:6 }}</small></td> {# Dispute reason, truncated to 6 words for compact display #}
+ <td><small class="text-muted">{{ dispute.created_at|date:"d M" }}</small></td> {# Date dispute was opened #}
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ {% else %}
+ {# Empty state: no disputes — show a success message with a large green checkmark #}
+ <div class="text-center py-4">
+ <i class="bi bi-check-circle-fill" style="font-size:2.5rem;color:#166534;"></i>
+ <h5 class="mt-2 fw-bold">All Clear!</h5>
+ <p class="text-muted mb-0">No open disputes at the moment.</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ </div>
 
-            {# ---- RIGHT COLUMN: Quick Actions card ---- #}
-            <div class="col-md-6">
-                {# This card has a gradient background (same dark green as the header) with white text for visual distinction #}
-                <div class="card-premium h-100 animate-on-scroll" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;">
-                    <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-5">
-                        {# Speedometer icon at the top in accent (gold) color #}
-                        <i class="bi bi-speedometer2" style="font-size:3.5rem;color:var(--accent);margin-bottom:1rem;"></i>
-                        <h4 class="fw-bold mb-3">Quick Actions</h4>
-                        {# Stacked buttons for common admin tasks #}
-                        <div class="d-grid gap-2 w-75">
-                            {# Django admin panel (opens in new tab) #}
-                            <a href="/admin/" class="btn-premium btn-premium-primary w-100 justify-content-center" target="_blank"><i class="bi bi-gear"></i> Admin Panel</a>
-                            {# All batches page #}
-                            <a href="{% url 'app:batch_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-box-seam"></i> All Batches</a>
-                            {# All orders page #}
-                            <a href="{% url 'app:order_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-truck"></i> All Orders</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+ {# ---- RIGHT COLUMN: Quick Actions card ---- #}
+ <div class="col-md-6">
+ {# This card has a gradient background (same dark green as the header) with white text for visual distinction #}
+ <div class="card-premium h-100" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;">
+ <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-5">
+ {# Speedometer icon at the top in accent (gold) color #}
+ <i class="bi bi-speedometer2" style="font-size:3.5rem;color:var(--accent);margin-bottom:1rem;"></i>
+ <h4 class="fw-bold mb-3">Quick Actions</h4>
+ {# Stacked buttons for common admin tasks #}
+ <div class="d-grid gap-2 w-75">
+ {# Django admin panel (opens in new tab) #}
+ <a href="/admin/" class="btn-premium btn-premium-primary w-100 justify-content-center" target="_blank"><i class="bi bi-gear"></i> Admin Panel</a>
+ {# All batches page #}
+ <a href="{% url 'app:batch_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-box-seam"></i> All Batches</a>
+ {# All orders page #}
+ <a href="{% url 'app:order_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-truck"></i> All Orders</a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 </div>
-{% endblock %}  {# Close the content block #}
+{% endblock %} {# Close the content block #}

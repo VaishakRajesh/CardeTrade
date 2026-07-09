@@ -1,14 +1,4 @@
-{# ============================================================
-   BATCH VERIFY TEMPLATE
-   ============================================================
-   Purpose: Product Manager quality verification form for a
-            single batch. Assigns a grade, verifies the price,
-            and records quality metrics. If verification already
-            exists, shows an "Already Verified" message instead.
-   URL: /batches/<id>/verify/
-   View: BatchVerifyView (UpdateView, restricted to 'product_manager')
-   Context: batch (Batch instance), form (VerificationForm)
-   ============================================================ #}
+
 
 {# Inherit the base layout (navbar, alerts, footer) #}
 {% extends 'base.html' %}
@@ -16,206 +6,192 @@
 {# Load static file tag for referring to images/CSS/JS files #}
 {% load static %}
 
-{# ============================================================
-   PAGE TITLE — shows the batch code in the browser tab
-   ============================================================ #}
 {% block title %}Verify Batch {{ batch.batch_code }} - CardeTrade{% endblock %}
 
-{# ============================================================
-   MAIN CONTENT BLOCK
-   ============================================================ #}
 {% block content %}
 
-{# --- Page header with a dark green gradient ---
-   The gradient goes from --primary-dark to a dark shade (#1a3a2e). #}
+<!-- --- Page header with a dark green gradient ---
+ The gradient goes from --primary-dark to a dark shade (#1a3a2e). -->
 <div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#1a3a2e);">
 
-    {# Decorative background image #}
-    <div class="page-header-bg">
-        <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
-    </div>
+ {# Decorative background image #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
 
-    <div class="container position-relative" style="z-index:1;">
+ <div class="container position-relative" style="z-index:1;">
 
-        {# --- Breadcrumb: Batches > [batch code] > Verify --- #}
-        <nav class="breadcrumb-premium">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'app:batch_list' %}">Batches</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'app:batch_detail' batch.pk %}">{{ batch.batch_code }}</a></li>
-                <li class="breadcrumb-item active">Verify</li>
-            </ol>
-        </nav>
+ {# --- Breadcrumb: Batches > [batch code] > Verify --- #}
+ <nav class="breadcrumb-premium">
+ <ol class="breadcrumb">
+ <li class="breadcrumb-item"><a href="{% url 'app:batch_list' %}">Batches</a></li>
+ <li class="breadcrumb-item"><a href="{% url 'app:batch_detail' batch.pk %}">{{ batch.batch_code }}</a></li>
+ <li class="breadcrumb-item active">Verify</li>
+ </ol>
+ </nav>
 
-        <h2><i class="bi bi-clipboard-check me-2"></i> Quality Verification</h2>
-        <p>{{ batch.batch_code }} — {{ batch.farmer.username }}</p>
+ <h2><i class="bi bi-clipboard-check me-2"></i> Quality Verification</h2>
+ <p>{{ batch.batch_code }} — {{ batch.farmer.username }}</p>
 
-    </div>
+ </div>
 </div>
 
 {# --- Main content area --- #}
 <div class="container py-5">
 
-    {# ============================================================
-       CHECK: Has this batch already been verified?
-       If yes, show a success message instead of the form.
-       If no, show the full verification form.
-       ============================================================ #}
-    {% if batch.verification %}
+ 
+ {% if batch.verification %}
 
-    {# --- Already-verified state ---
-       Displayed when batch.verification exists (OneToOne relation).
-       This prevents a PM from verifying the same batch twice. #}
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card-premium">
-                <div class="card-body text-center py-5">
-                    {# Large green checkmark icon #}
-                    <i class="bi bi-check-circle-fill" style="font-size:4rem;color:#166534;"></i>
-                    <h4 class="mt-3 fw-bold">Already Verified</h4>
-                    <p class="text-muted">This batch has already passed quality verification.</p>
-                    <a href="{% url 'app:batch_detail' batch.pk %}" class="btn-premium btn-premium-primary">View Details</a>
-                </div>
-            </div>
-        </div>
-    </div>
+ <!-- --- Already-verified state ---
+ Displayed when batch.verification exists (OneToOne relation).
+ This prevents a PM from verifying the same batch twice. -->
+ <div class="row justify-content-center">
+ <div class="col-md-8">
+ <div class="card-premium">
+ <div class="card-body text-center py-5">
+ {# Large green checkmark icon #}
+ <i class="bi bi-check-circle-fill" style="font-size:4rem;color:#166534;"></i>
+ <h4 class="mt-3 fw-bold">Already Verified</h4>
+ <p class="text-muted">This batch has already passed quality verification.</p>
+ <a href="{% url 'app:batch_detail' batch.pk %}" class="btn-premium btn-premium-primary">View Details</a>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    {% else %}
-    {# ============================================================
-       VERIFICATION FORM (only rendered when NOT already verified)
-       ============================================================ #}
-    <div class="row g-4">
+ {% else %}
+ 
+ <div class="row g-4">
 
-        {# --- LEFT COLUMN (wider — 8 of 12 columns): the form --- #}
-        <div class="col-lg-8">
-            <div class="card-premium">
-                <div class="card-header">
-                    <h4 class="mb-0"><i class="bi bi-clipboard-check me-2"></i> Verification Form</h4>
-                </div>
-                <div class="card-body p-4">
+ {# --- LEFT COLUMN (wider — 8 of 12 columns): the form --- #}
+ <div class="col-lg-8">
+ <div class="card-premium">
+ <div class="card-header">
+ <h4 class="mb-0"><i class="bi bi-clipboard-check me-2"></i> Verification Form</h4>
+ </div>
+ <div class="card-body p-4">
 
-                    {# --- Batch info summary bar (read-only reference for the PM) --- #}
-                    <div class="row g-3 mb-4 p-3" style="background:rgba(200,169,81,0.06);border-radius:var(--radius-sm);">
-                        <div class="col-md-4"><small class="text-muted">Farmer</small><p class="fw-bold mb-0">{{ batch.farmer.username }}</p></div>
-                        <div class="col-md-4"><small class="text-muted">Quantity</small><p class="fw-bold mb-0">{{ batch.quantity_kg }} kg</p></div>
-                        <div class="col-md-4"><small class="text-muted">Est. Price</small><p class="fw-bold mb-0">Rs {{ batch.estimated_price_per_kg }}/kg</p></div>
-                    </div>
+ {# --- Batch info summary bar (read-only reference for the PM) --- #}
+ <div class="row g-3 mb-4 p-3" style="background:rgba(200,169,81,0.06);border-radius:var(--radius-sm);">
+ <div class="col-md-4"><small class="text-muted">Farmer</small><p class="fw-bold mb-0">{{ batch.farmer.username }}</p></div>
+ <div class="col-md-4"><small class="text-muted">Quantity</small><p class="fw-bold mb-0">{{ batch.quantity_kg }} kg</p></div>
+ <div class="col-md-4"><small class="text-muted">Est. Price</small><p class="fw-bold mb-0">Rs {{ batch.estimated_price_per_kg }}/kg</p></div>
+ </div>
 
-                    {# --- Verification form ---
-                       Submitting this creates a QualityVerification record
-                       and then a Django signal auto-creates a Listing and
-                       updates the batch status to 'listed'. #}
-                    <form method="post" novalidate>
-                        {% csrf_token %}
+ <!-- --- Verification form ---
+ Submitting this creates a QualityVerification record
+ and then a Django signal auto-creates a Listing and
+ updates the batch status to 'listed'. -->
+ <form method="post" novalidate>
+ {% csrf_token %}
 
-                        <div class="row g-3">
+ <div class="row g-3">
 
-                            {# Grade selection (A = Premium, B = Standard, C = Processing) #}
-                            <div class="col-md-4">
-                                <label class="fw-semibold small">Grade *</label>
-                                <select name="grade" class="form-premium" required>
-                                    <option value="">— Select Grade —</option>
-                                    <option value="A">Grade A — Premium</option>
-                                    <option value="B">Grade B — Standard</option>
-                                    <option value="C">Grade C — Processing</option>
-                                </select>
-                            </div>
+ {# Grade selection (A = Premium, B = Standard, C = Processing) #}
+ <div class="col-md-4">
+ <label class="fw-semibold small">Grade *</label>
+ <select name="grade" class="form-premium" required>
+ <option value="">— Select Grade —</option>
+ <option value="A">Grade A — Premium</option>
+ <option value="B">Grade B — Standard</option>
+ <option value="C">Grade C — Processing</option>
+ </select>
+ </div>
 
-                            {# Verified price per kg — the official price set by the PM.
-                               This replaces the farmer's estimated price for listings. #}
-                            <div class="col-md-4">
-                                <label class="fw-semibold small">Verified Price/kg *</label>
-                                <input type="number" name="verified_price_per_kg" step="0.01" class="form-premium" placeholder="e.g. 50.00" required>
-                            </div>
+ <!-- Verified price per kg — the official price set by the PM.
+ This replaces the farmer's estimated price for listings. -->
+ <div class="col-md-4">
+ <label class="fw-semibold small">Verified Price/kg *</label>
+ <input type="number" name="verified_price_per_kg" step="0.01" class="form-premium" placeholder="e.g. 50.00" required>
+ </div>
 
-                            {# Moisture content percentage (optional metric) #}
-                            <div class="col-md-4">
-                                <label class="fw-semibold small">Moisture (%)</label>
-                                <input type="number" name="moisture_content_pct" step="0.01" class="form-premium" placeholder="e.g. 10.5">
-                            </div>
+ {# Moisture content percentage (optional metric) #}
+ <div class="col-md-4">
+ <label class="fw-semibold small">Moisture (%)</label>
+ <input type="number" name="moisture_content_pct" step="0.01" class="form-premium" placeholder="e.g. 10.5">
+ </div>
 
-                            {# Aroma score on a 1-10 scale (optional) #}
-                            <div class="col-md-4">
-                                <label class="fw-semibold small">Aroma Score (1-10)</label>
-                                {# min/max attributes provide HTML5 validation on the client side #}
-                                <input type="number" name="aroma_score" min="1" max="10" class="form-premium" placeholder="e.g. 8">
-                            </div>
+ {# Aroma score on a 1-10 scale (optional) #}
+ <div class="col-md-4">
+ <label class="fw-semibold small">Aroma Score (1-10)</label>
+ {# min/max attributes provide HTML5 validation on the client side #}
+ <input type="number" name="aroma_score" min="1" max="10" class="form-premium" placeholder="e.g. 8">
+ </div>
 
-                            {# Color score on a 1-10 scale (optional) #}
-                            <div class="col-md-4">
-                                <label class="fw-semibold small">Color Score (1-10)</label>
-                                <input type="number" name="color_score" min="1" max="10" class="form-premium" placeholder="e.g. 9">
-                            </div>
+ {# Color score on a 1-10 scale (optional) #}
+ <div class="col-md-4">
+ <label class="fw-semibold small">Color Score (1-10)</label>
+ <input type="number" name="color_score" min="1" max="10" class="form-premium" placeholder="e.g. 9">
+ </div>
 
-                            {# Purity percentage (optional) #}
-                            <div class="col-md-4">
-                                <label class="fw-semibold small">Purity (%)</label>
-                                <input type="number" name="purity_pct" step="0.01" class="form-premium" placeholder="e.g. 98.5">
-                            </div>
+ {# Purity percentage (optional) #}
+ <div class="col-md-4">
+ <label class="fw-semibold small">Purity (%)</label>
+ <input type="number" name="purity_pct" step="0.01" class="form-premium" placeholder="e.g. 98.5">
+ </div>
 
-                            {# Remarks textarea — any additional notes from the PM #}
-                            <div class="col-12">
-                                <label class="fw-semibold small">Remarks</label>
-                                <textarea name="remarks" class="form-premium" rows="3" placeholder="Any additional notes..."></textarea>
-                            </div>
+ {# Remarks textarea — any additional notes from the PM #}
+ <div class="col-12">
+ <label class="fw-semibold small">Remarks</label>
+ <textarea name="remarks" class="form-premium" rows="3" placeholder="Any additional notes..."></textarea>
+ </div>
 
-                        </div>{# /.row.g-3 #}
+ </div>{# /.row.g-3 #}
 
-                        {# Submit button — triggers the verification and listing creation #}
-                        <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center mt-4">
-                            <i class="bi bi-check-all"></i> Verify & Publish Batch
-                        </button>
+ {# Submit button — triggers the verification and listing creation #}
+ <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center mt-4">
+ <i class="bi bi-check-all"></i> Verify & Publish Batch
+ </button>
 
-                    </form>
-                </div>
-            </div>
-        </div>
+ </form>
+ </div>
+ </div>
+ </div>
 
-        {# --- RIGHT COLUMN (4 of 12 columns): grading guide + image --- #}
-        <div class="col-lg-4">
+ {# --- RIGHT COLUMN (4 of 12 columns): grading guide + image --- #}
+ <div class="col-lg-4">
 
-            {# --- Grading guide card ---
-               Provides the PM with a quick reference for grade meanings. #}
-            <div class="card-premium">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Grading Guide</h5>
-                </div>
-                <div class="card-body">
-                    {# Grade A description #}
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="grade-badge grade-A me-3">A</span>
-                        <div><strong>Premium</strong><br><small class="text-muted">Bold color, strong aroma</small></div>
-                    </div>
-                    {# Grade B description #}
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="grade-badge grade-B me-3">B</span>
-                        <div><strong>Standard</strong><br><small class="text-muted">Good quality, standard grade</small></div>
-                    </div>
-                    {# Grade C description #}
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="grade-badge grade-C me-3">C</span>
-                        <div><strong>Processing</strong><br><small class="text-muted">Lower grade, suitable for processing</small></div>
-                    </div>
-                    <hr>
-                    {# Important note about the verification workflow #}
-                    <p class="small text-muted mb-0">
-                        <i class="bi bi-info-circle me-1"></i> Verification automatically creates a marketplace listing.
-                    </p>
-                </div>
-            </div>
+ <!-- --- Grading guide card ---
+ Provides the PM with a quick reference for grade meanings. -->
+ <div class="card-premium">
+ <div class="card-header">
+ <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Grading Guide</h5>
+ </div>
+ <div class="card-body">
+ {# Grade A description #}
+ <div class="d-flex align-items-center mb-3">
+ <span class="grade-badge grade-A me-3">A</span>
+ <div><strong>Premium</strong><br><small class="text-muted">Bold color, strong aroma</small></div>
+ </div>
+ {# Grade B description #}
+ <div class="d-flex align-items-center mb-3">
+ <span class="grade-badge grade-B me-3">B</span>
+ <div><strong>Standard</strong><br><small class="text-muted">Good quality, standard grade</small></div>
+ </div>
+ {# Grade C description #}
+ <div class="d-flex align-items-center mb-3">
+ <span class="grade-badge grade-C me-3">C</span>
+ <div><strong>Processing</strong><br><small class="text-muted">Lower grade, suitable for processing</small></div>
+ </div>
+ <hr>
+ {# Important note about the verification workflow #}
+ <p class="small text-muted mb-0">
+ <i class="bi bi-info-circle me-1"></i> Verification automatically creates a marketplace listing.
+ </p>
+ </div>
+ </div>
 
-            {# --- Decorative image card --- #}
-            <div class="card-premium mt-3">
-                <div class="card-body text-center">
-                    <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:var(--radius-sm);" onerror="this.style.display='none'">
-                </div>
-            </div>
+ {# --- Decorative image card --- #}
+ <div class="card-premium mt-3">
+ <div class="card-body text-center">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:var(--radius-sm);" onerror="this.style.display='none'">
+ </div>
+ </div>
 
-        </div>{# /.col-lg-4 #}
-    </div>{# /.row.g-4 #}
-    {% endif %}
-    {# ============================================================
-       END of the if/else check for existing verification
-       ============================================================ #}
+ </div>{# /.col-lg-4 #}
+ </div>{# /.row.g-4 #}
+ {% endif %}
+ 
 
 </div>{# /.container.py-5 #}
 {% endblock %}
