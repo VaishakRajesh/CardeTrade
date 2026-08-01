@@ -1,0 +1,84 @@
+{% extends 'base.html' %} {# Inherit base layout with navbar, alerts, and footer #}
+{% load static %}
+
+{# ===== Auction Marketplace / Listing List Page (ListingListView) ===== #}
+{# Grid of active auction listings with grade badges, prices, bid counts, and Place Bid CTAs #}
+{% block title %}Auction Marketplace - CardeTrade{% endblock %}
+
+{% block content %}
+{# ---- Page header with "Marketplace" title ---- #}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#1a3a2e);">
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ <div class="container position-relative" style="z-index:1;">
+ <h2><i class="bi bi-hammer me-2"></i> Auction Marketplace</h2>
+ <p>Browse active auctions — place your bid on premium cardamom batches</p>
+ <div class="header-accent-line"></div>
+ </div>
+</div>
+
+{# ---- Auction listing cards grid ---- #}
+<div class="container py-4">
+ <div class="row g-4">
+ {% for listing in listings %}
+ <div class="col-lg-4 col-md-6">
+ <a href="{% url 'trader:listing_detail' listing.pk %}" class="text-decoration-none">
+  {# ---- Individual auction card with image, grade badge, and pricing ---- #}
+  <div class="listing-card-premium auction-card">
+  <div class="listing-image position-relative">
+   <img src="{% if listing.batch.image %}{{ listing.batch.image.url }}{% else %}{% static 'image/cardamom1.jpg' %}{% endif %}" alt="Cardamom" style="object-fit:cover;height:200px;width:100%;" onerror="this.style.display='none'">
+   {% if listing.batch.verification %}
+   <span class="grade-badge grade-{{ listing.batch.verification.grade }}" style="position:absolute;top:0.75rem;right:0.75rem;">{{ listing.batch.verification.grade }}</span>
+   {% endif %}
+  </div>
+  <div class="listing-body p-3">
+   <div class="d-flex justify-content-between align-items-start mb-1">
+   <h6 class="fw-bold mb-0 text-dark">{{ listing.batch.batch_code }}</h6>
+   </div>
+   <p class="text-muted small mb-2">
+   <i class="bi bi-person"></i> {{ listing.farmer.username }}
+   {% if listing.batch.farm and listing.batch.farm.region %}
+   · <i class="bi bi-geo-alt"></i> {{ listing.batch.farm.region }}
+   {% endif %}
+   </p>
+
+   {# ---- Current highest bid vs base price ---- #}
+   <div class="d-flex align-items-baseline gap-2 mb-2">
+   <span class="text-muted small"><s>Rs{{ listing.price_per_kg }}</s></span>
+   <span class="fs-5 fw-bold" style="color:var(--accent);">
+    Rs{{ listing.highest_bid|default:listing.price_per_kg }}
+   </span>
+   <small class="text-muted">/ kg</small>
+   </div>
+
+   {# ---- Bid count and available quantity ---- #}
+   <div class="d-flex justify-content-between align-items-center mb-3">
+   <span class="badge bg-warning text-dark">
+    <i class="bi bi-hammer me-1"></i>{{ listing.bid_count }} bid{{ listing.bid_count|pluralize }}
+   </span>
+   <span class="small text-muted">{{ listing.available_qty_kg }} kg</span>
+   </div>
+
+   {# ---- Call-to-action button ---- #}
+   <span class="btn-premium btn-premium-primary w-100 justify-content-center d-flex">
+   <i class="bi bi-hammer me-1"></i> Place Bid
+   </span>
+  </div>
+  </div>
+ </a>
+ </div>
+  {% empty %}
+  {# ---- Empty state: no active auctions, with guidance to check back later ---- #}
+ <div class="col-12">
+ <div class="empty-state-premium">
+  <i class="bi bi-basket2"></i>
+  <h5>No Active Auctions</h5>
+  <p>There are no active cardamom auctions at the moment. Please check back later.</p>
+  <a href="{% url 'accounts:dashboard' %}" class="btn-premium btn-premium-primary">Go to Dashboard</a>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
+</div>
+{% endblock %}

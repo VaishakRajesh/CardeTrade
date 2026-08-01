@@ -1,0 +1,103 @@
+{# ===== Dispute List Page (DisputeListView) ===== #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Disputes - CardeTrade{% endblock %}
+
+{% block content %}
+
+{# ===== PAGE: Table of disputes with status badges and admin resolve actions ===== #}
+
+{# ---- Page header ---- #}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark),#5f1e3a);">
+ {# Background image: cardamom photo; hidden on load failure. #}
+ <div class="page-header-bg">
+ <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+ </div>
+ {# Text overlay (z-index:1 keeps it above the image). #}
+ <div class="container position-relative" style="z-index:1;">
+ <h2><i class="bi bi-exclamation-triangle me-2"></i> Disputes</h2>
+ <p>Track and manage order disputes</p>
+ <div class="header-accent-line"></div>
+ </div>
+</div>
+
+<div class="dashboard-wrapper">
+ <div class="container">
+
+ 
+  {# ===== DISPUTE TABLE ===== #}
+
+  {% if disputes %}
+
+  {# Card wrapper around the table for consistent styling. #}
+ <div class="card-premium">
+ {# Responsive table wrapper — allows horizontal scroll on small screens. #}
+ <div class="table-responsive">
+ <table class="table-premium">
+ {# ---- TABLE HEADER ---- #}
+ <thead>
+ <tr>
+ <th>Order</th> {# Order code column #}
+ <th>Raised By</th> {# User who created the dispute #}
+ <th>Against</th> {# The other party involved #}
+ <th>Reason</th> {# Short reason preview #}
+ <th>Status</th> {# Current dispute status #}
+ <th>Date</th> {# Creation date #}
+ <th></th> {# Action column (Resolve button) #}
+ </tr>
+ </thead>
+ {# ---- TABLE BODY ---- #}
+ <tbody>
+ {# Loop through each dispute in the queryset. #}
+ {% for dispute in disputes %}
+ <tr>
+ {# Order code, displayed in bold. #}
+ <td class="fw-bold">{{ dispute.order.order_code }}</td>
+ {# Username of the person who raised the dispute. #}
+ <td>{{ dispute.raised_by.username }}</td>
+ {# Username of the person the dispute is against. #}
+ <td>{{ dispute.against_user.username }}</td>
+ {# Reason text truncated to 8 words to keep the table compact. #}
+ <td><small>{{ dispute.reason|truncatewords:8 }}</small></td>
+ <!-- Status badge with dynamic color:
+ open = danger (red),
+ under_review = warning (yellow),
+ resolved = success (green),
+ closed = secondary (grey). -->
+ <td><span class="badge-premium badge-premium-{% if dispute.status == 'open' %}danger{% elif dispute.status == 'under_review' %}warning{% elif dispute.status == 'resolved' %}success{% else %}secondary{% endif %}">{{ dispute.get_status_display }}</span></td>
+ {# Creation date formatted as"dd Mon YYYY" (e.g.,"07 Jul 2026"). #}
+ <td><small class="text-muted">{{ dispute.created_at|date:"d M Y" }}</small></td>
+ <!-- Action cell: only shown to admin users and only when the
+ dispute is NOT already closed. Links to the resolve page. -->
+ <td>
+ {% if user.role == 'admin' and dispute.status != 'closed' %}
+ <a href="{% url 'panel:dispute_resolve' dispute.pk %}" class="btn-premium btn-premium-primary btn-premium-sm" style="font-size:0.75rem;padding:0.3rem 1rem;">Resolve</a>
+ {% endif %}
+ </td>
+ </tr>
+ <!-- Fallback row if the loop iterates over an empty queryset
+ (though this is nested inside the disputes check, the
+ empty clause catches edge cases like filtered results). -->
+ {% empty %}
+ <tr><td colspan="7" class="text-center py-4 text-muted">No disputes found.</td></tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>{# /table-responsive #}
+ </div>{# /card-premium #}
+
+ 
+  {# ===== EMPTY STATE ===== #}
+  {% else %}
+  <div class="empty-state-premium">
+ {# Large green check-circle icon (no issues). #}
+ <i class="bi bi-check-circle-fill" style="font-size:4rem;color:#166534;"></i>
+ <h5>No Disputes</h5>
+ <p>There are no disputes on your account. Everything is running smoothly.</p>
+ </div>
+ {% endif %}
+
+ </div>
+</div>
+{% endblock %}

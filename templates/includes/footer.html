@@ -1,0 +1,66 @@
+{% load static %}
+
+{# Site footer with links and copyright #}
+{# ===== Footer ===== #}
+<footer class="footer-landing">
+ <div class="container">
+  {# ---- Row: brand description + link columns ---- #}
+  <div class="row g-4">
+   {# ---- Brand column with description and social links ---- #}
+   <div class="col-lg-4">
+    <div class="footer-brand">
+     <i class="bi bi-shop"></i> CardeTrade
+    </div>
+    <p class="footer-desc">
+     India's premier digital marketplace connecting cardamom farmers
+     directly with verified traders. Transparent pricing, quality assured.
+    </p>
+    <div class="footer-social">
+     <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+     <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+     <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+     <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+    </div>
+   </div>
+
+   {# ---- Platform links column ---- #}
+   <div class="col-6 col-lg-2">
+    <h6 class="footer-heading">Platform</h6>
+    <ul class="footer-links">
+     <li><a href="{% url 'accounts:home' %}">Home</a></li>
+     <li><a href="{% url 'trader:listing_list' %}">Marketplace</a></li>
+     <li><a href="{% url 'accounts:register' %}">Register</a></li>
+     <li><a href="{% url 'accounts:login' %}">Sign In</a></li>
+    </ul>
+   </div>
+
+   {# ---- Resources links column ---- #}
+   <div class="col-6 col-lg-3">
+    <h6 class="footer-heading">Resources</h6>
+    <ul class="footer-links">
+     <li><a href="#">How It Works</a></li>
+     <li><a href="#">Quality Standards</a></li>
+     <li><a href="#">FAQ</a></li>
+     <li><a href="#">Support</a></li>
+    </ul>
+   </div>
+
+   {# ---- Contact details column ---- #}
+   <div class="col-lg-3">
+    <h6 class="footer-heading">Contact</h6>
+    <ul class="footer-links">
+     <li><i class="bi bi-envelope"></i> support@cardetrade.com</li>
+     <li><i class="bi bi-telephone"></i> +91-484-XXX-XXXX</li>
+     <li><i class="bi bi-geo-alt"></i> Kochi, Kerala, India</li>
+    </ul>
+   </div>
+  </div>
+
+  {# ---- Bottom bar: copyright + tagline ---- #}
+  <div class="footer-divider"></div>
+  <div class="footer-bottom">
+   <p>&copy; {% now "Y" %} CardeTrade. All rights reserved.</p>
+   <p class="footer-tagline"><span class="accent">Grade First</span>, Trade Second.</p>
+  </div>
+ </div>
+</footer>

@@ -1,0 +1,115 @@
+{% load static %}
+
+{# Top navigation bar with brand, role-based links, and user dropdown #}
+{# ===== Navigation Bar ===== #}
+<nav class="navbar navbar-expand-lg navbar-glassmorphic" id="mainNav">
+ <div class="container">
+  {# ---- Brand / Logo ---- #}
+  <a class="navbar-brand" href="{% url 'accounts:home' %}">
+   <i class="bi bi-shop"></i> CardeTrade
+  </a>
+
+  {# ---- Mobile toggle button ---- #}
+  <button class="navbar-toggler border-0" type="button"
+   data-bs-toggle="collapse" data-bs-target="#navbarNav"
+   aria-label="Toggle navigation">
+   <i class="bi bi-list"></i>
+  </button>
+
+  {# ---- Collapsible navigation links ---- #}
+  <div class="collapse navbar-collapse" id="navbarNav">
+   {# ---- Public / authenticated links (left side) ---- #}
+   <ul class="navbar-nav me-auto">
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'accounts:home' %}">
+      <i class="bi bi-house me-1"></i>Home
+     </a>
+    </li>
+    {% if user.is_authenticated %} {# ---- Authenticated-only links ---- #}
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'accounts:dashboard' %}">
+      <i class="bi bi-speedometer2 me-1"></i>Dashboard
+     </a>
+    </li>
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'trader:listing_list' %}">
+      <i class="bi bi-shop me-1"></i>Marketplace
+     </a>
+    </li>
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'trader:order_list' %}">
+      <i class="bi bi-truck me-1"></i>Orders
+     </a>
+    </li>
+    {% if user.role == 'farmer' %} {# ---- Farmer-specific links ---- #}
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'farmer:batch_list' %}">
+      <i class="bi bi-boxes me-1"></i>Batches
+     </a>
+    </li>
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'farmer:farm_list' %}">
+      <i class="bi bi-tree me-1"></i>Farms
+     </a>
+    </li>
+    {% elif user.role == 'trader' %} {# ---- Trader-specific links ---- #}
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'trader:my_bids' %}">
+      <i class="bi bi-hammer me-1"></i>My Bids
+     </a>
+    </li>
+    {% elif user.role == 'product_manager' %} {# ---- PM-specific links ---- #}
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'farmer:batch_list' %}">
+      <i class="bi bi-clipboard-check me-1"></i>Review
+     </a>
+    </li>
+    {% endif %}
+    {% endif %}
+   </ul>
+
+   {# ---- User menu / auth buttons (right side) ---- #}
+   <ul class="navbar-nav align-items-center gap-1">
+    {% if user.is_authenticated %}
+    {# ---- User dropdown (Dashboard, Profile, Logout) ---- #}
+    <li class="nav-item dropdown">
+     <a class="nav-link dropdown-toggle d-flex align-items-center"
+      href="#" role="button" data-bs-toggle="dropdown">
+      <i class="bi bi-person-circle fs-5 me-1"></i>
+      <span class="nav-username">{{ user.username }}</span>
+     </a>
+     <ul class="dropdown-menu dropdown-menu-end shadow">
+      <li>
+       <a class="dropdown-item" href="{% url 'accounts:dashboard' %}">
+        <i class="bi bi-speedometer2 me-2" style="color:var(--accent)"></i> Dashboard
+       </a>
+      </li>
+      <li>
+       <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+        <i class="bi bi-person-gear me-2" style="color:var(--accent)"></i> Profile
+       </a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+       <a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+        <i class="bi bi-box-arrow-right me-2"></i> Logout
+       </a>
+      </li>
+     </ul>
+    </li>
+    {% else %} {# ---- Login / Get Started (unauthenticated) ---- #}
+    <li class="nav-item">
+     <a class="nav-link" href="{% url 'accounts:login' %}">
+      <i class="bi bi-box-arrow-in-right me-1"></i>Login
+     </a>
+    </li>
+    <li class="nav-item ms-1">
+     <a class="btn-register-nav nav-link" href="{% url 'accounts:register' %}">
+      <i class="bi bi-person-plus"></i> Get Started
+     </a>
+    </li>
+    {% endif %}
+   </ul>
+  </div>
+ </div>
+</nav>

@@ -1,0 +1,36 @@
+{% load static %}
+
+{# Floating AI chatbot widget toggle button and chat panel #}
+{# ===== AI Chatbot Floating Widget ===== #}
+<div id="chatPanel" class="chat-panel">
+  {# ---- Chat header with robot icon, title, and close button ---- #}
+  <div class="chat-header">
+    <div class="chat-header-title">
+      <i class="bi bi-robot"></i>
+      <div>
+        <strong>AI Assistant</strong>
+        <small class="chat-header-sub">CardeTrade Expert</small>
+      </div>
+    </div>
+    <button id="chatClose" title="Close">&times;</button>
+  </div>
+  {# ---- Chat message log area ---- #}
+  <div id="chatLog" class="chat-log">
+    <div class="chat-msg chat-msg-bot">
+      Hello! I'm the CardeTrade AI Assistant. Ask me about cardamom products, marketplace listings, pricing, grades, or anything about the platform!
+    </div>
+  </div>
+  {# ---- Chat input area with textarea and send button ---- #}
+  <div class="chat-footer">
+    <textarea id="chatInput" class="chat-input" placeholder="Ask me anything..." rows="1"></textarea>
+    <button id="chatSend" class="chat-send-btn" title="Send">
+      <i class="bi bi-send-fill"></i>
+    </button>
+  </div>
+</div>
+
+{# ---- Floating toggle button to open/close the chat panel ---- #}
+<button id="chatToggle" class="chat-toggle" title="Ask AI Assistant">
+  <i class="bi bi-chat-dots-fill"></i>
+  <span id="chatBadge" class="chat-badge" style="display:none;">1</span>
+</button>
