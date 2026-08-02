@@ -15,9 +15,9 @@ User = get_user_model()
 # Form for new user registration with role and document upload
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
-    phone = forms.CharField(max_length=20, required=False)
-    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False)
-    region = forms.CharField(max_length=100, required=False)
+    phone = forms.CharField(max_length=20, required=True)
+    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=True)
+    region = forms.CharField(max_length=100, required=True)
     verification_doc = forms.FileField(
         required=False,
         widget=forms.FileInput(attrs={'class': 'form-premium', 'accept': '.pdf,.jpg,.jpeg,.png'}),

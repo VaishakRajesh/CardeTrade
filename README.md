@@ -16,6 +16,7 @@ python manage.py runserver
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | admin@cardetrade.in | admin123 |
+pm@cardefind.in	 @Vaishak123
 
 Login at `/accounts/login/`. Create more users via Django admin.
 

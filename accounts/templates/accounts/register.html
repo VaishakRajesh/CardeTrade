@@ -65,9 +65,9 @@
  <div class="mb-3">
   <label class="form-label">I want to join as</label>
   <select name="role" class="form-premium" id="roleSelect" onchange="toggleVerificationDoc()">
-   <option value="farmer">🌾 Farmer — Sell my cardamom</option>
-   <option value="trader">📦 Trader — Buy cardamom</option>
-   <option value="product_manager">✅ Product Manager — Verify quality</option>
+   <option value="farmer">Farmer — Sell my cardamom</option>
+   <option value="trader">Trader — Buy cardamom</option>
+   <option value="product_manager">Product Manager — Verify quality</option>
   </select>
   </div>
 
@@ -81,22 +81,22 @@
  {% if form.verification_doc.errors %}<div class="text-danger small mt-1">{{ form.verification_doc.errors.0 }}</div>{% endif %}
  </div>
 
- {# ---- Optional fields: Phone + Region ---- #}
+ {# ---- Required fields: Phone + Region ---- #}
  <div class="row">
  <div class="col-md-6 mb-3">
-  <label class="form-label">Phone</label>
-  <input type="text" name="phone" class="form-premium" placeholder="Phone number (optional)">
+  <label class="form-label">Phone *</label>
+  <input type="text" name="phone" class="form-premium" placeholder="Your phone number" required>
  </div>
  <div class="col-md-6 mb-3">
-  <label class="form-label">Region</label>
-  <input type="text" name="region" class="form-premium" placeholder="e.g. Idukki, Kerala">
+  <label class="form-label">Region *</label>
+  <input type="text" name="region" class="form-premium" placeholder="e.g. Idukki, Kerala" required>
  </div>
  </div>
 
- {# ---- Address (optional) ---- #}
+ {# ---- Address (required) ---- #}
  <div class="mb-3">
- <label class="form-label">Address</label>
- <textarea name="address" class="form-premium" rows="2" placeholder="Your address (optional)"></textarea>
+ <label class="form-label">Address *</label>
+ <textarea name="address" class="form-premium" rows="2" placeholder="Your full address" required></textarea>
  </div>
 
  {# ---- Submit button ---- #}
