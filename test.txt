@@ -1,0 +1,7 @@
+##problems
+ui is shit
+the admin page have Pending PM Approvals add on navebar
+
+##test
+have all login is ok
+in farmer level createing farm and create batch is ok.is working.

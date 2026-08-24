@@ -2,12 +2,16 @@
 accounts/signals.py
 
 Django signal handlers for the accounts app.
-Automatically updates conversation timestamps when new messages are sent.
+Automatically updates conversation timestamps when new messages are sent,
+and writes audit-log rows for key mutations across the platform.
 """
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Message
+from django.forms.models import model_to_dict
+
+from .models import Message, AuditLog
+from .middleware import get_current_user, get_current_ip
 
 
 # Update the parent conversation's last_message_at when a new message is sent
@@ -17,3 +21,62 @@ def update_conversation_timestamp(sender, instance, created, **kwargs):
         conversation = instance.conversation
         conversation.last_message_at = instance.sent_at
         conversation.save(update_fields=['last_message_at'])
+
+
+# ---------------------------------------------------------------------------
+# Audit logging: write an AuditLog row whenever a tracked model is created or
+# updated. The acting user and request IP are pulled from the per-request
+# thread-local storage populated by AuditMiddleware. When no request context
+# exists (e.g. management commands, tests), user/IP are left blank.
+# ---------------------------------------------------------------------------
+
+# Maps the (app_label, model) -> AuditLog.TableType value to store.
+_AUDIT_TABLES = {
+    ('farmer', 'Batch'): AuditLog.TableType.BATCH,
+    ('pm', 'QualityVerification'): AuditLog.TableType.QUALITY_VERIFICATION,
+    ('trader', 'Listing'): AuditLog.TableType.LISTING,
+    ('trader', 'Bid'): AuditLog.TableType.BID,
+    ('trader', 'Order'): AuditLog.TableType.ORDER,
+    ('trader', 'Payment'): AuditLog.TableType.PAYMENT,
+    ('accounts', 'Dispute'): AuditLog.TableType.DISPUTE,
+}
+
+
+def _write_audit(instance, action):
+    table_name = _AUDIT_TABLES.get(
+        (instance._meta.app_label, instance._meta.model_name)
+    )
+    if not table_name:
+        return
+    try:
+        new_value = model_to_dict(instance)
+    except Exception:
+        new_value = {'id': instance.pk}
+    AuditLog.objects.create(
+        user=get_current_user(),
+        action=action,
+        table_name=table_name,
+        record_id=instance.pk,
+        new_value=new_value,
+        ip_address=get_current_ip(),
+    )
+
+
+def _make_audit_receiver():
+    def _receiver(sender, instance, created, **kwargs):
+        _write_audit(instance, 'created' if created else 'updated')
+    return _receiver
+
+
+for _model in [
+    'farmer.Batch',
+    'pm.QualityVerification',
+    'trader.Listing',
+    'trader.Bid',
+    'trader.Order',
+    'trader.Payment',
+    'accounts.Dispute',
+]:
+    receiver(post_save, sender=_model, dispatch_uid=f'audit_{_model}')(
+        _make_audit_receiver()
+    )

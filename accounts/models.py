@@ -40,6 +40,9 @@ class User(AbstractUser):
         elif self.role == self.Role.PRODUCT_MANAGER:
             self.is_staff = True
             self.is_superuser = False
+            # New PM accounts must be approved by an admin before they can log in
+            if self._state.adding:
+                self.is_active = False
         elif self.role == self.Role.TRADER:
             self.is_staff = False
             self.is_superuser = False
@@ -47,6 +50,9 @@ class User(AbstractUser):
         else:
             self.is_staff = False
             self.is_superuser = False
+        # Normalize email to lowercase so login is case-insensitive
+        if self.email:
+            self.email = self.email.lower()
         super().save(*args, **kwargs)
 
     def __str__(self):

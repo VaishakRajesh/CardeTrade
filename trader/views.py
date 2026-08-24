@@ -6,6 +6,7 @@ placing bids, managing orders, and making payments.
 """
 
 from django.shortcuts import redirect, get_object_or_404
+from django.http import HttpResponseForbidden
 from django.views.generic import TemplateView, CreateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -14,7 +15,7 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.db.models import Sum, Max, Count, Q
 from accounts.decorators import role_required
-from .models import Listing, Bid, Order, Payment
+from .models import Listing, Bid, Order, Payment, OrderTracking
 
 
 @method_decorator(role_required('trader'), name='dispatch')
@@ -177,3 +178,32 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
     model = Order
     template_name = 'trader/orders/detail.html'
     context_object_name = 'order'
+
+
+@method_decorator(role_required('farmer', 'admin'), name='dispatch')
+# Allows the seller (farmer) or an admin to log an order tracking update
+class OrderTrackingCreateView(LoginRequiredMixin, CreateView):
+    model = OrderTracking
+    template_name = 'trader/orders/track.html'
+    fields = ['status', 'location', 'notes']
+
+    # Restrict to the seller of the order (or an admin)
+    def dispatch(self, request, *args, **kwargs):
+        self.order = get_object_or_404(Order, pk=kwargs['pk'])
+        if not (request.user == self.order.seller or request.user.role == 'admin'):
+            return HttpResponseForbidden()
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.order = self.order
+        form.instance.updated_by = self.request.user
+        messages.success(self.request, "Tracking update added.")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['order'] = self.order
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('trader:order_detail', kwargs={'pk': self.order.pk})

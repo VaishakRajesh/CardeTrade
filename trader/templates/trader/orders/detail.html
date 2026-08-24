@@ -182,7 +182,11 @@
   <a href="{% url 'trader:listing_detail' order.listing.pk %}" class="btn btn-outline-success w-100 mb-2"><i class="bi bi-shop"></i> View Listing</a>
   {% endif %}
   {# Link back to the full orders list page. #}
-  <a href="{% url 'trader:order_list' %}" class="btn btn-outline-secondary w-100"><i class="bi bi-arrow-left"></i> Back to Orders</a>
+  <a href="{% url 'trader:order_list' %}" class="btn btn-outline-secondary w-100 mb-2"><i class="bi bi-arrow-left"></i> Back to Orders</a>
+  {# Sellers (farmers) and admins can log a tracking update. #}
+  {% if user.role == 'farmer' and user == order.seller or user.role == 'admin' %}
+  <a href="{% url 'trader:order_track' order.pk %}" class="btn btn-outline-info w-100"><i class="bi bi-geo-alt"></i> Update Tracking</a>
+  {% endif %}
  </div>
  </div>
  </div>

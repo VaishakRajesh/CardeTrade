@@ -21,6 +21,7 @@ def create_listing_on_verification(sender, instance, created, **kwargs):
             return
 
         from trader.models import Listing as TraderListing
+        # Only AUCTION listings are created today (see trader.models.Listing.ListingType).
         TraderListing.objects.get_or_create(
             batch=instance,
             defaults={

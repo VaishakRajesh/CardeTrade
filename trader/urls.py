@@ -25,4 +25,5 @@ urlpatterns = [
     path('orders/', views.OrderListView.as_view(), name='order_list'),
     path('orders/<int:pk>/', views.OrderDetailView.as_view(), name='order_detail'),
     path('orders/<int:pk>/pay/', views.MakePaymentView.as_view(), name='order_pay'),
+    path('orders/<int:pk>/track/', views.OrderTrackingCreateView.as_view(), name='order_track'),
 ]

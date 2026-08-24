@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{# ===== Admin User Detail Page (UserDetailView) ===== #}
+{# Read-only profile of any user with Revoke/Reactivate actions #}
+{% block title %}User - {{ u.username }} - CardeTrade{% endblock %}
+
+{% block content %}
+<div class="page-header-premium" style="background:linear-gradient(135deg,#0d1a10,#1a3a2e);">
+  <div class="page-header-bg">
+    <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
+  </div>
+  <div class="container position-relative" style="z-index:1;">
+    <div class="d-flex flex-wrap justify-content-between align-items-end">
+      <div>
+        <h2><i class="bi bi-person-badge me-2"></i> User: {{ u.username }}</h2>
+        <p>Account details</p>
+        <div class="header-accent-line"></div>
+      </div>
+      <a href="{% url 'panel:dashboard' %}" class="btn-premium btn-premium-sm mt-3"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-wrapper">
+  <div class="container">
+    <div class="row g-4">
+      {# ---- Account details ---- #}
+      <div class="col-lg-8">
+        <div class="card-premium">
+          <div class="card-header"><h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Account Details</h5></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6"><small class="text-muted">Username</small><p class="fw-bold">{{ u.username }}</p></div>
+              <div class="col-md-6"><small class="text-muted">Role</small><p><span class="badge-premium badge-premium-{% if u.role == 'farmer' %}success{% elif u.role == 'trader' %}primary{% elif u.role == 'product_manager' %}info{% else %}dark{% endif %}">{{ u.get_role_display }}</span></p></div>
+              <div class="col-md-6"><small class="text-muted">Email</small><p class="fw-bold">{{ u.email|default:"-" }}</p></div>
+              <div class="col-md-6"><small class="text-muted">Phone</small><p class="fw-bold">{{ u.phone|default:"-" }}</p></div>
+              <div class="col-md-6"><small class="text-muted">Region</small><p class="fw-bold">{{ u.region|default:"-" }}</p></div>
+              <div class="col-md-6"><small class="text-muted">Joined</small><p class="fw-bold">{{ u.date_joined|date:"d M Y" }}</p></div>
+              <div class="col-md-6"><small class="text-muted">Last Login</small><p class="fw-bold">{% if u.last_login %}{{ u.last_login|date:"d M Y" }}{% else %}<span class="text-muted">Never</span>{% endif %}</p></div>
+              <div class="col-12"><small class="text-muted">Address</small><p>{{ u.address|default:"-" }}</p></div>
+              <div class="col-md-4"><small class="text-muted">Verified</small><p>{% if u.is_verified %}<span class="badge-premium badge-premium-success">Yes</span>{% else %}<span class="badge-premium badge-premium-danger">No</span>{% endif %}</p></div>
+              <div class="col-md-4"><small class="text-muted">Active</small><p>{% if u.is_active %}<span class="badge-premium badge-premium-success">Yes</span>{% else %}<span class="badge-premium badge-premium-warning">No</span>{% endif %}</p></div>
+              <div class="col-md-4"><small class="text-muted">Staff</small><p>{% if u.is_staff %}<span class="badge-premium badge-premium-info">Yes</span>{% else %}<span class="badge-premium badge-premium-dark">No</span>{% endif %}</p></div>
+              <div class="col-12"><small class="text-muted">Verification Document</small><p>{% if u.verification_doc %}<a href="{{ u.verification_doc.url }}" target="_blank" class="btn-premium btn-premium-sm"><i class="bi bi-file-earmark-text me-1"></i> View uploaded document</a>{% else %}<span class="text-muted">No document uploaded</span>{% endif %}</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ---- Actions ---- #}
+      <div class="col-lg-4">
+        <div class="card-premium h-100">
+          <div class="card-header"><h5 class="mb-0"><i class="bi bi-shield-lock me-2"></i> Account Actions</h5></div>
+          <div class="card-body d-flex flex-column gap-2">
+            {% if u.pk == request.user.pk %}
+            <p class="text-muted">This is your own account. You cannot revoke your own access.</p>
+            {% elif u.is_active %}
+            <p class="text-muted">This account is currently active.</p>
+            <form method="post" action="{% url 'panel:user_revoke' u.pk %}" onsubmit="return confirm('Revoke access for {{ u.username }}? They will no longer be able to log in.');">
+              {% csrf_token %}
+              <button type="submit" class="btn-premium w-100 justify-content-center" style="background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.4);color:#dc3545;"><i class="bi bi-slash-circle"></i> Revoke Access</button>
+            </form>
+            {% else %}
+            <p class="text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i> This account is currently deactivated.</p>
+            <form method="post" action="{% url 'panel:user_reactivate' u.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center"><i class="bi bi-check-circle"></i> Reactivate</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

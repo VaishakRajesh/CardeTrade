@@ -36,7 +36,7 @@
  <i class="bi bi-people stat-icon"></i> {# People icon #}
  <div class="stat-number">{{ stats.total_users }}</div> {# Total registered users #}
  {# Sub-label showing breakdown: F=farmers, T=traders, P=product managers #}
- <div class="stat-label">Users · F{{ stats.farmers }} T{{ stats.traders }} P{{ stats.pms }}</div>
+  <div class="stat-label">Users · F{{ stats.farmers }} T{{ stats.traders }} P{{ stats.pms }}{% if pending_pm_count %} · <span class="text-warning fw-semibold">{{ pending_pm_count }} pending</span>{% endif %}</div>
  <div class="stat-trend"><i class="bi bi-arrow-up"></i> Registered</div> {# Trend indicator #}
  </div>
  </div>
@@ -80,9 +80,9 @@
  </thead>
  <tbody>
  {# Loop over the `users` queryset — most recently registered users #}
- {% for u in users %}
- <tr>
- <td class="fw-bold">{{ u.username }}</td> {# Username #}
+  {% for u in users %}
+  <tr>
+  <td class="fw-bold"><a href="{% url 'panel:user_detail' u.pk %}" class="text-decoration-none">{{ u.username }} <i class="bi bi-eye small"></i></a></td> {# Username links to admin user detail #}
  {# Role badge colored by role: farmer/green, trader/blue, PM/info-blue, admin/dark #}
  <td><span class="badge-premium badge-premium-{% if u.role == 'farmer' %}success{% elif u.role == 'trader' %}primary{% elif u.role == 'product_manager' %}info{% else %}dark{% endif %}">{{ u.get_role_display }}</span></td>
  <td>{{ u.email|default:"-" }}</td> {# Email or dash if empty #}
@@ -128,70 +128,118 @@
  </div>
 
  
- <div class="row g-4 mt-2">
+  <div class="row g-4 mt-2">
 
- {# ---- LEFT COLUMN: Open Disputes table ---- #}
- <div class="col-md-6">
- <div class="card-premium">
- <div class="card-header d-flex justify-content-between align-items-center">
- <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i> Open Disputes</h5>
- {# Badge showing the count of open disputes (danger/red color draws attention) #}
- <span class="badge-premium badge-premium-danger">{{ stats.open_disputes }} open</span>
- </div>
- <div class="card-body p-0">
- {# Only show the dispute table if there are pending disputes; otherwise show"All Clear!" #}
- {% if pending_disputes %}
- <div class="table-responsive">
- <table class="table-premium">
- <thead>
- <tr><th>Order</th><th>Raised By</th><th>Reason</th><th>Date</th></tr>
- </thead>
- <tbody>
- {# Loop over the `pending_disputes` queryset — disputes with status 'open' or 'under_review' #}
- {% for dispute in pending_disputes %}
- <tr>
- <td class="fw-bold">{{ dispute.order.order_code }}</td> {# Code of the disputed order #}
- <td>{{ dispute.raised_by.username }}</td> {# User who filed the dispute #}
- <td><small>{{ dispute.reason|truncatewords:6 }}</small></td> {# Dispute reason, truncated to 6 words for compact display #}
- <td><small class="text-muted">{{ dispute.created_at|date:"d M" }}</small></td> {# Date dispute was opened #}
- </tr>
- {% endfor %}
- </tbody>
- </table>
- </div>
- {% else %}
- {# Empty state: no disputes — show a success message with a large green checkmark #}
- <div class="text-center py-4">
- <i class="bi bi-check-circle-fill" style="font-size:2.5rem;color:#166534;"></i>
- <h5 class="mt-2 fw-bold">All Clear!</h5>
- <p class="text-muted mb-0">No open disputes at the moment.</p>
- </div>
- {% endif %}
- </div>
- </div>
- </div>
+  {# ---- LEFT COLUMN: Pending PM Approvals (inline accept/reject) ---- #}
+  <div class="col-md-6">
+  <div class="card-premium h-100">
+  <div class="card-header d-flex justify-content-between align-items-center">
+  <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i> Pending PM Approvals</h5>
+  {% if pending_pm_count %}<span class="badge-premium badge-premium-warning">{{ pending_pm_count }} pending</span>{% endif %}
+  </div>
+  <div class="card-body p-0">
+  {% if pending_pms %}
+  <div class="table-responsive">
+  <table class="table-premium">
+  <thead>
+  <tr><th>Username</th><th>Email</th><th>Joined</th><th class="text-end">Actions</th></tr>
+  </thead>
+  <tbody>
+  {% for pm in pending_pms %}
+  <tr>
+  <td class="fw-bold">{{ pm.username }}</td>
+  <td>{{ pm.email|default:"-" }}</td>
+  <td><small class="text-muted">{{ pm.date_joined|date:"d M" }}</small></td>
+  <td class="text-end">
+  <a href="{% url 'panel:pm_detail' pm.pk %}" class="btn btn-sm btn-outline-secondary" title="View details"><i class="bi bi-eye"></i></a>
+  <form method="post" action="{% url 'panel:pm_accept' pm.pk %}" class="d-inline">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-sm btn-success" title="Accept"><i class="bi bi-check-lg"></i></button>
+  </form>
+  <form method="post" action="{% url 'panel:pm_reject' pm.pk %}" class="d-inline">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-sm btn-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+  </form>
+  </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  </div>
+  <div class="card-footer bg-transparent border-0 text-end">
+  <a href="{% url 'panel:pm_pending_list' %}" class="btn-premium btn-premium-sm">View all pending</a>
+  </div>
+  {% else %}
+  <div class="text-center py-4">
+  <i class="bi bi-check-circle-fill" style="font-size:2.5rem;color:#166534;"></i>
+  <h5 class="mt-2 fw-bold">All Clear!</h5>
+  <p class="text-muted mb-0">No pending PM approvals.</p>
+  </div>
+  {% endif %}
+  </div>
+  </div>
+  </div>
 
- {# ---- RIGHT COLUMN: Quick Actions card ---- #}
- <div class="col-md-6">
- {# This card has a gradient background (same dark green as the header) with white text for visual distinction #}
- <div class="card-premium h-100" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;">
- <div class="card-body d-flex flex-column align-items-center justify-content-center text-center p-5">
- {# Speedometer icon at the top in accent (gold) color #}
- <i class="bi bi-speedometer2" style="font-size:3.5rem;color:var(--accent);margin-bottom:1rem;"></i>
- <h4 class="fw-bold mb-3">Quick Actions</h4>
- {# Stacked buttons for common admin tasks #}
- <div class="d-grid gap-2 w-75">
- {# Django admin panel (opens in new tab) #}
- <a href="/admin/" class="btn-premium btn-premium-primary w-100 justify-content-center" target="_blank"><i class="bi bi-gear"></i> Admin Panel</a>
- {# All batches page #}
- <a href="{% url 'farmer:batch_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-box-seam"></i> All Batches</a>
- {# All orders page #}
- <a href="{% url 'trader:order_list' %}" class="btn-premium w-100 justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-truck"></i> All Orders</a>
- </div>
- </div>
- </div>
- </div>
- </div>
+  {# ---- RIGHT COLUMN: Open Disputes table ---- #}
+  <div class="col-md-6">
+  <div class="card-premium">
+  <div class="card-header d-flex justify-content-between align-items-center">
+  <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i> Open Disputes</h5>
+  <span class="badge-premium badge-premium-danger">{{ stats.open_disputes }} open</span>
+  </div>
+  <div class="card-body p-0">
+  {% if pending_disputes %}
+  <div class="table-responsive">
+  <table class="table-premium">
+  <thead>
+  <tr><th>Order</th><th>Raised By</th><th>Reason</th><th>Date</th></tr>
+  </thead>
+  <tbody>
+  {% for dispute in pending_disputes %}
+  <tr>
+  <td class="fw-bold">{{ dispute.order.order_code }}</td>
+  <td>{{ dispute.raised_by.username }}</td>
+  <td><small>{{ dispute.reason|truncatewords:6 }}</small></td>
+  <td><small class="text-muted">{{ dispute.created_at|date:"d M" }}</small></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="text-center py-4">
+  <i class="bi bi-check-circle-fill" style="font-size:2.5rem;color:#166534;"></i>
+  <h5 class="mt-2 fw-bold">All Clear!</h5>
+  <p class="text-muted mb-0">No open disputes at the moment.</p>
+  </div>
+  {% endif %}
+  </div>
+  </div>
+  </div>
+  </div>
+
+  {# ---- Quick Actions (full width) ---- #}
+  <div class="row g-4 mt-2">
+  <div class="col-12">
+  <div class="card-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;">
+  <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3 p-4">
+  <div class="d-flex align-items-center">
+  <i class="bi bi-speedometer2" style="font-size:2.5rem;color:var(--accent);margin-right:1rem;"></i>
+  <div>
+  <h4 class="fw-bold mb-0">Quick Actions</h4>
+  <small style="opacity:.8;">Common administrative tasks</small>
+  </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+  <a href="/admin/" class="btn-premium btn-premium-primary justify-content-center" target="_blank"><i class="bi bi-gear"></i> Admin Panel</a>
+  <a href="{% url 'farmer:batch_list' %}" class="btn-premium justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-box-seam"></i> All Batches</a>
+  <a href="{% url 'trader:order_list' %}" class="btn-premium justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-truck"></i> All Orders</a>
+  <a href="{% url 'panel:pm_pending_list' %}" class="btn-premium justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-clipboard-check"></i> PM Approvals</a>
+  </div>
+  </div>
+  </div>
+  </div>
+  </div>
  </div>
 </div>
 {% endblock %} {# Close the content block #}

@@ -39,7 +39,10 @@ class RegistrationForm(UserCreationForm):
         doc = self.cleaned_data.get('verification_doc')
         role = self.data.get('role') or self.initial.get('role')
         if role in ('farmer', 'product_manager') and not doc:
-            raise forms.ValidationError('Verification document is required for this role.')
+            raise forms.ValidationError(
+                'A verification document is required to register as a '
+                'Farmer or Product Manager. Accepted formats: PDF, JPG, or PNG.'
+            )
         return doc
 
 
@@ -53,6 +56,14 @@ class LoginForm(AuthenticationForm):
         label='Password',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password', 'autocomplete': 'current-password'})
     )
+
+    # Lowercase the submitted email before authentication so that login is
+    # case-insensitive (e.g. John@Test.com == john@test.com).
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username:
+            username = username.lower()
+        return username
 
 
 # Form for users to edit their personal profile information

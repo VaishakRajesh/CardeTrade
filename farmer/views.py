@@ -165,7 +165,14 @@ class AcceptBidView(LoginRequiredMixin, TemplateView):
         listing = bid.listing
 
         with transaction.atomic():
+            # Lock the listing row so concurrent accepts serialize safely.
             listing = Listing.objects.select_for_update().get(pk=listing.pk)
+            # Re-read the bid under the lock to get its latest status; this
+            # prevents a double-accept (and a duplicate Order) under concurrency.
+            bid = Bid.objects.select_for_update().get(pk=bid.pk)
+            if bid.status != Bid.Status.ACTIVE:
+                messages.warning(request, "This bid is no longer active.")
+                return redirect('farmer:my_bids')
 
             Bid.objects.filter(listing=listing, status='active').exclude(pk=bid.pk).update(
                 status=Bid.Status.OUTBID

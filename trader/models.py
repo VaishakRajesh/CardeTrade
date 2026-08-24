@@ -14,7 +14,11 @@ from farmer.models import Batch
 
 # Represents an auction listing for a verified batch of cardamom
 class Listing(models.Model):
-    # Only auction type is currently supported
+    # NOTE: Only the AUCTION listing type is currently supported/created.
+    # The PM-verification signal (farmer/signals.py) always creates an
+    # AUCTION listing, and there is intentionally no fixed-price direct-buy
+    # flow yet. If a fixed-price flow is added later, extend this enum and
+    # the signal accordingly.
     class ListingType(models.TextChoices):
         AUCTION = 'auction', 'Auction'
 
