@@ -59,9 +59,25 @@
  </div>
  </div>
 
- {% else %}
- 
- <div class="row g-4">
+  {% elif batch.status == 'under_review' and batch.claimed_by_id and batch.claimed_by_id != request.user.pk %}
+
+  <!-- --- Under review by another PM --- -->
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card-premium">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-person-check" style="font-size:4rem;color:#b45309;"></i>
+          <h4 class="mt-3 fw-bold">Under Review by Another PM</h4>
+          <p class="text-muted">This batch is currently being reviewed by <strong>{{ batch.claimed_by.username }}</strong>. You cannot verify it right now.</p>
+          <a href="{% url 'pm:dashboard' %}" class="btn-premium btn-premium-primary">Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  
+  <div class="row g-4">
 
  {# --- LEFT COLUMN (wider — 8 of 12 columns): the form --- #}
  <div class="col-lg-8">

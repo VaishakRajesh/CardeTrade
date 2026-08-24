@@ -13,4 +13,5 @@ app_name = 'pm'
 urlpatterns = [
     path('dashboard/', views.PMDashboardView.as_view(), name='dashboard'),
     path('batches/<int:pk>/verify/', views.BatchVerifyView.as_view(), name='batch_verify'),
+    path('batches/<int:pk>/start-review/', views.StartReviewView.as_view(), name='batch_start_review'),
 ]

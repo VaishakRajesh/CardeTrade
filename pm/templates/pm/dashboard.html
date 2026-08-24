@@ -85,7 +85,12 @@
  <td>{{ batch.quantity_kg }} kg</td> {# Quantity in kilograms #}
  <td>Rs {{ batch.estimated_price_per_kg }}</td> {# Price the farmer estimated #}
  {# Action button: takes the PM to the verification page for this batch #}
- <td><a href="{% url 'pm:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-clipboard-check"></i> Verify</a></td>
+  <td>
+    <form method="post" action="{% url 'pm:batch_start_review' batch.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-clipboard-check"></i> Start Review</button>
+    </form>
+  </td>
  </tr>
  {% empty %}
  {# Empty state: all batches have been picked up; green checkmark for satisfaction #}
@@ -108,15 +113,26 @@
  </thead>
  <tbody>
  {# Loop over the `under_review` queryset — batches with status 'under_review' #}
- {% for batch in under_review %}
- <tr>
- <td class="fw-bold">{{ batch.batch_code }}</td>
- <td>{{ batch.farmer.username }}</td>
- <td>{{ batch.quantity_kg }} kg</td>
- <td>Rs {{ batch.estimated_price_per_kg }}</td>
- {# Action button:"View Details" — read-only view of the batch (cannot verify again if another PM is reviewing) #}
- <td><a href="{% url 'farmer:batch_detail' batch.pk %}" class="btn-premium btn-premium-outline btn-premium-sm">View Details</a></td>
- </tr>
+  {% for batch in under_review %}
+  <tr>
+  <td class="fw-bold">{{ batch.batch_code }}</td>
+  <td>{{ batch.farmer.username }}</td>
+  <td>{{ batch.quantity_kg }} kg</td>
+  <td>Rs {{ batch.estimated_price_per_kg }}</td>
+  {# Action depends on who claimed the batch for review #}
+  <td>
+    {% if batch.claimed_by_id %}
+      {% if batch.claimed_by_id == request.user.pk %}
+        <a href="{% url 'pm:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary btn-premium-sm"><i class="bi bi-clipboard-check"></i> Verify</a>
+        <a href="{% url 'farmer:batch_detail' batch.pk %}" class="btn-premium btn-premium-outline btn-premium-sm">Details</a>
+      {% else %}
+        <span class="text-muted small">Reviewed by {{ batch.claimed_by.username }}</span>
+      {% endif %}
+    {% else %}
+      <a href="{% url 'pm:batch_verify' batch.pk %}" class="btn-premium btn-premium-outline btn-premium-sm">View Details</a>
+    {% endif %}
+  </td>
+  </tr>
  {% empty %}
  <tr><td colspan="5" class="text-center py-4 text-muted">No batches under review.</td></tr>
  {% endfor %}

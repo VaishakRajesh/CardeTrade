@@ -18,7 +18,7 @@ class FarmAdmin(admin.ModelAdmin):
 # Admin config for the Batch model with an action to revoke batches
 @admin.register(Batch)
 class BatchAdmin(admin.ModelAdmin):
-    list_display = ['batch_code', 'farmer', 'quantity_kg', 'status', 'created_at']
+    list_display = ['batch_code', 'farmer', 'quantity_kg', 'status', 'claimed_by', 'created_at']
     list_filter = ['status', 'created_at']
     search_fields = ['batch_code', 'farmer__username']
     readonly_fields = ['batch_code']
