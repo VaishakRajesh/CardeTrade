@@ -92,12 +92,15 @@
  <tr><td colspan="4" class="text-center py-4 text-muted">No users yet.</td></tr>
  {% endfor %}
  </tbody>
- </table>
- </div>
- </div>
- </div>
+  </table>
+  </div>
+  <div class="card-footer bg-transparent border-0 text-end">
+  <a href="{% url 'panel:recent_users' %}" class="btn-premium btn-premium-sm">View all users</a>
+  </div>
+  </div>
+  </div>
 
- {# ---- RIGHT COLUMN: Recent Orders table ---- #}
+  {# ---- RIGHT COLUMN: Recent Orders table ---- #}
  <div class="col-md-6">
  <div class="card-premium h-100">
  <div class="card-header"><h5 class="mb-0"><i class="bi bi-truck me-2"></i> Recent Orders</h5></div>
@@ -110,7 +113,7 @@
  {# Loop over the `recent_orders` queryset — most recent orders across the platform #}
  {% for order in recent_orders %}
  <tr>
- <td class="fw-bold">{{ order.order_code }}</td> {# Unique order code (e.g. ORD-2026-0001) #}
+  <td class="fw-bold"><a href="{% url 'trader:order_detail' order.pk %}" class="text-decoration-none">{{ order.order_code }}</a></td> {# Links to order detail #}
  <td>{{ order.buyer.username }}</td> {# Trader who bought #}
  <td>{{ order.seller.username }}</td> {# Farmer who sold #}
  <td class="fw-bold" style="color:var(--primary);">Rs {{ order.total_amount }}</td> {# Total order value #}
@@ -121,13 +124,15 @@
  <tr><td colspan="5" class="text-center py-4 text-muted">No orders yet.</td></tr>
  {% endfor %}
  </tbody>
- </table>
- </div>
- </div>
- </div>
- </div>
+  </table>
+  </div>
+  <div class="card-footer bg-transparent border-0 text-end">
+  <a href="{% url 'panel:recent_orders' %}" class="btn-premium btn-premium-sm">View all orders</a>
+  </div>
+  </div>
+  </div>
+  </div>
 
- 
   <div class="row g-4 mt-2">
 
   {# ---- LEFT COLUMN: Pending PM Approvals (inline accept/reject) ---- #}
@@ -197,7 +202,7 @@
   <tbody>
   {% for dispute in pending_disputes %}
   <tr>
-  <td class="fw-bold">{{ dispute.order.order_code }}</td>
+  <td class="fw-bold"><a href="{% url 'panel:dispute_resolve' dispute.pk %}" class="text-decoration-none">{{ dispute.order.order_code }}</a></td>
   <td>{{ dispute.raised_by.username }}</td>
   <td><small>{{ dispute.reason|truncatewords:6 }}</small></td>
   <td><small class="text-muted">{{ dispute.created_at|date:"d M" }}</small></td>
@@ -214,32 +219,14 @@
   </div>
   {% endif %}
   </div>
+  <div class="card-footer bg-transparent border-0 text-end">
+    <a href="{% url 'accounts:dispute_list' %}" class="btn-premium btn-premium-sm">View all disputes</a>
+  </div>
   </div>
   </div>
   </div>
 
-  {# ---- Quick Actions (full width) ---- #}
-  <div class="row g-4 mt-2">
-  <div class="col-12">
-  <div class="card-premium" style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;">
-  <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3 p-4">
-  <div class="d-flex align-items-center">
-  <i class="bi bi-speedometer2" style="font-size:2.5rem;color:var(--accent);margin-right:1rem;"></i>
-  <div>
-  <h4 class="fw-bold mb-0">Quick Actions</h4>
-  <small style="opacity:.8;">Common administrative tasks</small>
-  </div>
-  </div>
-  <div class="d-flex flex-wrap gap-2">
-  <a href="/admin/" class="btn-premium btn-premium-primary justify-content-center" target="_blank"><i class="bi bi-gear"></i> Admin Panel</a>
-  <a href="{% url 'farmer:batch_list' %}" class="btn-premium justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-box-seam"></i> All Batches</a>
-  <a href="{% url 'trader:order_list' %}" class="btn-premium justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-truck"></i> All Orders</a>
-  <a href="{% url 'panel:pm_pending_list' %}" class="btn-premium justify-content-center" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;"><i class="bi bi-clipboard-check"></i> PM Approvals</a>
-  </div>
-  </div>
-  </div>
-  </div>
-  </div>
+
  </div>
 </div>
 {% endblock %} {# Close the content block #}

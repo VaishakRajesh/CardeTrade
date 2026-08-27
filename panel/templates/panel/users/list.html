@@ -1,0 +1,71 @@
+{% extends 'base.html' %} {# Inherit base layout with navbar, alerts, and footer #}
+{% load static %}
+
+{# ===== Recent Users Page (RecentUsersView) ===== #}
+{# Lists ALL registered users with pagination; each username links to user detail #}
+{% block title %}Recent Users - CardeTrade{% endblock %}
+
+{% block content %}
+
+{# ---- Page header with dark green gradient ---- #}
+<div class="page-header-premium" style="background:linear-gradient(135deg,#0d1a10,#1a3a2e);">
+  <div class="page-header-bg">
+  <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
+  </div>
+  <div class="container position-relative" style="z-index:1;">
+  <h2><i class="bi bi-people me-2"></i> Recent Users</h2>
+  <p>All registered users on the platform</p>
+  <div class="header-accent-line"></div> {# Decorative accent line #}
+  </div>
+</div>
+
+<div class="dashboard-wrapper">
+  <div class="container">
+
+  <div class="card-premium">
+    <div class="table-responsive">
+    <table class="table-premium">
+      <thead>
+      <tr><th>Username</th><th>Role</th><th>Email</th><th>Joined</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+      {# Loop over every user passed from the view. #}
+      {% for u in users %}
+      <tr>
+        {# Username links to the admin user detail page. #}
+        <td class="fw-bold"><a href="{% url 'panel:user_detail' u.pk %}" class="text-decoration-none">{{ u.username }} <i class="bi bi-eye small"></i></a></td>
+        {# Role badge coloured by role. #}
+        <td><span class="badge-premium badge-premium-{% if u.role == 'farmer' %}success{% elif u.role == 'trader' %}primary{% elif u.role == 'product_manager' %}info{% else %}dark{% endif %}">{{ u.get_role_display }}</span></td>
+        <td>{{ u.email|default:"-" }}</td>
+        <td><small class="text-muted">{{ u.date_joined|date:"d M Y" }}</small></td>
+        {# Active / Inactive indicator. #}
+        <td>{% if u.is_active %}<span class="badge-premium badge-premium-success">Active</span>{% else %}<span class="badge-premium badge-premium-danger">Inactive</span>{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center py-4 text-muted">No users yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  {# Pagination controls (Django ListView paginate_by). #}
+  {% if is_paginated %}
+  <nav class="mt-3">
+    <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+    {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  </div>
+</div>
+{% endblock %}

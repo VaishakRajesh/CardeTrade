@@ -1,7 +1,4 @@
 ##problems
 ui is shit
-the admin page have Pending PM Approvals add on navebar
-
-##test
-have all login is ok
-in farmer level createing farm and create batch is ok.is working.
+the user side have bid have find any racecondiction like problem like that
+the add the pament page much more better or relistics like that it is to simple

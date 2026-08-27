@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from accounts.decorators import role_required
 from accounts.models import User, Dispute, AuditLog
+from trader.models import Order
 
 
 @method_decorator(role_required('admin'), name='dispatch')
@@ -49,6 +50,32 @@ class AdminDashboardView(LoginRequiredMixin, TemplateView):
         context['pending_pms'] = pending_pms[:5]
         context['pending_pm_count'] = pending_pms.count()
         return context
+
+
+@method_decorator(role_required('admin'), name='dispatch')
+# Admin page: all orders with pagination; rows expand inline on the template
+class RecentOrdersView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'panel/orders/list.html'
+    context_object_name = 'orders'
+    paginate_by = 20
+
+    # Show every order on the platform, newest first, with related rows joined
+    def get_queryset(self):
+        return Order.objects.all().select_related('buyer', 'seller', 'batch').order_by('-created_at')
+
+
+@method_decorator(role_required('admin'), name='dispatch')
+# Admin page: all users with pagination; rows link to the user detail page
+class RecentUsersView(LoginRequiredMixin, ListView):
+    model = User
+    template_name = 'panel/users/list.html'
+    context_object_name = 'users'
+    paginate_by = 20
+
+    # Show every registered user, newest first
+    def get_queryset(self):
+        return User.objects.all().order_by('-date_joined')
 
 
 # Lists product manager accounts awaiting admin approval

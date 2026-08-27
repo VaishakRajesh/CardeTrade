@@ -14,6 +14,10 @@ urlpatterns = [
     # Admin dashboard with platform-wide statistics
     path('dashboard/', views.AdminDashboardView.as_view(), name='dashboard'),
 
+    # Admin lists (Recent Orders / Recent Users)
+    path('orders/', views.RecentOrdersView.as_view(), name='recent_orders'),
+    path('users/', views.RecentUsersView.as_view(), name='recent_users'),
+
     # PM Management
     path('pm/pending/', views.PendingPMListView.as_view(), name='pm_pending_list'),
     path('pm/<int:pk>/', views.PMDetailView.as_view(), name='pm_detail'),
