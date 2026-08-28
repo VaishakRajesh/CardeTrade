@@ -9,6 +9,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models import F, ExpressionWrapper, DecimalField, GeneratedField
 from django.utils import timezone
+from django.utils.functional import cached_property
 from farmer.models import Batch
 
 
@@ -45,16 +46,15 @@ class Listing(models.Model):
         bid = self.bids.filter(status='active').order_by('-bid_price_per_kg').first()
         return bid
 
-    # Returns the number of active bids (cached if annotated in queryset)
-    @property
+    # Returns the number of active bids; uses the ``active_bid_count``
+    # annotation when a list view provides one, otherwise queries once and
+    # caches the result on the instance.
+    @cached_property
     def bid_count(self):
-        if hasattr(self, '_bid_count_cache'):
-            return self._bid_count_cache
+        annotated = self.__dict__.get('active_bid_count')
+        if annotated is not None:
+            return annotated
         return self.bids.filter(status='active').count()
-
-    @bid_count.setter
-    def bid_count(self, value):
-        self._bid_count_cache = value
 
     # Returns the time left before the auction ends, or None if expired
     @property

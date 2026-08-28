@@ -8,16 +8,17 @@ management, messaging conversations, and dispute handling.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.http import HttpResponseForbidden
 from django.db.models import Q
 from .decorators import role_required
 from .forms import RegistrationForm, LoginForm, UserProfileForm
-from accounts.models import User, Conversation, ConversationParticipant, Message, Dispute
+from accounts.models import User, Conversation, ConversationParticipant, Message, Dispute, AuditLog
 from farmer.models import Batch
 from trader.models import Order
 
@@ -64,7 +65,7 @@ class RegisterView(CreateView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse_lazy('accounts:dashboard')
+        return reverse('accounts:dashboard')
 
 
 # Handles user login with email-based authentication
@@ -105,20 +106,60 @@ class LogoutView(TemplateView):
         return redirect('accounts:login')
 
 
-# Allows authenticated users to view and edit their own profile
-class ProfileView(LoginRequiredMixin, UpdateView):
-    model = User
-    form_class = UserProfileForm
+# Allows authenticated users to view/edit profile and change password on the same page (all roles)
+class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/profile.html'
-    success_url = reverse_lazy('accounts:profile')
 
-    # Always edit the currently logged-in user's profile
-    def get_object(self, queryset=None):
-        return self.request.user
+    # Provide both forms: profile_form/form (same object for backwards compat) + password_form
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if 'profile_form' not in kwargs and 'form' not in kwargs:
+            profile_form = UserProfileForm(instance=self.request.user)
+            context['profile_form'] = profile_form
+            context['form'] = profile_form
+        elif 'profile_form' in kwargs:
+            context['form'] = kwargs['profile_form']
+        if 'password_form' not in kwargs:
+            # kwargs may already contain password_form on POST error re-render
+            if 'password_form' not in context:
+                context['password_form'] = PasswordChangeForm(user=self.request.user)
+        return context
 
-    def form_valid(self, form):
-        messages.success(self.request, "Profile updated successfully!")
-        return super().form_valid(form)
+    def post(self, request, *args, **kwargs):
+        # Determine which card was submitted by button name
+        if 'update_profile' in request.POST:
+            profile_form = UserProfileForm(request.POST, instance=request.user)
+            password_form = PasswordChangeForm(user=request.user)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, "Profile updated successfully!")
+                return redirect('accounts:profile')
+            # Re-render with profile errors, keep empty password form
+            return self.render_to_response(self.get_context_data(profile_form=profile_form, password_form=password_form))
+
+        elif 'change_password' in request.POST:
+            profile_form = UserProfileForm(instance=request.user)
+            password_form = PasswordChangeForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                # Audit compliance (R6) — log password change, ignore audit failures
+                try:
+                    AuditLog.objects.create(
+                        user=request.user,
+                        action='user.password_changed',
+                        table_name=AuditLog.TableType.USER,
+                        record_id=request.user.pk,
+                        ip_address=request.META.get('REMOTE_ADDR', ''),
+                    )
+                except Exception:
+                    pass
+                messages.success(request, "Password changed successfully!")
+                return redirect('accounts:profile')
+            return self.render_to_response(self.get_context_data(profile_form=profile_form, password_form=password_form))
+
+        # Fallback (no recognized button) — treat as profile update
+        return self.get(request, *args, **kwargs)
 
 
 # Redirects users to their role-specific dashboard after login
@@ -222,7 +263,7 @@ class ConversationCreateView(LoginRequiredMixin, CreateView):
         return redirect('accounts:conversation_detail', pk=form.instance.pk)
 
     def get_success_url(self):
-        return reverse_lazy('accounts:conversation_list')
+        return reverse('accounts:conversation_list')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -255,7 +296,7 @@ class DisputeCreateView(LoginRequiredMixin, CreateView):
         return redirect('accounts:dispute_list')
 
     def get_success_url(self):
-        return reverse_lazy('accounts:dispute_list')
+        return reverse('accounts:dispute_list')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

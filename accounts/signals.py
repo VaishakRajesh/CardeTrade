@@ -13,6 +13,12 @@ from django.forms.models import model_to_dict
 from .models import Message, AuditLog
 from .middleware import get_current_user, get_current_ip
 
+# Real model classes for audit signal senders (string senders never fire)
+from farmer.models import Batch
+from pm.models import QualityVerification
+from trader.models import Listing, Bid, Order, Payment
+from accounts.models import Dispute
+
 
 # Update the parent conversation's last_message_at when a new message is sent
 @receiver(post_save, sender=Message)
@@ -62,21 +68,13 @@ def _write_audit(instance, action):
     )
 
 
-def _make_audit_receiver():
-    def _receiver(sender, instance, created, **kwargs):
-        _write_audit(instance, 'created' if created else 'updated')
-    return _receiver
+def _audit_receiver(sender, instance, created, **kwargs):
+    _write_audit(instance, 'created' if created else 'updated')
 
 
-for _model in [
-    'farmer.Batch',
-    'pm.QualityVerification',
-    'trader.Listing',
-    'trader.Bid',
-    'trader.Order',
-    'trader.Payment',
-    'accounts.Dispute',
-]:
-    receiver(post_save, sender=_model, dispatch_uid=f'audit_{_model}')(
-        _make_audit_receiver()
-    )
+for _model in (Batch, QualityVerification, Listing, Bid, Order, Payment, Dispute):
+    receiver(
+        post_save,
+        sender=_model,
+        dispatch_uid=f'audit_{_model._meta.app_label}_{_model.__name__}',
+    )(_audit_receiver)

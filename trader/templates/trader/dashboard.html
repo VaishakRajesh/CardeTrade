@@ -157,7 +157,11 @@
  <small class="text-muted">Rs {{ order.total_amount }}</small> {# Total order amount #}
  </div>
  {# Status badge colored by order status #}
- <span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span>
+  {% if order.payment_status == 'paid' %}
+  <span class="badge-premium badge-premium-success">{{ order.get_payment_status_display }}</span>
+  {% else %}
+  <span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ order.get_status_display }}</span>
+  {% endif %}
  </li>
  {% empty %}
  <li class="list-group-item text-center py-4 text-muted">No orders yet.</li>

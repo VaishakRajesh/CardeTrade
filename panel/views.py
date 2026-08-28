@@ -9,7 +9,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView, ListView, UpdateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.db.models import Sum
@@ -185,7 +185,7 @@ class DisputeResolveView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('accounts:dispute_list')
+        return reverse('accounts:dispute_list')
 
 
 # ---------------------------------------------------------------------------

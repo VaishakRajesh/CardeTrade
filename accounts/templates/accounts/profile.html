@@ -65,13 +65,41 @@
  </div>
   </div>
   {# ---- Submit button ---- #}
-  <button type="submit" class="btn-premium btn-premium-primary justify-content-center w-100 mt-4">
- <i class="bi bi-check-lg"></i> Update Profile
- </button>
- </form>
- </div>
- </div>
- </div>
- </div>
+  <button type="submit" name="update_profile" class="btn-premium btn-premium-primary justify-content-center w-100 mt-4">
+  <i class="bi bi-check-lg"></i> Update Profile
+  </button>
+  </form>
+  </div>
+  </div>
+  {# ---- Change Password (same page, all roles) ---- #}
+  <div class="card-premium mt-4">
+  <div class="card-header"><h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock me-2"></i> Change Password</h5></div>
+  <div class="card-body p-4">
+  <form method="post" novalidate>
+  {% csrf_token %}
+  <div class="mb-3">
+  <label class="fw-semibold small">Current Password</label>
+  <input type="password" name="old_password" class="form-premium {% if password_form.old_password.errors %}is-invalid{% endif %}" placeholder="Current password" autocomplete="current-password" required>
+  {% if password_form.old_password.errors %}<div class="invalid-feedback d-block">{{ password_form.old_password.errors|striptags }}</div>{% endif %}
+  </div>
+  <div class="mb-3">
+  <label class="fw-semibold small">New Password</label>
+  <input type="password" name="new_password1" class="form-premium {% if password_form.new_password1.errors %}is-invalid{% endif %}" placeholder="New password" autocomplete="new-password" required>
+  {% if password_form.new_password1.errors %}<div class="invalid-feedback d-block">{{ password_form.new_password1.errors|striptags }}</div>{% else %}<small class="text-muted">At least 8 characters, not common, not similar to your info.</small>{% endif %}
+  </div>
+  <div class="mb-3">
+  <label class="fw-semibold small">Confirm New Password</label>
+  <input type="password" name="new_password2" class="form-premium {% if password_form.new_password2.errors %}is-invalid{% endif %}" placeholder="Confirm new password" autocomplete="new-password" required>
+  {% if password_form.new_password2.errors %}<div class="invalid-feedback d-block">{{ password_form.new_password2.errors|striptags }}</div>{% endif %}
+  </div>
+  {% if password_form.non_field_errors %}<div class="alert alert-danger py-2 small">{{ password_form.non_field_errors|striptags }}</div>{% endif %}
+  <button type="submit" name="change_password" class="btn-premium btn-premium-primary justify-content-center w-100 mt-2">
+  <i class="bi bi-key me-1"></i> Change Password
+  </button>
+  </form>
+  </div>
+  </div>
+  </div>
+  </div>
 </div>
 {% endblock %}

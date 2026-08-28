@@ -1,67 +1,474 @@
-{% extends 'base.html' %} {# Inherit base layout with navbar, alerts, and footer #}
+{% extends 'base.html' %}
 {% load static %}
 
-{# ===== Order Payment Page (OrderPayView) ===== #}
-{# Payment form for a trader to pay for an order: method selector, reference number, and submit #}
-{% block title %}Pay Order {{ order.order_code }} - CardeTrade{% endblock %}
+{% block title %}Pay {{ order.order_code }} — Secure Checkout | CardeTrade{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-  <div class="col-md-6">
-  {# ---- Payment card: order summary + payment form ---- #}
-  <div class="card-premium">
-  <div class="card-header">
-  <h4 class="mb-0 fw-bold"><i class="bi bi-credit-card me-2"></i> Make Payment</h4>
+{# ---- Premium page header ---- #}
+<div class="page-header-premium" style="background:linear-gradient(135deg,var(--primary-dark) 0%, #1a3a2e 55%, var(--primary) 100%); padding: 7.5rem 0 2.5rem;">
+  <div class="page-header-bg">
+    <img src="{% static 'image/cardamom2.jpg' %}" alt="" onerror="this.style.display='none'">
   </div>
-  <div class="card-body p-4">
-  {# ---- Order summary section: order code, amount due, seller ---- #}
- <div class="mb-4 p-3" style="background:rgba(200,169,81,0.06);border-radius:var(--radius-sm);">
- <div class="d-flex justify-content-between mb-1">
- <span class="text-muted">Order</span>
- <span class="fw-bold">{{ order.order_code }}</span>
- </div>
- <div class="d-flex justify-content-between mb-1">
- <span class="text-muted">Amount Due</span>
- <span class="fw-bold fs-4" style="color:var(--primary);">Rs{{ order.total_amount }}</span>
- </div>
- <div class="d-flex justify-content-between">
- <span class="text-muted">Seller</span>
- <span class="fw-bold">{{ order.seller.username }}</span>
- </div>
- </div>
-
-  {# ---- Payment form ---- #}
-  <form method="post" novalidate>
-  {% csrf_token %}
-
-  {# -- Payment method selector: bank, mobile money, cash, or escrow -- #}
-  <div class="mb-3">
-  <label class="fw-semibold small">Payment Method *</label>
-  <select name="payment_method" class="form-premium" required>
-  <option value="">— Select Method —</option>
-  <option value="bank_transfer">Bank Transfer</option>
-  <option value="mobile_money">Mobile Money</option>
-  <option value="cash">Cash</option>
-  <option value="escrow">Escrow</option>
-  </select>
+  <div class="container position-relative" style="z-index:1;">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb breadcrumb-premium mb-2">
+        <li class="breadcrumb-item"><a href="{% url 'trader:order_list' %}">Orders</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'trader:order_detail' order.pk %}">{{ order.order_code }}</a></li>
+        <li class="breadcrumb-item active">Payment</li>
+      </ol>
+    </nav>
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <h2 class="mb-0" style="color:#fff;font-weight:800;letter-spacing:-0.5px;"><i class="bi bi-shield-lock me-2" style="color:var(--accent);"></i> Secure Checkout</h2>
+      <span class="badge" style="background:rgba(200,169,81,0.15);border:1px solid rgba(200,169,81,0.35);color:var(--accent);font-weight:700;letter-spacing:0.5px;"><i class="bi bi-dot"></i> DEMO — NO REAL CHARGE</span>
+      <span class="badge bg-light text-dark"><i class="bi bi-lock-fill me-1"></i> 256-bit SSL</span>
+    </div>
+    <p class="mb-0 mt-2" style="color:rgba(255,255,255,0.7);">Complete payment for <strong style="color:#fff;">{{ order.order_code }}</strong> • Seller: {{ order.seller.username }} • {{ order.quantity_kg }} kg @ Rs{{ order.price_per_kg }}/kg</p>
   </div>
-
-  {# -- Optional transaction reference input -- #}
-  <div class="mb-3">
-  <label class="fw-semibold small">Transaction Reference</label>
-  <input type="text" name="transaction_ref" class="form-premium" placeholder="Optional reference number">
-  <small class="text-muted">Leave blank for auto-generated reference</small>
-  </div>
-
-  {# -- Submit payment button with dynamic total amount -- #}
-  <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center mt-3">
- <i class="bi bi-check-lg"></i> Pay Rs{{ order.total_amount }}
- </button>
- </form>
- </div>
- </div>
- </div>
- </div>
 </div>
+
+<div class="container py-4 py-lg-5">
+  <div class="row g-4 align-items-start">
+
+    {# ===== LEFT — PAYMENT FORM ===== #}
+    <div class="col-lg-7">
+      <div class="card-premium payment-form-card">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));">
+          <h5 class="mb-0 fw-bold text-white"><i class="bi bi-credit-card-2-front me-2" style="color:var(--accent);"></i> Payment Details</h5>
+          <span class="small text-white-50 d-none d-md-inline"><i class="bi bi-shield-check me-1"></i> Encrypted & Secure</span>
+        </div>
+        <div class="card-body p-4 p-md-4">
+
+          <form method="post" id="paymentForm" novalidate>
+            {% csrf_token %}
+
+            {# Hidden fields that MakePaymentView actually reads — JS keeps them in sync #}
+            <input type="hidden" name="payment_method" id="hiddenPaymentMethod" value="bank_transfer">
+            <input type="hidden" name="transaction_ref" id="hiddenTransactionRef" value="">
+
+            {# Fallback for noscript / curl — hidden but functional if JS fails #}
+            <noscript>
+              <div class="alert alert-warning small">JavaScript is disabled. Use the fields below.</div>
+              <div class="mb-3">
+                <label class="fw-semibold small">Payment Method *</label>
+                <select name="payment_method" class="form-premium">
+                  <option value="bank_transfer">Card / Bank Transfer</option>
+                  <option value="mobile_money">Mobile Money / UPI</option>
+                  <option value="cash">Cash</option>
+                  <option value="escrow">Escrow</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="fw-semibold small">Transaction Reference</label>
+                <input type="text" name="transaction_ref" class="form-premium" placeholder="Optional — auto-generated if blank">
+              </div>
+            </noscript>
+
+            {# ---- Method selector as premium cards ---- #}
+            <label class="fw-bold small mb-2" style="letter-spacing:0.6px;color:var(--primary);">SELECT PAYMENT METHOD</label>
+            <div class="payment-method-grid mb-4">
+              <label class="payment-method-card selected" data-method="bank_transfer" role="button" tabindex="0">
+                <input type="radio" name="method_radio_visual" value="bank_transfer" checked hidden>
+                <div class="pmc-icon"><i class="bi bi-credit-card-2-front"></i></div>
+                <div class="pmc-body">
+                  <strong>Card</strong>
+                  <small>Debit / Credit</small>
+                </div>
+                <div class="pmc-check"><i class="bi bi-check-circle-fill"></i></div>
+                <div class="pmc-logos">
+                  <span class="pmc-logo">VISA</span><span class="pmc-logo">MC</span><span class="pmc-logo">RuPay</span>
+                </div>
+              </label>
+
+              <label class="payment-method-card" data-method="mobile_money" role="button" tabindex="0">
+                <input type="radio" name="method_radio_visual" value="mobile_money" hidden>
+                <div class="pmc-icon" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);"><i class="bi bi-phone"></i></div>
+                <div class="pmc-body"><strong>UPI</strong><small>Mobile Money</small></div>
+                <div class="pmc-check"><i class="bi bi-check-circle-fill"></i></div>
+              </label>
+
+              <label class="payment-method-card" data-method="cash" role="button" tabindex="0">
+                <input type="radio" name="method_radio_visual" value="cash" hidden>
+                <div class="pmc-icon" style="background:linear-gradient(135deg,#16a34a,#15803d);"><i class="bi bi-cash-stack"></i></div>
+                <div class="pmc-body"><strong>Cash</strong><small>On Delivery</small></div>
+                <div class="pmc-check"><i class="bi bi-check-circle-fill"></i></div>
+              </label>
+
+              <label class="payment-method-card" data-method="escrow" role="button" tabindex="0">
+                <input type="radio" name="method_radio_visual" value="escrow" hidden>
+                <div class="pmc-icon" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);"><i class="bi bi-shield-check"></i></div>
+                <div class="pmc-body"><strong>Escrow</strong><small>Protected</small></div>
+                <div class="pmc-check"><i class="bi bi-check-circle-fill"></i></div>
+              </label>
+            </div>
+
+            {# ---- CARD PANEL ---- #}
+            <div id="cardPanel" class="payment-panel">
+              {# Live card preview — flips to back on CVV focus #}
+              <div class="card-preview-wrap mb-4">
+                <div class="card-preview-inner" id="cardPreviewInner">
+                  {# FRONT #}
+                  <div class="card-preview-front">
+                    <div class="cpf-top">
+                      <div class="cpf-chip"></div>
+                      <div class="cpf-brand" id="previewBrand"><i class="bi bi-credit-card"></i><span> CARD</span></div>
+                    </div>
+                    <div class="cpf-number" id="previewNumber">•••• •••• •••• ••••</div>
+                    <div class="cpf-bottom">
+                      <div class="cpf-field"><label>CARDHOLDER NAME</label><div id="previewName">YOUR NAME</div></div>
+                      <div class="cpf-field text-end"><label>EXPIRES</label><div id="previewExpiry">MM/YY</div></div>
+                    </div>
+                    <div class="cpf-shimmer"></div>
+                  </div>
+                  {# BACK #}
+                  <div class="card-preview-back">
+                    <div class="cpb-stripe"></div>
+                    <div class="cpb-cvv"><label>CVV</label><span id="previewCvv">•••</span></div>
+                    <div class="cpb-brand-small" id="previewBrandBack">SECURE PAYMENT</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="fw-semibold small">Card Number *</label>
+                  <div class="payment-input-group">
+                    <input type="text" id="cardNumberInput" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="4242 4242 4242 4242" class="form-premium payment-input">
+                    <span class="payment-input-icon" id="cardNumberBrand"><i class="bi bi-credit-card"></i></span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <small class="text-muted" id="cardNumberHelp">Visa • Mastercard • Amex • RuPay • Discover</small>
+                    <small class="fw-bold" id="cardNumberError" style="color:#dc2626;display:none;"></small>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label class="fw-semibold small">Cardholder Name *</label>
+                  <input type="text" id="cardNameInput" autocomplete="cc-name" placeholder="John Doe" class="form-premium payment-input" maxlength="40">
+                  <small id="cardNameError" style="color:#dc2626;display:none;"></small>
+                </div>
+                <div class="col-6">
+                  <label class="fw-semibold small">Expiry (MM/YY) *</label>
+                  <input type="text" id="cardExpiryInput" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="12/30" class="form-premium payment-input">
+                  <small id="cardExpiryError" style="color:#dc2626;display:none;"></small>
+                </div>
+                <div class="col-6">
+                  <label class="fw-semibold small">CVV *</label>
+                  <div class="payment-input-group">
+                    <input type="password" id="cardCvvInput" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="123" class="form-premium payment-input">
+                    <button type="button" class="payment-input-icon btn p-0 border-0 bg-transparent" id="toggleCvv" aria-label="Show CVV"><i class="bi bi-eye"></i></button>
+                  </div>
+                  <small id="cardCvvError" style="color:#dc2626;display:none;"></small>
+                </div>
+              </div>
+
+              <div class="payment-demo-note mt-3">
+                <i class="bi bi-info-circle me-1"></i> <strong>Demo mode:</strong> No real charge. We validate live and only store <code>CARD-last4-timestamp</code> as reference.
+              </div>
+            </div>
+
+            {# ---- UPI PANEL ---- #}
+            <div id="upiPanel" class="payment-panel d-none">
+              <div class="payment-info-box">
+                <h6 class="fw-bold mb-2"><i class="bi bi-qr-code me-1"></i> UPI / Mobile Money</h6>
+                <p class="small text-muted mb-3">Pay via UPI ID, Google Pay, PhonePe, Paytm or mobile money wallet. Enter your UPI ID and reference.</p>
+                <label class="fw-semibold small">UPI ID <span class="text-muted">(optional)</span></label>
+                <input type="text" id="upiIdInput" placeholder="name@upi" class="form-premium mb-3">
+                <label class="fw-semibold small">Transaction Reference</label>
+                <input type="text" id="upiRefInput" placeholder="UPI ref — leave blank for auto" class="form-premium">
+                <small class="text-muted">Will be saved as your payment reference.</small>
+              </div>
+            </div>
+
+            {# ---- CASH PANEL ---- #}
+            <div id="cashPanel" class="payment-panel d-none">
+              <div class="payment-info-box">
+                <h6 class="fw-bold mb-2"><i class="bi bi-cash-stack me-1"></i> Cash on Delivery</h6>
+                <p class="small text-muted mb-3">Pay cash when the batch is delivered. No card needed. Confirm to place the order as paid on delivery.</p>
+                <label class="fw-semibold small">Reference / Note</label>
+                <input type="text" id="cashRefInput" placeholder="Optional note" class="form-premium">
+              </div>
+            </div>
+
+            {# ---- ESCROW PANEL ---- #}
+            <div id="escrowPanel" class="payment-panel d-none">
+              <div class="payment-info-box" style="border-left-color:var(--accent);">
+                <h6 class="fw-bold mb-2"><i class="bi bi-shield-lock me-1" style="color:var(--accent);"></i> Escrow Protected</h6>
+                <p class="small text-muted mb-3">Funds held securely until buyer confirms delivery. Safest for high-value cardamom trades.</p>
+                <label class="fw-semibold small">Escrow Reference</label>
+                <input type="text" id="escrowRefInput" placeholder="ESCROW reference — auto if blank" class="form-premium">
+                <small class="text-muted">Auto-generates <code>ESCROW-timestamp</code> if left blank.</small>
+              </div>
+            </div>
+
+            {# ---- Trust row ---- #}
+            <div class="payment-trust-row mt-4">
+              <span><i class="bi bi-lock-fill"></i> SSL 256-bit</span>
+              <span><i class="bi bi-shield-check"></i> PCI-DSS mock</span>
+              <span><i class="bi bi-patch-check"></i> Money-back</span>
+              <span class="d-none d-md-inline"><i class="bi bi-award"></i> CardeTrade Secure</span>
+            </div>
+
+            {# ---- Submit ---- #}
+            <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center mt-4" id="payBtn" style="padding:1rem;font-size:1.05rem;">
+              <span id="payBtnLabel"><i class="bi bi-lock-fill me-1"></i> Pay Rs{{ order.total_amount }}</span>
+              <span id="payBtnSpinner" class="d-none"><span class="spinner-border spinner-border-sm me-2"></span> Processing…</span>
+            </button>
+            <p class="text-center small text-muted mt-2 mb-0"><i class="bi bi-info-circle me-1"></i> Secure • Encrypted • No real money charged in demo</p>
+
+            <div class="d-flex gap-2 mt-3">
+              <a href="{% url 'trader:order_detail' order.pk %}" class="btn btn-outline-secondary w-50"><i class="bi bi-arrow-left"></i> Back to Order</a>
+              <a href="{% url 'trader:order_list' %}" class="btn btn-outline-success w-50"><i class="bi bi-list"></i> All Orders</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {# ===== RIGHT — ORDER SUMMARY ===== #}
+    <div class="col-lg-5">
+      <div class="card-premium sticky-summary">
+        <div class="card-header" style="background:rgba(200,169,81,0.08);border-bottom:1px solid rgba(200,169,81,0.15);">
+          <h6 class="mb-0 fw-bold" style="color:var(--primary);"><i class="bi bi-receipt me-2"></i> Order Summary</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-muted small">Order Code</span>
+              <span class="badge-premium badge-premium-gold">{{ order.order_code }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Seller</span><span class="fw-bold">{{ order.seller.username }}</span></div>
+            <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Buyer</span><span class="fw-bold">{{ order.buyer.username }}</span></div>
+            {% if order.batch %}
+            <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Batch</span><span class="fw-bold">{{ order.batch.batch_code }}</span></div>
+            {% endif %}
+            {% if order.listing %}
+            <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Listing</span><span class="fw-bold">#{{ order.listing.id }} • {{ order.listing.get_listing_type_display }}</span></div>
+            {% endif %}
+            <hr style="opacity:0.08;">
+            <div class="pricing-summary" style="background:none;padding:0;">
+              <div class="pricing-row"><span class="text-muted">Quantity</span><span class="fw-bold">{{ order.quantity_kg }} kg</span></div>
+              <div class="pricing-row"><span class="text-muted">Price per kg</span><span class="fw-bold">Rs{{ order.price_per_kg }}</span></div>
+              <div class="pricing-row"><span class="text-muted">Subtotal</span><span class="fw-bold">Rs{{ order.total_amount }}</span></div>
+              <div class="pricing-row"><span class="text-muted">Platform fee</span><span class="fw-bold" style="color:#16a34a;">Free</span></div>
+              <div class="pricing-row"><span class="text-muted">Shipping</span><span class="fw-bold">Included</span></div>
+              <div class="pricing-row pricing-total mb-0"><span>Total Due</span><span>Rs{{ order.total_amount }}</span></div>
+            </div>
+          </div>
+
+          <div class="px-4 pb-3">
+            <div class="d-flex align-items-center gap-2 p-3" style="background:rgba(26,77,46,0.04);border-radius:var(--radius-sm);border:1px solid rgba(26,77,46,0.06);">
+              <i class="bi bi-truck" style="font-size:1.4rem;color:var(--primary);"></i>
+              <div class="small">
+                <div class="fw-bold" style="color:var(--primary);">Delivery Protected</div>
+                <div class="text-muted">Tracking updates after payment. Escrow holds funds till delivery.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-4 pb-4">
+            <div class="d-flex flex-wrap gap-2 small">
+              <span class="badge bg-light text-dark border"><i class="bi bi-credit-card me-1"></i> Card</span>
+              <span class="badge bg-light text-dark border"><i class="bi bi-phone me-1"></i> UPI</span>
+              <span class="badge bg-light text-dark border"><i class="bi bi-cash me-1"></i> Cash</span>
+              <span class="badge bg-light text-dark border"><i class="bi bi-shield me-1"></i> Escrow</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-premium mt-3" style="border-left:4px solid var(--accent);">
+        <div class="card-body p-3 d-flex gap-3 align-items-start">
+          <i class="bi bi-headset" style="font-size:1.6rem;color:var(--accent);"></i>
+          <div class="small">
+            <div class="fw-bold">Need help?</div>
+            <div class="text-muted">Chat with support or raise a dispute from the order page after payment. We’re here 9am–7pm IST.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const hiddenMethod = document.getElementById('hiddenPaymentMethod');
+  const hiddenRef = document.getElementById('hiddenTransactionRef');
+  const payBtn = document.getElementById('payBtn');
+  const payLabel = document.getElementById('payBtnLabel');
+  const paySpinner = document.getElementById('payBtnSpinner');
+  const form = document.getElementById('paymentForm');
+  const methodCards = document.querySelectorAll('.payment-method-card');
+  const panels = { bank_transfer: document.getElementById('cardPanel'), mobile_money: document.getElementById('upiPanel'), cash: document.getElementById('cashPanel'), escrow: document.getElementById('escrowPanel') };
+  const cardNumberInput = document.getElementById('cardNumberInput');
+  const cardNameInput = document.getElementById('cardNameInput');
+  const cardExpiryInput = document.getElementById('cardExpiryInput');
+  const cardCvvInput = document.getElementById('cardCvvInput');
+  const previewNumber = document.getElementById('previewNumber');
+  const previewName = document.getElementById('previewName');
+  const previewExpiry = document.getElementById('previewExpiry');
+  const previewCvv = document.getElementById('previewCvv');
+  const previewBrand = document.getElementById('previewBrand');
+  const previewBrandBack = document.getElementById('previewBrandBack');
+  const cardBrandIcon = document.getElementById('cardNumberBrand');
+  const cardPreviewInner = document.getElementById('cardPreviewInner');
+  const toggleCvvBtn = document.getElementById('toggleCvv');
+
+  function setMethod(method) {
+    hiddenMethod.value = method;
+    methodCards.forEach(c => {
+      const isSel = c.dataset.method === method;
+      c.classList.toggle('selected', isSel);
+      const radio = c.querySelector('input[type=radio]');
+      if (radio) radio.checked = isSel;
+    });
+    Object.keys(panels).forEach(k => {
+      if (panels[k]) panels[k].classList.toggle('d-none', k !== method);
+    });
+  }
+  methodCards.forEach(card => {
+    card.addEventListener('click', () => setMethod(card.dataset.method));
+    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setMethod(card.dataset.method); }});
+  });
+
+  function detectBrand(num) {
+    const n = num.replace(/\s/g,'');
+    if (/^4/.test(n)) return {name:'VISA', icon:'bi-credit-card', color:'#1a1f71'};
+    if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return {name:'MASTERCARD', icon:'bi-credit-card-2-front', color:'#eb001b'};
+    if (/^3[47]/.test(n)) return {name:'AMEX', icon:'bi-credit-card-fill', color:'#2e77bb'};
+    if (/^6|^65|^81|^82/.test(n)) return {name:'RuPay', icon:'bi-credit-card-2-back', color:'#004d8f'};
+    if (/^6011|^622/.test(n)) return {name:'DISCOVER', icon:'bi-credit-card', color:'#ff6000'};
+    return {name:'CARD', icon:'bi-credit-card', color:'var(--accent)'};
+  }
+  function formatCardNumber(val) {
+    const digits = val.replace(/\D/g,'').slice(0,19);
+    const amex = /^3[47]/.test(digits);
+    if (amex) {
+      // 4-6-5 formatting for Amex
+      return digits.replace(/(\d{0,4})(\d{0,6})(\d{0,5})/, (m,a,b,c) => [a,b,c].filter(Boolean).join(' ')).trim();
+    }
+    return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+  }
+  function luhnCheck(num) {
+    const s = num.replace(/\s/g,'');
+    if (s.length < 13) return false;
+    let sum=0, dbl=false;
+    for (let i=s.length-1;i>=0;i--) { let d=parseInt(s[i],10); if(dbl){ d*=2; if(d>9)d-=9; } sum+=d; dbl=!dbl; }
+    return sum%10===0;
+  }
+
+  if (cardNumberInput) {
+    cardNumberInput.addEventListener('input', () => {
+      const formatted = formatCardNumber(cardNumberInput.value);
+      cardNumberInput.value = formatted;
+      const raw = formatted.replace(/\s/g,'');
+      previewNumber.textContent = formatted || '•••• •••• •••• ••••';
+      const brand = detectBrand(raw);
+      previewBrand.innerHTML = '<i class="bi '+brand.icon+'"></i><span> '+brand.name+'</span>';
+      previewBrandBack.textContent = brand.name + ' • SECURE';
+      cardBrandIcon.innerHTML = '<i class="bi '+brand.icon+'"></i>';
+      cardBrandIcon.style.color = brand.color;
+      const errEl = document.getElementById('cardNumberError');
+      if (raw.length >= 13) {
+        if (!luhnCheck(raw)) { errEl.textContent='Invalid card number'; errEl.style.display='block'; }
+        else { errEl.style.display='none'; }
+      } else { errEl.style.display='none'; }
+    });
+    cardNumberInput.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,19);
+      cardNumberInput.value = formatCardNumber(pasted);
+      cardNumberInput.dispatchEvent(new Event('input'));
+    });
+  }
+  if (cardNameInput) {
+    cardNameInput.addEventListener('input', () => {
+      previewName.textContent = (cardNameInput.value.trim().toUpperCase() || 'YOUR NAME');
+    });
+  }
+  if (cardExpiryInput) {
+    cardExpiryInput.addEventListener('input', () => {
+      let v = cardExpiryInput.value.replace(/\D/g,'').slice(0,4);
+      if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+      cardExpiryInput.value = v;
+      previewExpiry.textContent = v || 'MM/YY';
+      const errEl = document.getElementById('cardExpiryError');
+      if (v.length === 5) {
+        const mm = parseInt(v.split('/')[0],10), yy = parseInt(v.split('/')[1],10);
+        const now = new Date(); const curYY = now.getFullYear()%100, curMM = now.getMonth()+1;
+        if (mm <1 || mm>12) { errEl.textContent='Invalid month'; errEl.style.display='block'; }
+        else if (yy < curYY || (yy===curYY && mm < curMM)) { errEl.textContent='Card expired'; errEl.style.display='block'; }
+        else if (yy > curYY+20) { errEl.textContent='Invalid year'; errEl.style.display='block'; }
+        else { errEl.style.display='none'; }
+      } else { errEl.style.display='none'; }
+    });
+  }
+  if (cardCvvInput) {
+    cardCvvInput.addEventListener('input', () => {
+      previewCvv.textContent = cardCvvInput.value ? cardCvvInput.value.replace(/./g,'•') : '•••';
+      const errEl = document.getElementById('cardCvvError');
+      if (cardCvvInput.value && !/^[0-9]{3,4}$/.test(cardCvvInput.value)) { errEl.textContent='3-4 digits'; errEl.style.display='block'; }
+      else { errEl.style.display='none'; }
+    });
+    cardCvvInput.addEventListener('focus', () => { cardPreviewInner.classList.add('is-flipped'); });
+    cardCvvInput.addEventListener('blur', () => { cardPreviewInner.classList.remove('is-flipped'); });
+  }
+  if (toggleCvvBtn && cardCvvInput) {
+    toggleCvvBtn.addEventListener('click', () => {
+      const isPwd = cardCvvInput.type === 'password';
+      cardCvvInput.type = isPwd ? 'text' : 'password';
+      toggleCvvBtn.innerHTML = isPwd ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+    });
+  }
+
+  // Sync UPI/Cash/Escrow refs to hidden field live
+  const upiRef = document.getElementById('upiRefInput');
+  const cashRef = document.getElementById('cashRefInput');
+  const escrowRef = document.getElementById('escrowRefInput');
+  function syncNonCardRef() {
+    const m = hiddenMethod.value;
+    if (m === 'mobile_money' && upiRef) hiddenRef.value = upiRef.value.trim();
+    else if (m === 'cash' && cashRef) hiddenRef.value = cashRef.value.trim();
+    else if (m === 'escrow' && escrowRef) hiddenRef.value = escrowRef.value.trim();
+  }
+  if (upiRef) upiRef.addEventListener('input', syncNonCardRef);
+  if (cashRef) cashRef.addEventListener('input', syncNonCardRef);
+  if (escrowRef) escrowRef.addEventListener('input', syncNonCardRef);
+
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      // Always sync method already
+      const method = hiddenMethod.value;
+      if (method === 'bank_transfer') {
+        // Card path: build ref from last4
+        const raw = cardNumberInput ? cardNumberInput.value.replace(/\s/g,'') : '';
+        const name = cardNameInput ? cardNameInput.value.trim() : '';
+        const exp = cardExpiryInput ? cardExpiryInput.value.trim() : '';
+        const cvv = cardCvvInput ? cardCvvInput.value.trim() : '';
+        // Light front validation — block submit with inline messages (not just server)
+        let ok = true;
+        const nErr = document.getElementById('cardNumberError'), nameErr=document.getElementById('cardNameError'), expErr=document.getElementById('cardExpiryError'), cvvErr=document.getElementById('cardCvvError');
+        if (!raw || raw.length < 13) { nErr.textContent='Enter card number'; nErr.style.display='block'; ok=false; }
+        else if (!luhnCheck(raw)) { nErr.textContent='Invalid card number'; nErr.style.display='block'; ok=false; }
+        if (!name) { nameErr.textContent='Enter cardholder name'; nameErr.style.display='block'; ok=false; } else { nameErr.style.display='none'; }
+        if (!/^\d{2}\/\d{2}$/.test(exp)) { expErr.textContent='Enter MM/YY'; expErr.style.display='block'; ok=false; }
+        if (!/^[0-9]{3,4}$/.test(cvv)) { cvvErr.textContent='Enter CVV'; cvvErr.style.display='block'; ok=false; }
+        if (!ok) { e.preventDefault(); return; }
+        const last4 = raw.slice(-4);
+        hiddenRef.value = 'CARD-' + last4 + '-' + Date.now();
+      } else {
+        syncNonCardRef();
+        // let hiddenRef be as typed or empty (server generates MOCK)
+      }
+      // Button loading state
+      payBtn.disabled = true;
+      if (payLabel) payLabel.classList.add('d-none');
+      if (paySpinner) paySpinner.classList.remove('d-none');
+    });
+  }
+  // Init
+  setMethod('bank_transfer');
+})();
+</script>
 {% endblock %}

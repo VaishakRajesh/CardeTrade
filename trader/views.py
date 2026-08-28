@@ -10,7 +10,7 @@ from django.http import HttpResponseForbidden
 from django.views.generic import TemplateView, CreateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.db.models import Sum, Max, Count, Q
@@ -54,7 +54,7 @@ class ListingListView(ListView):
             .annotate(
                 highest_bid=Max('bids__bid_price_per_kg',
                     filter=Q(bids__status='active')),
-                bid_count=Count('bids',
+                active_bid_count=Count('bids',
                     filter=Q(bids__status='active')),
             )
 
@@ -94,7 +94,7 @@ class PlaceBidView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('trader:listing_detail', kwargs={'pk': self.listing.pk})
+        return reverse('trader:listing_detail', kwargs={'pk': self.listing.pk})
 
 
 @method_decorator(role_required('trader'), name='dispatch')
@@ -166,7 +166,8 @@ class MakePaymentView(LoginRequiredMixin, TemplateView):
         )
 
         order.payment_status = Order.PaymentStatus.PAID
-        order.save(update_fields=['payment_status'])
+        order.status = Order.Status.CONFIRMED
+        order.save(update_fields=['payment_status', 'status'])
 
         messages.success(request, f"Payment of Rs{order.total_amount} completed successfully!")
         return redirect('trader:order_detail', pk=order.pk)
@@ -197,8 +198,13 @@ class OrderTrackingCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.order = self.order
         form.instance.updated_by = self.request.user
+        response = super().form_valid(form)
+        # Propagate the tracking status onto the parent order so its
+        # fulfillment status reflects the latest update.
+        self.order.status = form.instance.status
+        self.order.save(update_fields=['status'])
         messages.success(self.request, "Tracking update added.")
-        return super().form_valid(form)
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -206,4 +212,4 @@ class OrderTrackingCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('trader:order_detail', kwargs={'pk': self.order.pk})
+        return reverse('trader:order_detail', kwargs={'pk': self.order.pk})

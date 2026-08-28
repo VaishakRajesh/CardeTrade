@@ -9,7 +9,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import TemplateView, CreateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.db.models import Sum
 from accounts.decorators import role_required
@@ -69,7 +69,7 @@ class FarmCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('farmer:farm_list')
+        return reverse('farmer:farm_list')
 
 
 @method_decorator(role_required('farmer'), name='dispatch')
@@ -86,7 +86,7 @@ class BatchCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('farmer:batch_list')
+        return reverse('farmer:batch_list')
 
     # Limit farm choices to only those owned by the current farmer
     def get_form(self, form_class=None):
@@ -129,10 +129,6 @@ class MyBidsView(LoginRequiredMixin, ListView):
         from trader.models import Bid
         return Bid.objects.filter(listing__farmer=self.request.user).select_related('trader', 'listing__batch')
 
-    def get_model(self):
-        from trader.models import Bid
-        return Bid
-
 
 # Lists orders where the current farmer is the seller
 @method_decorator(role_required('farmer'), name='dispatch')
@@ -144,10 +140,6 @@ class OrderListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         from trader.models import Order
         return Order.objects.filter(seller=self.request.user).select_related('buyer', 'batch')
-
-    def get_model(self):
-        from trader.models import Order
-        return Order
 
 
 # Handles bid acceptance: marks other bids as outbid and creates an order

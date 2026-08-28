@@ -27,5 +27,12 @@ class AuditMiddleware:
 
     def __call__(self, request):
         _thread_locals.user = getattr(request, 'user', None)
-        _thread_locals.ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
-        return self.get_response(request)
+        _thread_locals.ip = request.META.get('HTTP_X_FORWARDED_FOR',
+                                             request.META.get('REMOTE_ADDR', ''))
+        try:
+            return self.get_response(request)
+        finally:
+            # Clear thread-locals so a stale user/ip can't leak into the next
+            # request handled by the same (pooled) worker thread.
+            _thread_locals.user = None
+            _thread_locals.ip = None

@@ -31,10 +31,10 @@
  <div class="card-header bg-white d-flex justify-content-between align-items-center">
  <h4 class="mb-0 fw-bold">{{ order.order_code }}</h4>
  <div>
- <!-- {# Order status badge — colour changes based on status value. #}
- <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}primary{% else %}secondary{% endif %} fs-6 me-2">{{ order.get_status_display }}</span> -->
- {# Payment status badge. #}
- <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'unpaid' %}secondary{% elif order.payment_status == 'refunded' %}danger{% else %}warning{% endif %} fs-6">{{ order.get_payment_status_display }}</span>
+  {# Order status badge — handles legacy paid orders whose status is still pending. #}
+  <span class="badge bg-{% if order.payment_status == 'paid' and order.status == 'pending' %}success{% elif order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}primary{% else %}secondary{% endif %} fs-6 me-2">{% if order.payment_status == 'paid' and order.status == 'pending' %}Confirmed{% else %}{{ order.get_status_display }}{% endif %}</span>
+  {# Payment status badge. #}
+  <span class="badge bg-{% if order.payment_status == 'paid' %}success{% elif order.payment_status == 'unpaid' %}secondary{% elif order.payment_status == 'refunded' %}danger{% else %}warning{% endif %} fs-6">{{ order.get_payment_status_display }}</span>
  </div>
  </div>
  <div class="card-body">

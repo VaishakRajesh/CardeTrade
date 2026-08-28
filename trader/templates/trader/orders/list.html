@@ -79,7 +79,7 @@
  - processing → primary (dark blue)
  - else → secondary (grey)
  -------------------------------------------------- -->
- <td><span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}primary{% else %}secondary{% endif %}">{{ order.get_status_display }}</span></td>
+  <td>{% if order.payment_status == 'paid' %}<span class="badge-premium badge-premium-success">{{ order.get_payment_status_display }}</span>{% else %}<span class="badge-premium badge-premium-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% elif order.status == 'processing' %}primary{% else %}secondary{% endif %}">{{ order.get_status_display }}</span>{% endif %}</td>
  <!-- --------------------------------------------------
  PAYMENT STATUS BADGE
  Dynamic colour coding:
