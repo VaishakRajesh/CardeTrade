@@ -19,8 +19,8 @@
     </nav>
     <div class="d-flex flex-wrap align-items-center gap-3">
       <h2 class="mb-0" style="color:#fff;font-weight:800;letter-spacing:-0.5px;"><i class="bi bi-shield-lock me-2" style="color:var(--accent);"></i> Secure Checkout</h2>
-      <span class="badge" style="background:rgba(200,169,81,0.15);border:1px solid rgba(200,169,81,0.35);color:var(--accent);font-weight:700;letter-spacing:0.5px;"><i class="bi bi-dot"></i> DEMO — NO REAL CHARGE</span>
-      <span class="badge bg-light text-dark"><i class="bi bi-lock-fill me-1"></i> 256-bit SSL</span>
+      <!-- <span class="badge" style="background:rgba(200,169,81,0.15);border:1px solid rgba(200,169,81,0.35);color:var(--accent);font-weight:700;letter-spacing:0.5px;"><i class="bi bi-dot"></i> DEMO — NO REAL CHARGE</span>
+      <span class="badge bg-light text-dark"><i class="bi bi-lock-fill me-1"></i> 256-bit SSL</span> -->
     </div>
     <p class="mb-0 mt-2" style="color:rgba(255,255,255,0.7);">Complete payment for <strong style="color:#fff;">{{ order.order_code }}</strong> • Seller: {{ order.seller.username }} • {{ order.quantity_kg }} kg @ Rs{{ order.price_per_kg }}/kg</p>
   </div>
@@ -93,12 +93,12 @@
                 <div class="pmc-check"><i class="bi bi-check-circle-fill"></i></div>
               </label>
 
-              <label class="payment-method-card" data-method="escrow" role="button" tabindex="0">
+              <!-- <label class="payment-method-card" data-method="escrow" role="button" tabindex="0">
                 <input type="radio" name="method_radio_visual" value="escrow" hidden>
                 <div class="pmc-icon" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);"><i class="bi bi-shield-check"></i></div>
                 <div class="pmc-body"><strong>Escrow</strong><small>Protected</small></div>
                 <div class="pmc-check"><i class="bi bi-check-circle-fill"></i></div>
-              </label>
+              </label> -->
             </div>
 
             {# ---- CARD PANEL ---- #}
@@ -269,20 +269,20 @@
               <span class="badge bg-light text-dark border"><i class="bi bi-credit-card me-1"></i> Card</span>
               <span class="badge bg-light text-dark border"><i class="bi bi-phone me-1"></i> UPI</span>
               <span class="badge bg-light text-dark border"><i class="bi bi-cash me-1"></i> Cash</span>
-              <span class="badge bg-light text-dark border"><i class="bi bi-shield me-1"></i> Escrow</span>
+              <!-- <span class="badge bg-light text-dark border"><i class="bi bi-shield me-1"></i> Escrow</span> -->
             </div>
           </div>
         </div>
       </div>
 
       <div class="card-premium mt-3" style="border-left:4px solid var(--accent);">
-        <div class="card-body p-3 d-flex gap-3 align-items-start">
+        <!-- <div class="card-body p-3 d-flex gap-3 align-items-start">
           <i class="bi bi-headset" style="font-size:1.6rem;color:var(--accent);"></i>
           <div class="small">
             <div class="fw-bold">Need help?</div>
             <div class="text-muted">Chat with support or raise a dispute from the order page after payment. We’re here 9am–7pm IST.</div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 

@@ -32,22 +32,6 @@ These happen when 2 users act at the same second. Locally on SQLite you won’t 
 
 ---
 
-## 🟡 Shit UI — What Looks Bad (User Experience)
-
-| # | Page | Why It’s Shit | How It Should Look |
-|---|------|---------------|--------------------|
-| **U1** | **Payment Page (old)** | Only dropdown + text box, no card, no feel, looks like admin form | **FIXED ✓** — now 2-col premium: card preview (front/back flip), method cards (Card/UPI/Cash/Escrow), live formatting, trust badges, sticky summary |
-| **U2** | Order Detail | Basic Bootstrap table, no timeline design, hard to read | Use `timeline-premium` + `card-premium` like payment page, color badges |
-| **U3** | Listing Cards | Image no hover, price small, no stock bar | Add hover zoom, `available_qty` progress bar, grade badge prominent |
-| **U4** | Bidding Form (on listing detail) | Plain inputs, no min/max hint, no live highest bid | Add `min = current_highest+1`, live validation, show “You are top bidder” |
-| **U5** | Empty States | Shows blank table when no data | Show friendly `empty-state-premium` with icon + “Create Batch” button |
-| **U6** | Mobile Navbar | Transparent breaks, particles hide text | Always opaque on <768px (already fixed for landing, need for dashboard) |
-| **U7** | Dashboards (Farmer/Trader/PM) | Stat cards okay, but no recent activity feed | Add 5-row activity feed + quick actions |
-
-> **Rule:** Every page should use `card-premium`, `btn-premium`, `badge-premium` and `Bootstrap Icons` — no plain `card`/`btn-primary`.
-
----
-
 ## 🟠 Other Messy / Lazy Code (Not Crash, But Dirty)
 
 | # | File | What’s Wrong | Why Fix It |
@@ -115,3 +99,6 @@ Run also: `python manage.py check` → `0 issues`, `python manage.py test` → g
 ## error
 
 ## test
+
+## cc
+cc no: 4111 1111 1111 1111
