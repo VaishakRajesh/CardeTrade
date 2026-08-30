@@ -341,6 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * the transform when the mouse leaves the card.
  */
 (function initTiltCards() {
+ return; // hover tilt disabled - no translate/rotate on mousemove
  const cards = document.querySelectorAll('.feature-card-landing');
  if (cards.length === 0) return;
 
