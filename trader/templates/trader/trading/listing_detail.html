@@ -192,8 +192,19 @@
    </div>
   </div>
 
-  {% if user.role == 'farmer' and listing.farmer == user and listing.is_active %}
-  <div class="card-premium mb-4">
+   {% if user.is_authenticated and user != listing.farmer %}
+   <div class="card-premium mb-4">
+    <div class="card-body text-center">
+      <a href="{% url 'accounts:conversation_create' listing.batch.pk %}" class="btn-premium btn-premium-secondary w-100 justify-content-center">
+        <i class="bi bi-chat-dots me-1"></i> Ask About This Batch
+      </a>
+      <small class="text-muted d-block mt-2">Chat with {{ listing.farmer.username }}</small>
+    </div>
+   </div>
+   {% endif %}
+
+   {% if user.role == 'farmer' and listing.farmer == user and listing.is_active %}
+   <div class="card-premium mb-4">
    <div class="card-header"><h5 class="mb-0 fw-bold"><i class="bi bi-person-check me-2"></i> Manage Auction</h5></div>
    <div class="card-body text-center">
    <p class="text-muted small">Accept the highest bid to create an order.</p>

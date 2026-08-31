@@ -36,7 +36,9 @@
  {# ---- Top navigation bar ---- #}
  {% include 'includes/navbar.html' %}
  {# ---- Django messages / alerts ---- #}
- {% include 'includes/alerts.html' %}
+<div style="padding-top: 3.8rem;"> {# spacer for fixed navbar #}
+  {% include 'includes/alerts.html' %}
+</div>
 
  {% if user.is_authenticated %} {# ---- AI chatbot floating widget (authenticated users only) ---- #}
   {% include 'includes/chatbot_widget.html' %}

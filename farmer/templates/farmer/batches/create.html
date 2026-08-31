@@ -81,8 +81,21 @@
  {# Harvest date — native date picker (HTML5 input type="date") #}
  <div class="col-md-6 mb-3">
  <label class="form-label">Harvest Date *</label>
- <input type="date" name="harvest_date" class="form-premium" required>
+<input type="date" name="harvest_date" class="form-premium" required max="{{ today|date:'Y-m-d' }}" id="harvestDate">
  </div>
+ <script>
+  // Set max to today if server didn't pass `today`
+  const el = document.getElementById('harvestDate');
+  if(el && !el.max){
+    el.max = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  }
+  el.addEventListener('change', function(){
+    if(this.value > this.max){
+      alert("Harvest date cannot be in the future");
+      this.value = this.max;
+    }
+  });
+</script>
  <!-- Estimated price per kg — the farmer's initial price expectation.
  This will be replaced by the PM's verified price later. -->
  <div class="col-md-6 mb-3">

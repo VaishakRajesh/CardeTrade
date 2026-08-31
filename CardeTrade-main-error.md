@@ -100,5 +100,7 @@ Run also: `python manage.py check` → `0 issues`, `python manage.py test` → g
 
 ## test
 
-## cc
+## notes
 cc no: 4111 1111 1111 1111
+
+Cardamom cultivation in Kerala is primarily centered in the Idukki district, particularly across the famous Cardamom Hills (Yela Mala) in the Western Ghats.Key Cultivation HubsMajor towns and areas known for extensive cardamom farming include:Vandanmedu (home to one of the largest cardamom auctions)KumilyNedumkandamUdumbancholaVattavada, Santhanpara, and Pooppara

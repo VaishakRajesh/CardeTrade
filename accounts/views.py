@@ -257,9 +257,9 @@ class ConversationCreateView(LoginRequiredMixin, CreateView):
             ConversationParticipant.objects.create(
                 conversation=form.instance,
                 user=other_user,
-                role_in_chat='product_manager' if other_user.role == 'product_manager' else 'farmer'
+                role_in_chat=other_user.role
             )
-        messages.success(request, "Conversation started!")
+        messages.success(self.request, "Conversation started!")
         return redirect('accounts:conversation_detail', pk=form.instance.pk)
 
     def get_success_url(self):
