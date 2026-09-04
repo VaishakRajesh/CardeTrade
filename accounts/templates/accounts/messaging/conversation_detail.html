@@ -43,29 +43,28 @@
   <div class="card-premium">
 
   {# ---- CARD HEADER ---- #}
-  <!-- --- CARD HEADER ---
- Shows the other participant's name, conversation subject,
- type label, and a status badge. -->
  <div class="card-header d-flex justify-content-between align-items-center">
  <div>
  <h5 class="mb-0">
  <i class="bi bi-chat-dots me-2"></i>
- {# Display all participants except the current user. #}
  {% for p in conversation.participants.all %}
  {% if p.user != user %}{{ p.user.username }}{% endif %}
  {% endfor %}
- {# If a subject exists, append it after an em dash. #}
  {% if conversation.subject %} — {{ conversation.subject }}{% endif %}
  </h5>
- {# Small text showing the conversation type (e.g."Quality Review"). #}
- <small class="opacity-75">{{ conversation.get_type_display }}</small>
+ <small class="opacity-75">{{ conversation.get_type_display }} {% if conversation.batch %}· {{ conversation.batch.batch_code }}{% endif %}</small>
  </div>
- <!-- Status badge: color changes based on conversation status.
- open = success (green),
- archived = secondary (grey),
- locked = warning (yellow). -->
  <span class="badge-premium badge-premium-{% if conversation.status == 'open' %}success{% elif conversation.status == 'archived' %}secondary{% else %}warning{% endif %}">{{ conversation.get_status_display }}</span>
  </div>
+ {% if conversation.batch %}
+ <div class="px-3 py-2 bg-light border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+  <small class="text-muted"><i class="bi bi-box-seam me-1"></i><b style="color:var(--primary)">{{ conversation.batch.batch_code }}</b> · {{ conversation.batch.quantity_kg }}kg · Rs{{ conversation.batch.estimated_price_per_kg }}/kg · {{ conversation.batch.get_status_display }}</small>
+  <a href="{% url 'farmer:batch_detail' conversation.batch.pk %}" class="btn btn-sm btn-outline-success" style="font-size:0.75rem; padding:0.25rem 0.6rem;">View Batch</a>
+ </div>
+ {% endif %}
+ {% if conversation.status == 'locked' %}
+ <div class="alert alert-warning rounded-0 mb-0 py-2 small text-center"><i class="bi bi-lock me-1"></i> This conversation is locked by admin. You cannot send new messages.</div>
+ {% endif %}
 
   {# ---- MESSAGE LIST (scrollable container) ---- #}
   <!-- --- MESSAGE LIST (scrollable container) ---
@@ -73,57 +72,43 @@
 "chatContainer" so JavaScript can auto-scroll to bottom. -->
  <div class="chat-container" id="chatContainer">
 
- <!-- Loop through every message in the conversation,
- ordered by sent_at (oldest first). -->
  {% for msg in conversation.messages.all %}
-
- <!-- Each message row: if the sender is the current user,
- align the bubble to the right (justify-content-end).
- Otherwise it aligns left. -->
+ {% if msg.is_deleted %}
+ <div class="text-center small text-muted my-2"><i class="bi bi-trash me-1"></i> Message deleted</div>
+ {% else %}
  <div class="d-flex mb-3 {% if msg.sender == user %}justify-content-end{% endif %}">
- <!-- The speech-bubble itself: gets class 'sent' for outgoing
- messages or 'received' for incoming messages. -->
  <div class="msg-bubble {% if msg.sender == user %}sent{% else %}received{% endif %}">
- <!-- For incoming messages, show the sender's name above
- the content. Not shown for own messages. -->
  {% if msg.sender != user %}
- <small class="fw-bold d-block" style="color:var(--accent);">{{ msg.sender.username }}</small>
+ <small class="fw-bold d-block" style="color:var(--accent);">{{ msg.sender.username }} <span class="fw-normal text-muted">({{ msg.sender.get_role_display }})</span></small>
  {% endif %}
- {# The actual message text content. #}
  {{ msg.content }}
- <!-- Timestamp displayed right-aligned below the message,
- formatted as HH:MM (24-hour). -->
- <div class="msg-time text-end">{{ msg.sent_at|date:"H:i" }}</div>
+ <div class="msg-time text-end">{{ msg.sent_at|date:"H:i d M" }}</div>
  </div>
  </div>
-
- {# If there are zero messages, show an empty-state prompt. #}
+ {% endif %}
  {% empty %}
  <div class="text-center py-5 text-muted">
  <i class="bi bi-chat fs-1 d-block mb-2"></i>
- No messages yet. Start the conversation.
+ No messages yet. Say hi to {% for p in conversation.participants.all %}{% if p.user != user %}{{ p.user.username }}{% endif %}{% endfor %}!
  </div>
  {% endfor %}
 
  </div>
 
   {# ---- REPLY FORM ---- #}
-  <!-- --- REPLY FORM ---
- A form at the bottom of the card that POSTs a new message.
- The top border separates it from the message history. -->
+ {% if conversation.status == 'locked' %}
+ <div class="card-body border-top bg-light text-center text-muted small">Locked — contact admin to reopen.</div>
+ {% else %}
  <div class="card-body border-top">
  <form method="post" class="d-flex gap-2">
- {# CSRF token: security measure required by Django for all POST forms. #}
  {% csrf_token %}
- <!-- Text input for the message body. Uses the custom form-premium
- styling class. Required and gets autofocus when page loads. -->
- <input type="text" name="content" class="form-premium" placeholder="Type your message..." required autofocus>
- {# Submit button with a send icon. #}
- <button type="submit" class="btn-premium btn-premium-primary" style="padding:0.75rem 1.5rem;">
+ <input type="text" name="content" class="form-premium" placeholder="Type your message..." required autofocus {% if conversation.status != 'open' %}disabled{% endif %}>
+ <button type="submit" class="btn-premium btn-premium-primary" style="padding:0.75rem 1.5rem;" {% if conversation.status != 'open' %}disabled{% endif %}>
  <i class="bi bi-send"></i>
  </button>
  </form>
  </div>
+ {% endif %}
 
  </div>{# /card-premium #}
  </div>

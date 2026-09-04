@@ -189,7 +189,7 @@ class ConversationListView(LoginRequiredMixin, ListView):
         return Conversation.objects.filter(
             participants__user=self.request.user,
             participants__is_active=True
-        ).prefetch_related('participants__user').order_by('-last_message_at')
+        ).prefetch_related('participants__user', 'messages__sender').order_by('-last_message_at')
 
 
 @method_decorator(role_required('farmer', 'trader', 'product_manager', 'admin'), name='dispatch')
@@ -218,6 +218,10 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
     # Handle sending a new message in this conversation
     def post(self, request, *args, **kwargs):
         conversation = self.get_object()
+        # Block posting if conversation is locked/archived
+        if conversation.status == Conversation.Status.LOCKED:
+            messages.error(request, "This conversation is locked by admin.")
+            return redirect('accounts:conversation_detail', pk=conversation.pk)
         content = request.POST.get('content', '').strip()
         if content:
             Message.objects.create(
@@ -228,7 +232,7 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
         return redirect('accounts:conversation_detail', pk=conversation.pk)
 
 
-@method_decorator(role_required('farmer', 'trader'), name='dispatch')
+@method_decorator(role_required('farmer', 'trader', 'product_manager', 'admin'), name='dispatch')
 # Creates a new conversation tied to a specific batch
 class ConversationCreateView(LoginRequiredMixin, CreateView):
     model = Conversation
@@ -240,25 +244,50 @@ class ConversationCreateView(LoginRequiredMixin, CreateView):
         self.batch = get_object_or_404(Batch, pk=kwargs.get('batch_pk', 0))
         return super().dispatch(request, *args, **kwargs)
 
-    # Save the conversation, add participants (current user + batch farmer/PM)
+    # Save the conversation, add participants (reuse if Farmer+Trader+Batch already exists)
     def form_valid(self, form):
-        form.instance.batch = self.batch
-        form.instance.type = Conversation.Type.BATCH_INQUIRY
-        form.save()
+        from django.db import transaction
 
-        ConversationParticipant.objects.create(
-            conversation=form.instance,
-            user=self.request.user,
-            role_in_chat=self.request.user.role
-        )
+        # Reuse existing 1-to-1 Farmer-Trader-Batch conversation to avoid duplicates
+        existing = Conversation.objects.filter(
+            batch=self.batch,
+            participants__user=self.request.user,
+        ).filter(
+            participants__user=self.batch.farmer
+        ).first()
+        if existing and existing.participants.filter(is_active=True).count() == 2:
+            # Ensure both participants still active, reuse it
+            messages.info(self.request, "Conversation already exists, opened it.")
+            return redirect('accounts:conversation_detail', pk=existing.pk)
 
-        other_user = self.batch.farmer if self.request.user != self.batch.farmer else User.objects.filter(role='product_manager').first()
-        if other_user:
+        with transaction.atomic():
+            form.instance.batch = self.batch
+            form.instance.type = Conversation.Type.BATCH_INQUIRY
+            form.instance.status = Conversation.Status.OPEN
+            form.save()
+
             ConversationParticipant.objects.create(
                 conversation=form.instance,
-                user=other_user,
-                role_in_chat=other_user.role
+                user=self.request.user,
+                role_in_chat=self.request.user.role
             )
+
+            other_user = self.batch.farmer
+            if other_user != self.request.user:
+                ConversationParticipant.objects.create(
+                    conversation=form.instance,
+                    user=other_user,
+                    role_in_chat=other_user.role
+                )
+            else:
+                # Farmer chatting about own batch with PM - pick first PM as counterpart
+                pm = User.objects.filter(role='product_manager').first()
+                if pm:
+                    ConversationParticipant.objects.create(
+                        conversation=form.instance,
+                        user=pm,
+                        role_in_chat=pm.role
+                    )
         messages.success(self.request, "Conversation started!")
         return redirect('accounts:conversation_detail', pk=form.instance.pk)
 
@@ -292,7 +321,7 @@ class DisputeCreateView(LoginRequiredMixin, CreateView):
         form.save()
         self.order.status = Order.Status.DISPUTED
         self.order.save(update_fields=['status'])
-        messages.success(request, "Dispute raised. An admin will review it shortly.")
+        messages.success(self.request, "Dispute raised. An admin will review it shortly.")
         return redirect('accounts:dispute_list')
 
     def get_success_url(self):

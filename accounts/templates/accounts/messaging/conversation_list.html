@@ -74,16 +74,12 @@
  </div>
 
  {# Bottom row: conversation type badge and last message preview. #}
- <small class="text-muted">
- <!-- Badge color changes based on conversation type:
- quality_review = primary (blue),
- order_support = warning (yellow),
- everything else = secondary (grey). -->
+  <small class="text-muted d-flex flex-wrap gap-1 align-items-center">
  <span class="badge-premium badge-premium-{% if conversation.type == 'quality_review' %}primary{% elif conversation.type == 'order_support' %}warning{% else %}secondary{% endif %} badge-premium-sm" style="font-size:0.65rem;">{{ conversation.get_type_display }}</span>
- <!-- Grab the last message in the conversation and show its
- first 60 characters. Falls back to"No messages". -->
+ {% if conversation.batch %}<span class="badge-premium badge-premium-secondary badge-premium-sm" style="font-size:0.65rem;">{{ conversation.batch.batch_code }}</span>{% endif %}
+ {% if conversation.status == 'locked' %}<span class="badge-premium badge-premium-warning badge-premium-sm" style="font-size:0.65rem;">Locked</span>{% endif %}
  {% with last_msg=conversation.messages.last %}
- {{ last_msg.content|truncatechars:60|default:"No messages" }}
+ <span class="text-truncate" style="max-width:280px;">{{ last_msg.content|truncatechars:60|default:"No messages" }}</span>
  {% endwith %}
  </small>
  </div>

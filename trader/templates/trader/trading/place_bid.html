@@ -78,16 +78,19 @@
  <small class="text-muted">Minimum bid: Rs {{ listing.price_per_kg }}/kg</small>
  </div>
 
- <!-- --------------------------------------------------
- FIELD: Quantity in kg
- --------------------------------------------------
- The user specifies how many kg they want to bid on.
- The maximum value is the listing's remaining quantity. -->
- <div class="mb-3">
- <label class="fw-semibold small">Quantity (kg) *</label>
- <input type="number" name="quantity_kg" step="0.01" class="form-premium" placeholder="e.g. 100" max="{{ listing.available_qty_kg }}" required>
- <small class="text-muted">Maximum available: {{ listing.available_qty_kg }} kg</small>
- </div>
+  <!-- --------------------------------------------------
+  FIELD: Quantity in kg (FULL-BATCH ONLY)
+  --------------------------------------------------
+  Partial bids not allowed: display the full available
+  quantity as fixed text + hidden field. Server
+  (PlaceBidView.form_valid) enforces this regardless
+  of what is POSTed. -->
+  <div class="mb-3">
+  <label class="fw-semibold small">Quantity (kg) *</label>
+  <div class="form-premium fw-bold">{{ listing.available_qty_kg }} kg (Full batch only)</div>
+  <input type="hidden" name="quantity_kg" value="{{ listing.available_qty_kg }}">
+  <small class="text-muted">Partial bids not allowed - you must buy full batch.</small>
+  </div>
 
  <!-- --------------------------------------------------
  FIELD: Notes (optional)
@@ -125,25 +128,25 @@
 <script>
 // Wait for the DOM to finish loading before attaching event listeners.
 document.addEventListener('DOMContentLoaded', function() {
- // Grab references to the two number inputs and the total display span.
- var priceInput = document.querySelector('input[name="bid_price_per_kg"]');
- var qtyInput = document.querySelector('input[name="quantity_kg"]');
- var totalDisplay = document.getElementById('bidTotalDisplay');
+  // Price is user-entered; quantity is FIXED full-batch (hidden field).
+  var priceInput = document.querySelector('input[name="bid_price_per_kg"]');
+  var qtyInput = document.querySelector('input[name="quantity_kg"]');
+  var totalDisplay = document.getElementById('bidTotalDisplay');
 
- // updateTotal: reads the current values of price and quantity,
- // multiplies them together, and displays the formatted result.
- function updateTotal() {
- var price = parseFloat(priceInput.value) || 0; // Default to 0 if blank/invalid.
- var qty = parseFloat(qtyInput.value) || 0; // Same for quantity.
- totalDisplay.textContent = 'Rs ' + (price * qty).toFixed(2);
- }
+  // updateTotal: reads price × fixed full quantity, displays formatted result.
+  function updateTotal() {
+  var price = parseFloat(priceInput.value) || 0; // Default to 0 if blank/invalid.
+  var qty = parseFloat(qtyInput.value) || 0; // Fixed full-batch qty from hidden field.
+  totalDisplay.textContent = 'Rs ' + (price * qty).toFixed(2);
+  }
 
- // Only attach listeners if both input elements exist on the page.
- if (priceInput && qtyInput) {
- // Recalculate the total whenever the user types in either field.
- priceInput.addEventListener('input', updateTotal);
- qtyInput.addEventListener('input', updateTotal);
- }
+  // Only attach listener if price input exists on the page.
+  if (priceInput) {
+  // Recalculate the total whenever the user types a price.
+  priceInput.addEventListener('input', updateTotal);
+  // Show initial total for the full batch.
+  updateTotal();
+  }
 });
 </script>
 {% endblock %}

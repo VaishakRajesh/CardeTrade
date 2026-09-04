@@ -179,17 +179,19 @@ class AcceptBidView(LoginRequiredMixin, TemplateView):
                 buyer=bid.trader,
                 seller=listing.farmer,
                 bid=bid,
-                quantity_kg=bid.quantity_kg,
+                # FULL-BATCH ONLY: always sell the entire available quantity,
+                # never bid.quantity_kg (prevents partial leftover).
+                quantity_kg=listing.available_qty_kg,
                 price_per_kg=bid.bid_price_per_kg,
             )
 
-            listing.available_qty_kg -= bid.quantity_kg
-            if listing.available_qty_kg <= 0:
-                listing.available_qty_kg = 0
-                listing.is_active = False
-                listing.batch.status = Batch.Status.SOLD
-                listing.batch.save(update_fields=['status'])
+            # Full sale: close in one step, no leftover.
+            listing.available_qty_kg = 0
+            listing.is_active = False
             listing.save(update_fields=['available_qty_kg', 'is_active'])
+
+            listing.batch.status = Batch.Status.SOLD
+            listing.batch.save(update_fields=['status'])
 
         messages.success(request, f"Bid accepted! Order {order.order_code} created.")
         return redirect('trader:order_detail', pk=order.pk)

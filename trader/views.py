@@ -67,12 +67,13 @@ class ListingDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'listing'
 
 
-# Handles placing a new bid on an auction listing
+# Handles placing a new bid on an auction listing (FULL-BATCH ONLY)
 @method_decorator(role_required('trader'), name='dispatch')
 class PlaceBidView(LoginRequiredMixin, CreateView):
     model = Bid
     template_name = 'trader/trading/place_bid.html'
-    fields = ['bid_price_per_kg', 'quantity_kg', 'notes']
+    # quantity_kg removed from user input: always forced to full available qty
+    fields = ['bid_price_per_kg', 'notes']
 
     # Verify the listing is active before allowing a bid
     def dispatch(self, request, *args, **kwargs):
@@ -82,10 +83,33 @@ class PlaceBidView(LoginRequiredMixin, CreateView):
             return redirect('trader:listing_list')
         return super().dispatch(request, *args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+        # Strict guard: reject partial quantities tampered via devtools.
+        # self.listing is already set in dispatch().
+        posted_qty = request.POST.get('quantity_kg')
+        if posted_qty:
+            from decimal import Decimal, InvalidOperation
+            try:
+                if Decimal(str(posted_qty)) != Decimal(str(self.listing.available_qty_kg)):
+                    messages.error(
+                        request,
+                        f"You must bid for full {self.listing.available_qty_kg} kg, partial not allowed."
+                    )
+                    return redirect('trader:listing_detail', pk=self.listing.pk)
+            except (InvalidOperation, ValueError):
+                messages.error(
+                    request,
+                    f"You must bid for full {self.listing.available_qty_kg} kg, partial not allowed."
+                )
+                return redirect('trader:listing_detail', pk=self.listing.pk)
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.listing = self.listing
         form.instance.trader = self.request.user
-        messages.success(self.request, "Bid placed successfully!")
+        # FORCE full-batch: ignore what user sends, use full available qty.
+        form.instance.quantity_kg = self.listing.available_qty_kg
+        messages.success(self.request, f"Bid placed for full {self.listing.available_qty_kg} kg!")
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
