@@ -162,7 +162,7 @@
  {# --- Conversation actions: visible to all authenticated users --- #}
 {% if user.is_authenticated and user != batch.farmer %}
   {% if user.role == 'product_manager' %}
-  <a href="{% url 'accounts:conversation_create' batch.pk %}" class="btn-premium btn-premium-secondary w-100 justify-content-center mb-2" style="border:1px solid var(--accent); color:var(--primary);">
+  <a href="{% url 'accounts:conversation_create' batch.pk %}" class="btn-premium btn-premium-outline w-100 justify-content-center mb-2">
     <i class="bi bi-chat-dots"></i> Message Farmer
   </a>
   <a href="{% url 'accounts:conversation_list' %}" class="btn-premium w-100 justify-content-center mb-2" style="background:rgba(200,169,81,0.08); color:var(--text-muted); font-size:0.85rem;">
@@ -170,7 +170,7 @@
   </a>
   {% else %}
   {# Trader or other #}
-  <a href="{% url 'accounts:conversation_create' batch.pk %}" class="btn-premium btn-premium-secondary w-100 justify-content-center mb-2" style="border:1px solid var(--accent); color:var(--primary);">
+  <a href="{% url 'accounts:conversation_create' batch.pk %}" class="btn-premium btn-premium-outline w-100 justify-content-center mb-2">
     <i class="bi bi-chat-dots"></i> Contact Farmer
   </a>
   {% endif %}

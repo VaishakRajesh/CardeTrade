@@ -53,8 +53,8 @@
        <i class="bi bi-truck me-1"></i>Orders
       </a>
      </li>
-    {% if user.role == 'farmer' or user.role == 'trader' %}
-    <li class="nav-item">
+{% if user.role == 'farmer' or user.role == 'trader' or user.role == 'product_manager' %} 
+   <li class="nav-item">
       <a class="nav-link" href="{% url 'accounts:conversation_list' %}">
         <i class="bi bi-chat-dots me-1"></i>Conversations
       </a>

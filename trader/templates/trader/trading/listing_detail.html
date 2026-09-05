@@ -197,8 +197,7 @@
    {% if user.is_authenticated and user != listing.farmer %}
    <div class="card-premium mb-4">
     <div class="card-body text-center">
-      <a href="{% url 'accounts:conversation_create' listing.batch.pk %}" class="btn-premium btn-premium-secondary w-100 justify-content-center">
-        <i class="bi bi-chat-dots me-1"></i> Ask About This Batch
+<a href="{% url 'accounts:conversation_create' listing.batch.pk %}" class="btn-premium btn-premium-outline w-100 justify-content-center">        <i class="bi bi-chat-dots me-1"></i> Ask About This Batch
       </a>
       <small class="text-muted d-block mt-2">Chat with {{ listing.farmer.username }}</small>
     </div>
