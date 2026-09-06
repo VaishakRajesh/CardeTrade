@@ -88,6 +88,14 @@
  <div class="col-6 mb-3"><small class="text-muted">Created</small><p class="fw-bold mb-0">{{ batch.created_at|date:"d M Y" }}</p></div>
  </div>
  </div>
+  {% if user.role == 'product_manager' or user.role == 'admin' %}
+<div class="row mt-2 pt-3 border-top">
+  <div class="col-12 mb-2"><small class="text-muted">Farmer Contact (PM only)</small></div>
+  <div class="col-6 mb-2"><small class="text-muted">Email</small><p class="fw-bold mb-0">{{ batch.farmer.email }}</p></div>
+  <div class="col-6 mb-2"><small class="text-muted">Phone</small><p class="fw-bold mb-0">{{ batch.farmer.phone|default:"-" }}</p></div>
+  <div class="col-6 mb-2"><small class="text-muted">Region</small><p class="fw-bold mb-0">{{ batch.farmer.region|default:"-" }}</p></div>
+</div>
+{% endif %}
  </div>
 
  {# Optional description — only shown if the farmer entered one #}

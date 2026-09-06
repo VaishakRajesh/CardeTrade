@@ -31,6 +31,53 @@
    </div>
   </div>
   {% endif %}
+  {% if user.is_authenticated and user.role == 'admin' %}
+ {# ===== GALLERY ===== #}
+   <div class="row mb-5 animate-on-scroll-landing">
+   <div class="col-12 text-center mb-5">
+    <span class="section-label"><i class="bi bi-images me-1"></i> Our Marketplace</span>
+    <h2 class="section-title">Premium Cardamom Gallery</h2>
+   </div>
+   <div class="col-md-6 mb-4">
+    <div class="gallery-card" style="height:350px;">
+     <img src="{% static 'image/cardamom2.jpg' %}" alt="Premium Cardamom" onerror="this.style.display='none'">
+    </div>
+   </div>
+   <div class="col-md-6 mb-4">
+    <div class="row g-3">
+     <div class="col-6">
+      <div class="gallery-card" style="height:160px;">
+       <img src="{% static 'image/cardamom1.jpg' %}" alt="Cardamom Pods" onerror="this.style.display='none'">
+      </div>
+     </div>
+     <div class="col-6">
+      <div class="gallery-card">
+       <div class="gallery-card-overlay" style="height:160px;">
+        <i class="bi bi-star-fill"></i>
+        <strong>Grade A</strong>
+        <small>Premium Quality</small>
+       </div>
+      </div>
+     </div>
+     <div class="col-6">
+      <div class="gallery-card">
+       <div class="gallery-card-overlay" style="height:160px;background:linear-gradient(135deg,var(--accent),var(--gold));color:var(--primary-dark);">
+        <i class="bi bi-trophy-fill" style="color:var(--primary-dark);"></i>
+        <strong>Certified</strong>
+        <small>By PMs</small>
+       </div>
+      </div>
+     </div>
+     <div class="col-6">
+      <div class="gallery-card" style="height:160px;">
+       <img src="{% static 'image/cardamom2.jpg' %}" alt="Cardamom" onerror="this.style.display='none'">
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+{% endif %}
 
    {# ===== TRADER LISTINGS SECTION ===== #}
 

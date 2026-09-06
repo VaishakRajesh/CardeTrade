@@ -75,9 +75,9 @@
  {# Individual listing card with image, batch info, price, and grade badge #}
  <div class="listing-card-premium h-100" style="box-shadow:var(--shadow-sm);transform:none;">
  {# Clickable image area — links to the listing detail page #}
- <a href="{% url 'trader:listing_detail' listing.pk %}" class="listing-image d-block" style="height:140px;">
- <img src="{% static 'image/cardamom1.jpg' %}" alt="" onerror="this.style.display='none'">
- </a>
+<a href="{% url 'trader:listing_detail' listing.pk %}" class="listing-image d-block" style="height:140px;">
+  <img src="{% if listing.batch.image %}{{ listing.batch.image.url }}{% else %}{% static 'image/cardamom1.jpg' %}{% endif %}" alt="{{ listing.batch.batch_code }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='{% static 'image/cardamom1.jpg' %}'">
+</a>
  {# Body section below the image #}
  <div class="listing-body" style="padding:1rem;">
  {# Row: batch code (left) + listing type badge (right) #}
