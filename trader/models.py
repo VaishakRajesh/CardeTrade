@@ -64,6 +64,22 @@ class Listing(models.Model):
         remaining = self.auction_end_time - timezone.now()
         return remaining if remaining.total_seconds() > 0 else None
 
+    @property
+    def time_left_display(self):
+        remaining = self.time_remaining
+        if remaining is None:
+            return "Ended"
+        days = remaining.days
+        hours = remaining.seconds // 3600
+        if days > 0:
+            return f"{days} day{'s' if days != 1 else ''} left"
+        if hours > 0:
+            return f"{hours} hour{'s' if hours != 1 else ''} left"
+        minutes = (remaining.seconds % 3600) // 60
+        if minutes > 0:
+            return f"{minutes} minute{'s' if minutes != 1 else ''} left"
+        return "Ending soon"
+
 
 # Represents a bid placed by a trader on an auction listing
 class Bid(models.Model):

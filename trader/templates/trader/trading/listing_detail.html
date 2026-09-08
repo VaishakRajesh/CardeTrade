@@ -121,8 +121,8 @@
    </div>
    <div class="card-body text-center">
    {% if listing.time_remaining %}
-    <div class="display-6 fw-bold" style="color:var(--primary);">{{ listing.time_remaining.days }}d {{ listing.time_remaining.seconds|divisibleby:"3600" }}h</div>
-    <p class="text-muted small mt-1">Remaining</p>
+<div class="display-6 fw-bold" style="color:var(--primary);font-size:1.6rem;">{{ listing.time_left_display }}</div>
+   <p class="text-muted small mt-1">Remaining</p>
    {% elif listing.auction_end_time %}
     <div class="display-6 fw-bold text-danger">Ended</div>
     <p class="text-muted small mt-1">This auction has closed</p>
