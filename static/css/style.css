@@ -90,16 +90,9 @@ html {
     scroll-behavior: smooth;  /* Smooth scrolling for anchor links */
     font-size: 16px;          /* Default font size (1rem = 16px) */
 }
-
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;  /* Clean modern font */
-    background: var(--cream);     /* Warm cream fallback background */
-    color: var(--text-dark);      /* Dark text for readability */
-    line-height: 1.7;             /* Comfortable line spacing */
-    overflow-x: hidden;           /* Prevent horizontal scroll */
-    -webkit-font-smoothing: antialiased;  /* Smooth font rendering on Mac */
-    position: relative;
-    min-height: 100vh;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* ===== ANIMATED GIF BACKGROUND (global, premium, fixed) =====
@@ -2418,15 +2411,16 @@ img { max-width: 100%; height: auto; }
  height: 100%;
  object-fit: cover;
  display: block;
+ /* filter: saturate(1.15) contrast(1.05) brightness(0.92); */
 }
 
 .hero-overlay-dark {
  position: absolute;
  inset: 0;
  background: linear-gradient(135deg,
-  rgba(10,26,16,0.85) 0%,
-  rgba(26,77,46,0.55) 50%,
-  rgba(10,26,16,0.70) 100%
+  /* rgba(46,26,12,0.84) 0%,
+  rgba(92,60,22,0.58) 50%,
+  rgba(30,18,8,0.72) 100% */
  );
  z-index: 1;
 }
@@ -2451,6 +2445,7 @@ img { max-width: 100%; height: auto; }
  position: relative;
  min-height: 100vh;
  display: flex;
+ flex-direction: column;
  align-items: center;
  justify-content: center;
  text-align: center;
@@ -2463,7 +2458,10 @@ img { max-width: 100%; height: auto; }
  z-index: 10;
  padding: 0 2rem;
  max-width: 880px;
- margin: 0 auto;
+ margin-top: auto;
+ margin-bottom: auto;
+ margin-left: auto;
+ margin-right: auto;
  animation: fadeInUp 0.8s ease-out;
 }
 
@@ -2500,10 +2498,10 @@ img { max-width: 100%; height: auto; }
 
 .hero-title-landing .shimmer-text-landing {
   display: inline-block;
-  background: linear-gradient(90deg, var(--gold), var(--accent-light));
+  /* background: linear-gradient(90deg, var(--gold), var(--accent-light)); */
   -webkit-background-clip: text;
   background-clip: text;
-  -webkit-text-fill-color: transparent;
+  /* -webkit-text-fill-color: transparent; */
   animation: none !important;
 }
 
@@ -2584,8 +2582,10 @@ img { max-width: 100%; height: auto; }
 }
 
 .hero-stat-item-landing h3 {
+ font-family: 'Silkscreen', cursive;
  font-size: 2.2rem;
- font-weight: 900;
+ font-weight: 400;
+ letter-spacing: -0.05em;
  color: #fff;
  margin-bottom: 0.2rem;
  background: linear-gradient(135deg, var(--accent), var(--gold));
