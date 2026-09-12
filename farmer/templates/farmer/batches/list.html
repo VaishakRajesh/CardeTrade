@@ -116,9 +116,11 @@
  Links to the batch detail page. -->
  <a href="{% url 'farmer:batch_detail' batch.pk %}" class="btn-premium btn-custom-premium btn-premium-sm" style="border:1px solid var(--primary); color:var(--primary); font-size:0.8rem; padding:0.3rem 1rem;">View</a>
 
- {% if user.role == 'product_manager' and batch.status == 'pending' %}
- <a href="{% url 'pm:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary btn-premium-sm ms-1" style="font-size:0.8rem; padding:0.3rem 1rem;">Verify</a>
- {% endif %}
+  {% if user.role == 'product_manager' %}
+    {% if batch.status == 'pending' or batch.status == 'under_review' %}
+  <a href="{% url 'pm:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary btn-premium-sm ms-1" style="font-size:0.8rem; padding:0.3rem 1rem;">Verify</a>
+    {% endif %}
+  {% endif %}
  </td>
 
  </tr>

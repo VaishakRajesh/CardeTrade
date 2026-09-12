@@ -151,13 +151,15 @@
  </div>
  <div class="card-body">
 
- <!--"Verify Batch" button — only shown to Product Managers
- when the batch is still in 'pending' status -->
- {% if user.role == 'product_manager' and batch.status == 'pending' %}
- <a href="{% url 'pm:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary w-100 justify-content-center mb-2">
- <i class="bi bi-clipboard-check"></i> Verify Batch
- </a>
- {% endif %}
+  <!--"Verify Batch" button — only shown to Product Managers
+  when the batch is still 'pending' or 'under_review' (matches BatchVerifyView) -->
+  {% if user.role == 'product_manager' %}
+    {% if batch.status == 'pending' or batch.status == 'under_review' %}
+  <a href="{% url 'pm:batch_verify' batch.pk %}" class="btn-premium btn-premium-primary w-100 justify-content-center mb-2">
+  <i class="bi bi-clipboard-check"></i> Verify Batch
+  </a>
+    {% endif %}
+  {% endif %}
 
   <!--"View Listing" button — only shown to the farmer who
   owns this batch, once it's been verified and listed -->
