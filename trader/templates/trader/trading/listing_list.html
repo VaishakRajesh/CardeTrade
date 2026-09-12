@@ -20,6 +20,26 @@
 
 {# ---- Auction listing cards grid ---- #}
 <div class="container py-4">
+ {# ---- Sort + grade filter bar (every link keeps the other param) ---- #}
+ <div class="d-flex flex-wrap gap-2 mb-3">
+  <a href="?sort=newest{% if current_grade %}&grade={{ current_grade }}{% endif %}"
+     class="btn btn-sm {% if current_sort == 'newest' %}btn-success{% else %}btn-outline-success{% endif %}">Newest</a>
+  <a href="?sort=price_low{% if current_grade %}&grade={{ current_grade }}{% endif %}"
+     class="btn btn-sm {% if current_sort == 'price_low' %}btn-success{% else %}btn-outline-success{% endif %}">Price Low-High</a>
+  <a href="?sort=price_high{% if current_grade %}&grade={{ current_grade }}{% endif %}"
+     class="btn btn-sm {% if current_sort == 'price_high' %}btn-success{% else %}btn-outline-success{% endif %}">Price High-Low</a>
+  <a href="?sort=most_bids{% if current_grade %}&grade={{ current_grade }}{% endif %}"
+     class="btn btn-sm {% if current_sort == 'most_bids' %}btn-success{% else %}btn-outline-success{% endif %}">Most Bids</a>
+  <a href="?sort=qty_high{% if current_grade %}&grade={{ current_grade }}{% endif %}"
+     class="btn btn-sm {% if current_sort == 'qty_high' %}btn-success{% else %}btn-outline-success{% endif %}">Most Qty</a>
+  <a href="?sort=grade{% if current_grade %}&grade={{ current_grade }}{% endif %}"
+     class="btn btn-sm {% if current_sort == 'grade' %}btn-success{% else %}btn-outline-success{% endif %}">Grade</a>
+  <span class="ms-2"></span>
+  <a href="?sort={{ current_sort }}" class="btn btn-sm {% if not current_grade %}btn-dark{% else %}btn-outline-dark{% endif %}">All Grades</a>
+  <a href="?sort={{ current_sort }}&grade=A" class="btn btn-sm {% if current_grade == 'A' %}btn-dark{% else %}btn-outline-dark{% endif %}">A</a>
+  <a href="?sort={{ current_sort }}&grade=B" class="btn btn-sm {% if current_grade == 'B' %}btn-dark{% else %}btn-outline-dark{% endif %}">B</a>
+  <a href="?sort={{ current_sort }}&grade=C" class="btn btn-sm {% if current_grade == 'C' %}btn-dark{% else %}btn-outline-dark{% endif %}">C</a>
+ </div>
  <div class="row g-4">
  {% for listing in listings %}
  <div class="col-lg-4 col-md-6">
@@ -78,7 +98,27 @@
   <a href="{% url 'accounts:dashboard' %}" class="btn-premium btn-premium-primary">Go to Dashboard</a>
  </div>
  </div>
- {% endfor %}
- </div>
+  {% endfor %}
+  </div>
+  {# ---- Pagination (keeps current sort + grade across pages) ---- #}
+  {% if is_paginated %}
+  <nav aria-label="Marketplace pages" class="mt-4">
+   <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+     <a class="page-link" href="?sort={{ current_sort }}{% if current_grade %}&grade={{ current_grade }}{% endif %}&page={{ page_obj.previous_page_number }}">Previous</a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+     <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+     <a class="page-link" href="?sort={{ current_sort }}{% if current_grade %}&grade={{ current_grade }}{% endif %}&page={{ page_obj.next_page_number }}">Next</a>
+    </li>
+    {% endif %}
+   </ul>
+  </nav>
+  {% endif %}
 </div>
 {% endblock %}

@@ -47,16 +47,46 @@ class ListingListView(ListView):
     context_object_name = 'listings'
     paginate_by = 12
 
-    # Annotate each listing with highest bid and bid count for display
+    # Whitelist of allowed sort keys -> ORM order_by. Never pass
+    # request.GET directly to order_by(); unknown keys fall back to newest.
+    SORT_OPTIONS = {
+        'newest': '-created_at',
+        'price_low': 'price_per_kg',
+        'price_high': '-price_per_kg',
+        'qty_high': '-available_qty_kg',
+        'most_bids': '-active_bid_count',
+        'grade': 'batch__verification__grade',
+    }
+
+    # Annotate each listing with highest bid and bid count for display,
+    # then apply optional grade filter and whitelisted ordering
     def get_queryset(self):
-        return Listing.objects.filter(is_active=True)\
+        qs = Listing.objects.filter(is_active=True)\
             .select_related('batch__verification', 'batch__farm', 'farmer')\
             .annotate(
                 highest_bid=Max('bids__bid_price_per_kg',
-                    filter=Q(bids__status='active')),
+                    filter=Q(bids__status=Bid.Status.ACTIVE)),
                 active_bid_count=Count('bids',
-                    filter=Q(bids__status='active')),
+                    filter=Q(bids__status=Bid.Status.ACTIVE)),
             )
+        # filter part - ?grade=A
+        grade = self.request.GET.get('grade', '')
+        if grade in ['A', 'B', 'C']:
+            qs = qs.filter(batch__verification__grade=grade)
+
+        # sort part - ?sort=price_low (bogus values fall back to newest)
+        sort = self.request.GET.get('sort', 'newest')
+        return qs.order_by(self.SORT_OPTIONS.get(sort, '-created_at'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Normalise so a bogus ?sort=/ ?grade= still highlights the
+        # effective fallback (Newest / All Grades) instead of nothing.
+        sort = self.request.GET.get('sort', 'newest')
+        grade = self.request.GET.get('grade', '')
+        context['current_sort'] = sort if sort in self.SORT_OPTIONS else 'newest'
+        context['current_grade'] = grade if grade in ['A', 'B', 'C'] else ''
+        return context
 
 
 @method_decorator(role_required('farmer', 'trader', 'product_manager', 'admin'), name='dispatch')

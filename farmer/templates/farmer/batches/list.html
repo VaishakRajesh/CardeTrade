@@ -39,22 +39,48 @@
 
 {# --- Main content: the batches table --- #}
 <div class="container py-4">
- <div class="card-premium visible">
- <div class="table-responsive">
+  <div class="card-premium visible">
+  {# Status filter — keeps current sort so ?status=pending&sort=price works together. #}
+  <div class="d-flex flex-wrap align-items-center gap-2 px-3 pt-3 pb-2">
+    <span class="text-muted small me-1"><i class="bi bi-funnel me-1"></i>Status:</span>
+    <a href="?status=all&amp;sort={{ current_sort }}" class="btn btn-sm {% if current_status == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}&amp;sort={{ current_sort }}" class="btn btn-sm {% if current_status == value %}btn-primary{% else %}btn-outline-secondary{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  <div class="table-responsive">
 
  {# The table displays batch information in columns. #}
  <table class="table-premium">
- <thead>
- <tr>
- <th>Code</th> {# Auto-generated batch code (CDM-YEAR-NNNN) #}
- <th>Farmer</th> {# Username of the farmer who created it #}
- <th>Qty</th> {# Quantity in kilograms #}
- <th>Est. Price</th> {# Farmer's estimated price per kg #}
- <th>Status</th> {# Current workflow status (color-coded badge) #}
- <th>Created</th> {# Date the batch was registered #}
- <th>Action</th> {# Links to view or verify #}
- </tr>
- </thead>
+  <thead>
+  <tr>
+  {# Sortable: first click A-Z/cheap-first, second click flips. current_sort comes from BatchListView.get_context_data. #}
+  {# Every sort link carries status={{ current_status }} so filtering survives re-sorting. #}
+  <th>
+    <a href="?sort={% if current_sort == 'code' %}-code{% else %}code{% endif %}&amp;status={{ current_status }}" class="text-decoration-none text-reset" title="Sort by code">
+      Code {% if current_sort == 'code' %}▲{% elif current_sort == '-code' %}▼{% endif %}
+    </a>
+  </th>
+  <th>Farmer</th> {# Username of the farmer who created it #}
+  <th>
+    <a href="?sort={% if current_sort == 'qty' %}-qty{% else %}qty{% endif %}&amp;status={{ current_status }}" class="text-decoration-none text-reset" title="Sort by quantity">
+      Qty {% if current_sort == 'qty' %}▲{% elif current_sort == '-qty' %}▼{% endif %}
+    </a>
+  </th>
+  <th>
+    <a href="?sort={% if current_sort == 'price' %}-price{% else %}price{% endif %}&amp;status={{ current_status }}" class="text-decoration-none text-reset" title="Sort by estimated price">
+      Est. Price {% if current_sort == 'price' %}▲{% elif current_sort == '-price' %}▼{% endif %}
+    </a>
+  </th>
+  <th>Status</th> {# Current workflow status (color-coded badge) #}
+  <th>
+    <a href="?sort={% if current_sort == '-created' %}created{% else %}-created{% endif %}&amp;status={{ current_status }}" class="text-decoration-none text-reset" title="Sort by created date">
+      Created {% if current_sort == 'created' %}▲{% elif current_sort == '-created' %}▼{% endif %}
+    </a>
+  </th>
+  <th>Action</th> {# Links to view or verify #}
+  </tr>
+  </thead>
  <tbody>
 
  
@@ -105,8 +131,13 @@
  <div class="empty-state-premium">
  {# Large inbox icon to indicate"nothing here" #}
  <i class="bi bi-inbox"></i>
- <h5>No Batches Found</h5>
- <p>There are no batches registered yet.</p>
+  <h5>No Batches Found</h5>
+  {% if current_status == 'all' %}
+  <p>There are no batches registered yet.</p>
+  {% else %}
+  <p>There are no batches with this status filter.</p>
+  <a href="?status=all&amp;sort={{ current_sort }}" class="btn btn-sm btn-outline-secondary mt-2">Clear status filter</a>
+  {% endif %}
  <!-- If the logged-in user is a farmer, offer a
  shortcut to create their first batch. -->
  {% if user.role == 'farmer' %}
@@ -117,9 +148,34 @@
  </tr>
  {% endfor %}
 
- </tbody>
- </table>
- </div>
- </div>
+  </tbody>
+  </table>
+  </div>
+
+  {# Pagination — always carry sort + status so page 2 keeps the ordering and filter. #}
+  {% if is_paginated %}
+  <nav aria-label="Batch pages" class="d-flex justify-content-center py-3">
+    <ul class="pagination mb-0">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?sort={{ current_sort }}&amp;status={{ current_status }}&amp;page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+      <li class="page-item disabled">
+        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      </li>
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?sort={{ current_sort }}&amp;status={{ current_status }}&amp;page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+  </div>
 </div>
 {% endblock %}

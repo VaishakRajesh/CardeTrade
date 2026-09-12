@@ -96,19 +96,62 @@ class BatchCreateView(LoginRequiredMixin, CreateView):
         return form
 
 
-# Lists batches — farmers see only their own, others see all
+# Lists batches — farmers see only their own, others see all.
+# Supports ?sort= URL ordering (e.g. ?sort=price cheap-first, ?sort=-price costly-first).
 class BatchListView(LoginRequiredMixin, ListView):
     model = Batch
     template_name = 'farmer/batches/list.html'
     context_object_name = 'batches'
     paginate_by = 12
 
-    # Farmers see their own batches; other roles see all batches
+    SORT_OPTIONS = {
+        'code': 'batch_code',
+        '-code': '-batch_code',
+        'qty': 'quantity_kg',
+        '-qty': '-quantity_kg',
+        'price': 'estimated_price_per_kg',
+        '-price': '-estimated_price_per_kg',
+        'created': 'created_at',
+        '-created': '-created_at',
+    }
+    DEFAULT_SORT = '-created'
+    DEFAULT_STATUS = 'all'
+
+    def get_sort(self):
+        sort = self.request.GET.get('sort', self.DEFAULT_SORT)
+        if sort not in self.SORT_OPTIONS:
+            return self.DEFAULT_SORT
+        return sort
+
+    def get_status(self):
+        status = self.request.GET.get('status', self.DEFAULT_STATUS)
+        # Never trust URL: bogus ?status= falls back to 'all' (no filter).
+        if status not in Batch.Status.values:
+            return self.DEFAULT_STATUS
+        return status
+
+    # Farmers see their own batches; other roles see all batches.
+    # Never order by raw URL input — only allowlisted SORT_OPTIONS keys.
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'farmer':
-            return Batch.objects.filter(farmer=user).select_related('farm')
-        return Batch.objects.all().select_related('farmer', 'farm')
+        if user.role == User.Role.FARMER:
+            qs = Batch.objects.filter(farmer=user).select_related('farm', 'farmer')
+        else:
+            qs = Batch.objects.all().select_related('farmer', 'farm')
+
+        status = self.get_status()
+        if status != self.DEFAULT_STATUS:
+            qs = qs.filter(status=status)
+
+        order_by = self.SORT_OPTIONS.get(self.get_sort(), '-created_at')
+        return qs.order_by(order_by)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_sort'] = self.get_sort()
+        context['current_status'] = self.get_status()
+        context['status_choices'] = Batch.Status.choices
+        return context
 
 
 # Shows detailed info for a single batch (accessible by most roles)
