@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.http import HttpResponseForbidden
@@ -45,15 +45,16 @@ class HomeView(TemplateView):
 class RegisterView(CreateView):
     form_class = RegistrationForm
     template_name = 'accounts/register.html'
-    success_url = reverse_lazy('accounts:dashboard')
 
     # Create user, handle auto-login, and show role-specific messages
     def form_valid(self, form):
-        user = form.save(commit=False)
+        self.object = form.save(commit=False)
         doc = form.cleaned_data.get('verification_doc')
         if doc:
-            user.verification_doc = doc
-        user.save()
+            self.object.verification_doc = doc
+        self.object.save()
+        user = self.object
+
         if user.role == 'product_manager':
             messages.info(self.request, 'Your account requires admin approval. You can browse the platform in the meantime.')
             return redirect(self.get_success_url())
